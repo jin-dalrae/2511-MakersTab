@@ -114,6 +114,76 @@ class AnalyticsData(BaseModel):
     recent_transactions: List[Dict[str, Any]]
     spending_trend: List[Dict[str, Any]]
 
+# ============= Semester Utilities =============
+
+def get_semester_dates(semester: str, year: int) -> tuple:
+    """Get start and end dates for a semester"""
+    if semester == "fall":
+        # Fall Term: July 10 - September 1
+        start = datetime(year, 7, 10, tzinfo=timezone.utc)
+        end = datetime(year, 9, 1, 23, 59, 59, tzinfo=timezone.utc)
+    elif semester == "spring":
+        # Spring Term: December 1 - January 18 (spans years)
+        start = datetime(year, 12, 1, tzinfo=timezone.utc)
+        end = datetime(year + 1, 1, 18, 23, 59, 59, tzinfo=timezone.utc)
+    elif semester == "summer":
+        # Summer Term: May 1 - May 16
+        start = datetime(year, 5, 1, tzinfo=timezone.utc)
+        end = datetime(year, 5, 16, 23, 59, 59, tzinfo=timezone.utc)
+    else:
+        # Default to fall
+        start = datetime(year, 7, 10, tzinfo=timezone.utc)
+        end = datetime(year, 9, 1, 23, 59, 59, tzinfo=timezone.utc)
+    
+    return start, end
+
+def get_current_semester_info(semester: str) -> dict:
+    """Calculate weeks remaining and recommended weekly spending"""
+    now = datetime.now(timezone.utc)
+    current_year = now.year
+    
+    # Try current year first
+    start, end = get_semester_dates(semester, current_year)
+    
+    # If semester hasn't started yet, it might be from previous year
+    if now < start:
+        start, end = get_semester_dates(semester, current_year - 1)
+    
+    # If semester ended, use next year
+    if now > end:
+        start, end = get_semester_dates(semester, current_year + 1)
+    
+    # Calculate days and weeks remaining
+    if now < start:
+        days_remaining = (end - start).days
+        weeks_remaining = days_remaining / 7
+        days_until_start = (start - now).days
+        status = "upcoming"
+    elif now > end:
+        days_remaining = 0
+        weeks_remaining = 0
+        days_until_start = 0
+        status = "ended"
+    else:
+        days_remaining = (end - now).days
+        weeks_remaining = max(days_remaining / 7, 0.5)  # At least 0.5 weeks
+        days_until_start = 0
+        status = "active"
+    
+    total_days = (end - start).days
+    total_weeks = total_days / 7
+    
+    return {
+        "semester": semester,
+        "start_date": start.isoformat(),
+        "end_date": end.isoformat(),
+        "status": status,
+        "total_weeks": round(total_weeks, 1),
+        "weeks_remaining": round(weeks_remaining, 1),
+        "days_remaining": days_remaining,
+        "days_until_start": days_until_start
+    }
+
 # ============= Auth Utilities =============
 
 def hash_password(password: str) -> str:
