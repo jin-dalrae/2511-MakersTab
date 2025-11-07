@@ -431,6 +431,42 @@ async def get_all_users(current_user: dict = Depends(get_admin_user)):
     ).to_list(1000)
     return users
 
+@api_router.patch("/admin/users/{user_id}/toggle-admin")
+async def toggle_user_admin(
+    user_id: str,
+    current_user: dict = Depends(get_admin_user)
+):
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    new_admin_status = not user.get('is_admin', False)
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"is_admin": new_admin_status}}
+    )
+    
+    return {"success": True, "is_admin": new_admin_status}
+
+@api_router.delete("/admin/users/{user_id}")
+async def delete_user(
+    user_id: str,
+    current_user: dict = Depends(get_admin_user)
+):
+    # Prevent self-deletion
+    if user_id == current_user['id']:
+        raise HTTPException(status_code=400, detail="Cannot delete yourself")
+    
+    result = await db.users.delete_one({"id": user_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Also delete user's receipts and transactions
+    await db.receipts.delete_many({"user_id": user_id})
+    await db.transactions.delete_many({"user_id": user_id})
+    
+    return {"success": True, "message": "User deleted successfully"}
+
 @api_router.get("/admin/today-expenses")
 async def get_today_expenses(current_user: dict = Depends(get_admin_user)):
     today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
