@@ -64,7 +64,7 @@ function App() {
             path="/"
             element={
               isAuthenticated ? (
-                <Navigate to={user?.is_admin ? "/admin" : "/dashboard"} replace />
+                <Navigate to="/dashboard" replace />
               ) : (
                 <AuthPage onLogin={handleLogin} />
               )
