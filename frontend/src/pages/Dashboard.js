@@ -331,22 +331,11 @@ const Dashboard = ({ user, onLogout }) => {
                   </div>
                 ) : (
                   <div className="space-y-3 max-h-[600px] overflow-y-auto">
-                    {(() => {
-                      // Calculate initial balance (current amount + all spent)
-                      const totalSpentSoFar = transactions.reduce((sum, t) => sum + (t.price * t.quantity), 0);
-                      let startingBalance = user.meal_plan_amount + totalSpentSoFar;
+                    {transactions.map((transaction, index) => {
+                      const IconComponent = categoryIcons[transaction.category] || ShoppingBag;
+                      const totalSpent = transaction.price * transaction.quantity;
                       
-                      return transactions.map((transaction, index) => {
-                        const IconComponent = categoryIcons[transaction.category] || ShoppingBag;
-                        const totalSpent = transaction.price * transaction.quantity;
-                        
-                        // Balance before this transaction
-                        const balanceBefore = startingBalance;
-                        // Subtract this transaction
-                        startingBalance -= totalSpent;
-                        const balanceAfter = startingBalance;
-                        
-                        return (
+                      return (
                         <div
                           key={transaction.id}
                           className="p-3 sm:p-4 bg-white rounded-xl border border-gray-200 hover:shadow-md duration-300"
@@ -361,15 +350,14 @@ const Dashboard = ({ user, onLogout }) => {
                                 <IconComponent className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: categoryColors[transaction.category] }} />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="font-semibold text-sm sm:text-base text-gray-800 truncate">{transaction.item_name}</p>
-                                <div className="flex flex-wrap gap-2 mt-1">
-                                  <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded capitalize">
+                                <p className="font-semibold text-sm sm:text-base text-gray-800">{transaction.item_name}</p>
+                                <div className="flex flex-wrap gap-2 mt-1 text-xs text-gray-600">
+                                  <span className="px-2 py-0.5 bg-gray-100 rounded capitalize">
                                     {transaction.category}
                                   </span>
-                                  <span className="text-xs text-gray-600">
-                                    Qty: {transaction.quantity}
-                                  </span>
-                                  <span className="text-xs text-gray-600">
+                                  <span>Qty: {transaction.quantity}</span>
+                                  <span className="hidden sm:inline">•</span>
+                                  <span>
                                     {new Date(transaction.transaction_date).toLocaleDateString()} {new Date(transaction.transaction_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                                   </span>
                                 </div>
@@ -379,15 +367,11 @@ const Dashboard = ({ user, onLogout }) => {
                               <p className="text-base sm:text-lg font-bold text-red-600">
                                 -${totalSpent.toFixed(2)}
                               </p>
-                              <p className="text-xs text-gray-600 mt-1">
-                                Remaining: <span className={`font-semibold ${balanceAfter < 50 ? 'text-red-600' : 'text-green-600'}`}>${Math.max(0, balanceAfter).toFixed(2)}</span>
-                              </p>
                             </div>
                           </div>
                         </div>
                       );
-                      });
-                    })()}
+                    })}
                   </div>
                 )}
               </CardContent>
