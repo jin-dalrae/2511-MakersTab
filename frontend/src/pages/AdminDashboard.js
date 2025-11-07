@@ -331,6 +331,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                         <th className="text-left p-2 sm:p-4 font-semibold hidden sm:table-cell">Email</th>
                         <th className="text-left p-2 sm:p-4 font-semibold">Budget</th>
                         <th className="text-left p-2 sm:p-4 font-semibold hidden lg:table-cell">Joined</th>
+                        <th className="text-left p-2 sm:p-4 font-semibold">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -344,9 +345,31 @@ const AdminDashboard = ({ user, onLogout }) => {
                             </div>
                           </td>
                           <td className="p-2 sm:p-4 hidden sm:table-cell text-gray-600">{u.email}</td>
-                          <td className="p-2 sm:p-4 font-semibold text-green-600">${u.meal_plan_amount}</td>
+                          <td className="p-2 sm:p-4 font-semibold text-green-600">${u.meal_plan_amount.toFixed(2)}</td>
                           <td className="p-2 sm:p-4 text-gray-600 hidden lg:table-cell text-sm">
                             {new Date(u.created_at).toLocaleDateString()}
+                          </td>
+                          <td className="p-2 sm:p-4">
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleToggleAdmin(u.id)}
+                                disabled={u.id === user.id}
+                                className={`text-xs ${u.is_admin ? 'bg-purple-50 text-purple-700 hover:bg-purple-100' : 'text-gray-700'}`}
+                              >
+                                {u.is_admin ? 'Remove Admin' : 'Make Admin'}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteUser(u.id, u.name)}
+                                disabled={u.id === user.id}
+                                className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </td>
                         </tr>
                       ))}
