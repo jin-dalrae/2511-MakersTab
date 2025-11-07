@@ -57,6 +57,7 @@ class UserSignup(BaseModel):
     password: str
     name: str
     meal_plan_amount: float
+    semester: str = "fall"
 
 class UserLogin(BaseModel):
     email: EmailStr
