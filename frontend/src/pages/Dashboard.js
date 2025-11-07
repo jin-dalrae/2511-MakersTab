@@ -331,18 +331,18 @@ const Dashboard = ({ user, onLogout }) => {
                   </div>
                 ) : (
                   <div className="space-y-3 max-h-[600px] overflow-y-auto">
-                    {transactions.map((transaction, index) => {
-                      const IconComponent = categoryIcons[transaction.category] || ShoppingBag;
-                      const totalSpent = transaction.price * transaction.quantity;
+                    {(() => {
+                      // Calculate running balance from current meal plan back through transactions
+                      let runningBalance = user.meal_plan_amount;
                       
-                      // Calculate remaining amount based on all previous transactions
-                      let remainingAmount = user.meal_plan_amount;
-                      for (let i = 0; i <= index; i++) {
-                        const t = transactions[i];
-                        remainingAmount -= (t.price * t.quantity);
-                      }
-                      
-                      return (
+                      return transactions.map((transaction, index) => {
+                        const IconComponent = categoryIcons[transaction.category] || ShoppingBag;
+                        const totalSpent = transaction.price * transaction.quantity;
+                        
+                        // This is the balance BEFORE this transaction
+                        const balanceBeforeTransaction = runningBalance + totalSpent;
+                        
+                        return (
                         <div
                           key={transaction.id}
                           className="p-3 sm:p-4 bg-white rounded-xl border border-gray-200 hover:shadow-md duration-300"
