@@ -62,8 +62,10 @@ const AuthPage = ({ onLogin }) => {
       <div className="w-full max-w-6xl flex flex-col lg:flex-row gap-8 lg:gap-12 items-center">
         {/* Left Side - Branding */}
         <div className="flex-1 text-center lg:text-left space-y-6 w-full">
-          <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-md px-6 py-3 rounded-full shadow-lg">
-            <img src={LOGO_URL} alt="MakersTab" className="w-8 h-8" />
+          <div className="inline-flex items-center gap-3 bg-white/80 backdrop-blur-md px-6 py-3 rounded-full shadow-lg border border-gray-200">
+            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+              <img src={LOGO_URL} alt="MakersTab" className="w-7 h-7" />
+            </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-green-800" style={{fontFamily: 'Space Grotesk'}}>MakersTab</h1>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 leading-tight" style={{fontFamily: 'Space Grotesk'}}>
