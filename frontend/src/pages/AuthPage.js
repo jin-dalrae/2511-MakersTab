@@ -163,6 +163,21 @@ const AuthPage = ({ onLogin }) => {
                         required
                       />
                     </div>
+                    <div>
+                      <Label htmlFor="semester" className="text-sm">Semester</Label>
+                      <select
+                        id="semester"
+                        data-testid="semester-select"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white"
+                        value={signupData.semester}
+                        onChange={(e) => setSignupData({ ...signupData, semester: e.target.value })}
+                        required
+                      >
+                        <option value="fall">Fall Term (Jul 10 - Sep 1)</option>
+                        <option value="spring">Spring Term (Dec 1 - Jan 18)</option>
+                        <option value="summer">Summer Term (May 1 - May 16)</option>
+                      </select>
+                    </div>
                     <Button
                       type="submit"
                       className="w-full bg-green-600 hover:bg-green-700 text-sm sm:text-base"
