@@ -230,10 +230,10 @@ const Dashboard = ({ user, onLogout }) => {
             {analytics && pieData.length > 0 && (
               <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
                 <CardHeader>
-                  <CardTitle style={{fontFamily: 'Space Grotesk'}}>Spending by Category</CardTitle>
+                  <CardTitle className="text-base sm:text-lg" style={{fontFamily: 'Space Grotesk'}}>Spending by Category</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width="100%" height={250}>
                     <PieChart>
                       <Pie
                         data={pieData}
@@ -241,7 +241,7 @@ const Dashboard = ({ user, onLogout }) => {
                         cy="50%"
                         labelLine={false}
                         label={({ name, value }) => `${name}: $${value}`}
-                        outerRadius={100}
+                        outerRadius={80}
                         fill="#8884d8"
                         dataKey="value"
                       >
