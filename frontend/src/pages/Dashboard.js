@@ -116,24 +116,24 @@ const Dashboard = ({ user, onLogout }) => {
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-lime-50">
       {/* Header */}
       <div className="bg-white/70 backdrop-blur-lg border-b border-green-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
-              <Receipt className="w-6 h-6 text-white" />
+        <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4 flex justify-between items-center">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+              <img src={LOGO_URL} alt="MakersTab" className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-800" style={{fontFamily: 'Space Grotesk'}}>CafeWallet</h1>
-              <p className="text-xs text-gray-600">Welcome, {user.name}</p>
+              <h1 className="text-lg sm:text-xl font-bold text-gray-800" style={{fontFamily: 'Space Grotesk'}}>MakersTab</h1>
+              <p className="text-xs text-gray-600 hidden sm:block">Welcome, {user.name}</p>
             </div>
           </div>
           <Button 
             variant="outline" 
             onClick={onLogout}
-            className="gap-2 hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+            className="gap-2 hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-sm"
             data-testid="logout-button"
           >
             <LogOut className="w-4 h-4" />
-            Logout
+            <span className="hidden sm:inline">Logout</span>
           </Button>
         </div>
       </div>
