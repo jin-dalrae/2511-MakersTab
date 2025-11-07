@@ -273,6 +273,26 @@ async def login(input: UserLogin):
 async def get_me(current_user: dict = Depends(get_current_user)):
     return {k: v for k, v in current_user.items() if k != 'password_hash'}
 
+@api_router.get("/semester-info")
+async def get_semester_info(current_user: dict = Depends(get_current_user)):
+    semester = current_user.get('semester', 'fall')
+    semester_info = get_current_semester_info(semester)
+    
+    # Calculate recommended weekly spending
+    remaining_balance = current_user.get('meal_plan_amount', 0)
+    weeks_remaining = semester_info['weeks_remaining']
+    
+    if weeks_remaining > 0:
+        recommended_weekly = remaining_balance / weeks_remaining
+    else:
+        recommended_weekly = 0
+    
+    return {
+        **semester_info,
+        "remaining_balance": remaining_balance,
+        "recommended_weekly_spending": round(recommended_weekly, 2)
+    }
+
 # Receipt Routes
 @api_router.post("/receipts/upload")
 async def upload_receipt(
