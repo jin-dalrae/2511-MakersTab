@@ -1,0 +1,103 @@
+{
+  "timestamp": "2025-11-07T22:14:57.136352",
+  "total_tests": 10,
+  "passed": 10,
+  "failed": 0,
+  "success_rate": "100.0%",
+  "results": [
+    {
+      "test": "Root Endpoint",
+      "passed": true,
+      "message": "",
+      "response": {
+        "message": "Meal Plan Tracker API"
+      }
+    },
+    {
+      "test": "User Signup",
+      "passed": true,
+      "message": "",
+      "response": {
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZmUzNTU1NmYtZmE1MS00ZDk0LWE3NjktMmIyNWUwYjgwNjM2IiwiZXhwIjoxNzY1MTQ1Njk2fQ.-6v0Jnxy-B7CcdxvPm_8ErV8p5ogAE1uv2cRRQhpMF4",
+        "user": {
+          "id": "fe35556f-fa51-4d94-a769-2b25e0b80636",
+          "email": "test221456@example.com",
+          "name": "Test User 221456",
+          "meal_plan_amount": 500.0,
+          "created_at": "2025-11-07T22:14:56.698658+00:00"
+        }
+      }
+    },
+    {
+      "test": "Get Current User",
+      "passed": true,
+      "message": "",
+      "response": {
+        "id": "fe35556f-fa51-4d94-a769-2b25e0b80636",
+        "email": "test221456@example.com",
+        "name": "Test User 221456",
+        "meal_plan_amount": 500.0,
+        "created_at": "2025-11-07T22:14:56.698658+00:00"
+      }
+    },
+    {
+      "test": "Get Receipts",
+      "passed": true,
+      "message": "",
+      "response": []
+    },
+    {
+      "test": "Get Transactions",
+      "passed": true,
+      "message": "",
+      "response": []
+    },
+    {
+      "test": "Get Transaction History",
+      "passed": true,
+      "message": "",
+      "response": {
+        "transactions": [],
+        "total": 0
+      }
+    },
+    {
+      "test": "Receipt Upload Without File",
+      "passed": true,
+      "message": "Correctly rejected request without file",
+      "response": null
+    },
+    {
+      "test": "Get Analytics",
+      "passed": true,
+      "message": "",
+      "response": {
+        "total_spent": 0.0,
+        "transactions_count": 0,
+        "spending_by_category": {},
+        "recent_transactions": [],
+        "spending_trend": []
+      }
+    },
+    {
+      "test": "Get Menu",
+      "passed": true,
+      "message": "",
+      "response": []
+    },
+    {
+      "test": "Create Menu Item",
+      "passed": true,
+      "message": "",
+      "response": {
+        "id": "14dbf567-2faf-4f23-bf60-8f63ba2a754f",
+        "name": "Test Coffee",
+        "category": "drinks",
+        "price": 3.5,
+        "description": "Test coffee item",
+        "available_date": "2025-11-07T22:14:57.065881Z",
+        "created_at": "2025-11-07T22:14:57.065908Z"
+      }
+    }
+  ]
+}
