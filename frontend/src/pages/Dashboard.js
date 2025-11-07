@@ -152,6 +152,33 @@ const Dashboard = ({ user, onLogout }) => {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6" data-testid="overview-content">
+            {/* Semester & Weekly Spending Card */}
+            {semesterInfo && (
+              <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-0 shadow-xl">
+                <CardContent className="pt-4 sm:pt-6">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                      <p className="text-xs sm:text-sm text-gray-600 mb-1">
+                        {semesterInfo.semester.charAt(0).toUpperCase() + semesterInfo.semester.slice(1)} Term
+                        {semesterInfo.status === 'active' && <span className="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">Active</span>}
+                        {semesterInfo.status === 'upcoming' && <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">Upcoming</span>}
+                        {semesterInfo.status === 'ended' && <span className="ml-2 px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full">Ended</span>}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {semesterInfo.weeks_remaining} weeks remaining • {semesterInfo.days_remaining} days left
+                      </p>
+                    </div>
+                    <div className="text-left sm:text-right">
+                      <p className="text-xs sm:text-sm text-gray-600 mb-1">Recommended This Week</p>
+                      <p className="text-2xl sm:text-3xl font-bold text-blue-600">
+                        ${semesterInfo.recommended_weekly_spending.toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Budget Overview */}
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
               <CardHeader>
