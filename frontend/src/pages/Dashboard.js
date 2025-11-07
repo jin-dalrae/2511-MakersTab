@@ -43,17 +43,19 @@ const Dashboard = ({ user, onLogout }) => {
       const token = localStorage.getItem('token');
       const headers = { Authorization: `Bearer ${token}` };
 
-      const [analyticsRes, receiptsRes, transactionsRes, menuRes] = await Promise.all([
+      const [analyticsRes, receiptsRes, transactionsRes, menuRes, semesterRes] = await Promise.all([
         axios.get(`${API}/analytics`, { headers }),
         axios.get(`${API}/receipts`, { headers }),
         axios.get(`${API}/transactions`, { headers }),
-        axios.get(`${API}/menu`)
+        axios.get(`${API}/menu`),
+        axios.get(`${API}/semester-info`, { headers })
       ]);
 
       setAnalytics(analyticsRes.data);
       setReceipts(receiptsRes.data);
       setTransactions(transactionsRes.data);
       setMenuItems(menuRes.data);
+      setSemesterInfo(semesterRes.data);
     } catch (error) {
       toast.error('Failed to load data');
     } finally {
