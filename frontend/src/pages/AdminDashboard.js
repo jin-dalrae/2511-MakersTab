@@ -105,6 +105,36 @@ const AdminDashboard = ({ user, onLogout }) => {
     }
   };
 
+  const handleToggleAdmin = async (userId) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.patch(`${API}/admin/users/${userId}/toggle-admin`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('User admin status updated');
+      fetchData();
+    } catch (error) {
+      toast.error('Failed to update user');
+    }
+  };
+
+  const handleDeleteUser = async (userId, userName) => {
+    if (!window.confirm(`Are you sure you want to delete ${userName}? This will also delete all their receipts and transactions.`)) {
+      return;
+    }
+    
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${API}/admin/users/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('User deleted successfully');
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to delete user');
+    }
+  };
+
   const categoryColors = {
     meal: '#22c55e',
     salad: '#84cc16',
