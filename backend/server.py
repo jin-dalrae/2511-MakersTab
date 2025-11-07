@@ -170,7 +170,8 @@ async def signup(input: UserSignup):
     await db.users.insert_one(doc)
     
     token = create_token(user_obj.id)
-    user_response = {k: v for k, v in doc.items() if k != 'password_hash'}
+    # Exclude _id and password_hash from response
+    user_response = {k: v for k, v in doc.items() if k not in ['password_hash', '_id']}
     
     return {"token": token, "user": user_response}
 
