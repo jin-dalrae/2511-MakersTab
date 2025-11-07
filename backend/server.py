@@ -396,14 +396,15 @@ async def upload_receipt(
             await db.transactions.insert_one(trans_doc)
         
         # Update meal plan amount to remaining balance from receipt
-        remaining_balance = float(parsed_data.get('remaining_balance', 0))
-        if remaining_balance > 0:
+        remaining_balance = parsed_data.get('remaining_balance', 0)
+        if remaining_balance and float(remaining_balance) > 0:
+            # Use the remaining balance shown on the receipt
             await db.users.update_one(
                 {"id": current_user['id']},
-                {"$set": {"meal_plan_amount": remaining_balance}}
+                {"$set": {"meal_plan_amount": float(remaining_balance)}}
             )
         else:
-            # Fallback: deduct total if no remaining balance found
+            # Fallback: deduct total if no remaining balance found on receipt
             total_amount = float(parsed_data.get('total', 0))
             await db.users.update_one(
                 {"id": current_user['id']},
