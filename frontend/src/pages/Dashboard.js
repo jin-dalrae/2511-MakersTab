@@ -30,6 +30,7 @@ const Dashboard = ({ user, onLogout }) => {
   const [receipts, setReceipts] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
+  const [semesterInfo, setSemesterInfo] = useState(null);
   const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
