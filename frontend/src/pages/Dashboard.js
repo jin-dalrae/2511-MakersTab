@@ -320,8 +320,8 @@ const Dashboard = ({ user, onLogout }) => {
           <TabsContent value="history" data-testid="history-content">
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
               <CardHeader>
-                <CardTitle style={{fontFamily: 'Space Grotesk'}}>Transaction History</CardTitle>
-                <CardDescription>Your recent purchases at Makers Cafe</CardDescription>
+                <CardTitle className="text-base sm:text-lg" style={{fontFamily: 'Space Grotesk'}}>Transaction History</CardTitle>
+                <CardDescription className="text-sm">Your recent purchases at Makers Cafe (Most Recent First)</CardDescription>
               </CardHeader>
               <CardContent>
                 {transactions.length === 0 ? (
@@ -331,33 +331,54 @@ const Dashboard = ({ user, onLogout }) => {
                   </div>
                 ) : (
                   <div className="space-y-3 max-h-[600px] overflow-y-auto">
-                    {transactions.map((transaction) => {
+                    {transactions.map((transaction, index) => {
                       const IconComponent = categoryIcons[transaction.category] || ShoppingBag;
+                      const totalSpent = transaction.price * transaction.quantity;
+                      
+                      // Calculate remaining amount based on all previous transactions
+                      let remainingAmount = user.meal_plan_amount;
+                      for (let i = 0; i <= index; i++) {
+                        const t = transactions[i];
+                        remainingAmount -= (t.price * t.quantity);
+                      }
+                      
                       return (
                         <div
                           key={transaction.id}
-                          className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200 hover:shadow-md duration-300"
+                          className="p-3 sm:p-4 bg-white rounded-xl border border-gray-200 hover:shadow-md duration-300"
                           data-testid="transaction-item"
                         >
-                          <div className="flex items-center gap-4">
-                            <div
-                              className="w-12 h-12 rounded-xl flex items-center justify-center"
-                              style={{ backgroundColor: `${categoryColors[transaction.category]}20` }}
-                            >
-                              <IconComponent className="w-6 h-6" style={{ color: categoryColors[transaction.category] }} />
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-start gap-3 flex-1 min-w-0">
+                              <div
+                                className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                                style={{ backgroundColor: `${categoryColors[transaction.category]}20` }}
+                              >
+                                <IconComponent className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: categoryColors[transaction.category] }} />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-semibold text-sm sm:text-base text-gray-800 truncate">{transaction.item_name}</p>
+                                <div className="flex flex-wrap gap-2 mt-1">
+                                  <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded capitalize">
+                                    {transaction.category}
+                                  </span>
+                                  <span className="text-xs text-gray-600">
+                                    Qty: {transaction.quantity}
+                                  </span>
+                                  <span className="text-xs text-gray-600">
+                                    {new Date(transaction.transaction_date).toLocaleDateString()} {new Date(transaction.transaction_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
-                            <div>
-                              <p className="font-semibold text-gray-800">{transaction.item_name}</p>
-                              <p className="text-sm text-gray-600">
-                                {new Date(transaction.transaction_date).toLocaleDateString()}
+                            <div className="text-right flex-shrink-0">
+                              <p className="text-base sm:text-lg font-bold text-red-600">
+                                -${totalSpent.toFixed(2)}
+                              </p>
+                              <p className="text-xs text-gray-600 mt-1">
+                                Balance: <span className="font-semibold text-green-600">${Math.max(0, remainingAmount).toFixed(2)}</span>
                               </p>
                             </div>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-lg font-bold text-gray-800">
-                              ${(transaction.price * transaction.quantity).toFixed(2)}
-                            </p>
-                            <p className="text-xs text-gray-600 capitalize">{transaction.category}</p>
                           </div>
                         </div>
                       );
