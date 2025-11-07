@@ -317,9 +317,11 @@ async def upload_receipt(
             {
                 "items": [{"name": "item name", "price": 0.00, "quantity": 1, "category": "meal/salad/drinks/convenience"}],
                 "total": 0.00,
+                "remaining_balance": 0.00,
                 "date": "YYYY-MM-DD",
                 "merchant": "store name"
             }
+            IMPORTANT: Look for the REMAINING BALANCE or MEAL PLAN BALANCE on the receipt (usually shown as "Balance", "Remaining", "New Balance", or "Meal Plan Balance"). Extract this exact amount for remaining_balance field.
             Be as precise as possible. If you can't determine the category, use 'other'.""",
             file_contents=[image_content]
         )
