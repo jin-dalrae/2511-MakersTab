@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import AuthPage from './pages/AuthPage';
 import Dashboard from './pages/Dashboard';
+import AdminDashboard from './pages/AdminDashboard';
 import { Toaster } from '@/components/ui/sonner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -63,7 +64,7 @@ function App() {
             path="/"
             element={
               isAuthenticated ? (
-                <Navigate to="/dashboard" replace />
+                <Navigate to={user?.is_admin ? "/admin" : "/dashboard"} replace />
               ) : (
                 <AuthPage onLogin={handleLogin} />
               )
@@ -74,6 +75,16 @@ function App() {
             element={
               isAuthenticated ? (
                 <Dashboard user={user} onLogout={handleLogout} />
+              ) : (
+                <Navigate to="/" replace />
+              )
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              isAuthenticated && user?.is_admin ? (
+                <AdminDashboard user={user} onLogout={handleLogout} />
               ) : (
                 <Navigate to="/" replace />
               )

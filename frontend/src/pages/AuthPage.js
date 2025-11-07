@@ -7,7 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { UtensilsCrossed, Receipt, TrendingUp, History } from 'lucide-react';
+import { Receipt, TrendingUp, History } from 'lucide-react';
+
+const LOGO_URL = 'https://customer-assets.emergentagent.com/job_cafe-wallet-2/artifacts/d2wwykae_makerstab.svg';
 
 const AuthPage = ({ onLogin }) => {
   const [signupData, setSignupData] = useState({
@@ -57,38 +59,38 @@ const AuthPage = ({ onLogin }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-lime-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-6xl flex flex-col lg:flex-row gap-12 items-center">
+      <div className="w-full max-w-6xl flex flex-col lg:flex-row gap-8 lg:gap-12 items-center">
         {/* Left Side - Branding */}
-        <div className="flex-1 text-center lg:text-left space-y-6">
+        <div className="flex-1 text-center lg:text-left space-y-6 w-full">
           <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-md px-6 py-3 rounded-full shadow-lg">
-            <UtensilsCrossed className="w-8 h-8 text-green-600" />
-            <h1 className="text-3xl font-bold text-green-800" style={{fontFamily: 'Space Grotesk'}}>CafeWallet</h1>
+            <img src={LOGO_URL} alt="MakersTab" className="w-8 h-8" />
+            <h1 className="text-2xl sm:text-3xl font-bold text-green-800" style={{fontFamily: 'Space Grotesk'}}>MakersTab</h1>
           </div>
-          <h2 className="text-4xl lg:text-5xl font-bold text-gray-800 leading-tight" style={{fontFamily: 'Space Grotesk'}}>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 leading-tight" style={{fontFamily: 'Space Grotesk'}}>
             Track Your Campus
             <br />
             <span className="text-green-600">Dining Expenses</span>
           </h2>
-          <p className="text-lg text-gray-600 max-w-md">
+          <p className="text-base sm:text-lg text-gray-600 max-w-md">
             Scan receipts, track spending, and manage your meal plan with AI-powered insights.
           </p>
 
           {/* Feature highlights */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
             <div className="bg-white/70 backdrop-blur-sm p-4 rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-1 duration-300">
-              <Receipt className="w-8 h-8 text-orange-500 mb-2" />
-              <h3 className="font-semibold text-gray-800">Smart OCR</h3>
-              <p className="text-sm text-gray-600">AI receipt scanning</p>
+              <Receipt className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500 mb-2" />
+              <h3 className="font-semibold text-sm sm:text-base text-gray-800">Smart OCR</h3>
+              <p className="text-xs sm:text-sm text-gray-600">AI receipt scanning</p>
             </div>
             <div className="bg-white/70 backdrop-blur-sm p-4 rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-1 duration-300">
-              <TrendingUp className="w-8 h-8 text-green-500 mb-2" />
-              <h3 className="font-semibold text-gray-800">Analytics</h3>
-              <p className="text-sm text-gray-600">Spending insights</p>
+              <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-green-500 mb-2" />
+              <h3 className="font-semibold text-sm sm:text-base text-gray-800">Analytics</h3>
+              <p className="text-xs sm:text-sm text-gray-600">Spending insights</p>
             </div>
             <div className="bg-white/70 backdrop-blur-sm p-4 rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-1 duration-300">
-              <History className="w-8 h-8 text-blue-500 mb-2" />
-              <h3 className="font-semibold text-gray-800">History</h3>
-              <p className="text-sm text-gray-600">Track all meals</p>
+              <History className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 mb-2" />
+              <h3 className="font-semibold text-sm sm:text-base text-gray-800">History</h3>
+              <p className="text-xs sm:text-sm text-gray-600">Track all meals</p>
             </div>
           </div>
         </div>
@@ -97,8 +99,8 @@ const AuthPage = ({ onLogin }) => {
         <div className="flex-1 w-full max-w-md">
           <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-xl">
             <CardHeader>
-              <CardTitle className="text-2xl" style={{fontFamily: 'Space Grotesk'}}>Get Started</CardTitle>
-              <CardDescription>Create an account or sign in to continue</CardDescription>
+              <CardTitle className="text-xl sm:text-2xl" style={{fontFamily: 'Space Grotesk'}}>Get Started</CardTitle>
+              <CardDescription className="text-sm">Create an account or sign in to continue</CardDescription>
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="signup" className="w-full">
@@ -110,7 +112,7 @@ const AuthPage = ({ onLogin }) => {
                 <TabsContent value="signup">
                   <form onSubmit={handleSignup} className="space-y-4" data-testid="signup-form">
                     <div>
-                      <Label htmlFor="signup-name">Full Name</Label>
+                      <Label htmlFor="signup-name" className="text-sm">Full Name</Label>
                       <Input
                         id="signup-name"
                         data-testid="signup-name-input"
@@ -122,7 +124,7 @@ const AuthPage = ({ onLogin }) => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="signup-email">Email</Label>
+                      <Label htmlFor="signup-email" className="text-sm">Email</Label>
                       <Input
                         id="signup-email"
                         data-testid="signup-email-input"
@@ -134,7 +136,7 @@ const AuthPage = ({ onLogin }) => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="signup-password">Password</Label>
+                      <Label htmlFor="signup-password" className="text-sm">Password</Label>
                       <Input
                         id="signup-password"
                         data-testid="signup-password-input"
@@ -146,7 +148,7 @@ const AuthPage = ({ onLogin }) => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="meal-plan">Meal Plan Budget ($)</Label>
+                      <Label htmlFor="meal-plan" className="text-sm">Meal Plan Budget ($)</Label>
                       <Input
                         id="meal-plan"
                         data-testid="meal-plan-input"
@@ -160,7 +162,7 @@ const AuthPage = ({ onLogin }) => {
                     </div>
                     <Button
                       type="submit"
-                      className="w-full bg-green-600 hover:bg-green-700"
+                      className="w-full bg-green-600 hover:bg-green-700 text-sm sm:text-base"
                       disabled={loading}
                       data-testid="signup-submit-button"
                     >
@@ -172,7 +174,7 @@ const AuthPage = ({ onLogin }) => {
                 <TabsContent value="login">
                   <form onSubmit={handleLogin} className="space-y-4" data-testid="login-form">
                     <div>
-                      <Label htmlFor="login-email">Email</Label>
+                      <Label htmlFor="login-email" className="text-sm">Email</Label>
                       <Input
                         id="login-email"
                         data-testid="login-email-input"
@@ -184,7 +186,7 @@ const AuthPage = ({ onLogin }) => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="login-password">Password</Label>
+                      <Label htmlFor="login-password" className="text-sm">Password</Label>
                       <Input
                         id="login-password"
                         data-testid="login-password-input"
@@ -197,7 +199,7 @@ const AuthPage = ({ onLogin }) => {
                     </div>
                     <Button
                       type="submit"
-                      className="w-full bg-green-600 hover:bg-green-700"
+                      className="w-full bg-green-600 hover:bg-green-700 text-sm sm:text-base"
                       disabled={loading}
                       data-testid="login-submit-button"
                     >
