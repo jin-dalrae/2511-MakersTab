@@ -166,6 +166,54 @@ const Dashboard = ({ user, onLogout }) => {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6" data-testid="overview-content">
+            {/* Quick Upload Receipt Section */}
+            <Card className="bg-gradient-to-br from-orange-50 to-amber-50 border-0 shadow-xl">
+              <CardContent className="pt-4 sm:pt-6">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="text-center sm:text-left">
+                    <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-1" style={{fontFamily: 'Space Grotesk'}}>
+                      Quick Upload Receipt
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-600">
+                      Scan your receipt instantly with AI-powered OCR
+                    </p>
+                  </div>
+                  <div className="flex gap-3">
+                    <label
+                      htmlFor="quick-file-upload"
+                      className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-orange-300 rounded-xl cursor-pointer hover:bg-orange-50 hover:border-orange-400 duration-300 shadow-md"
+                      data-testid="quick-file-upload-btn"
+                    >
+                      <Upload className="w-5 h-5 text-orange-600" />
+                      <span className="font-semibold text-orange-700 text-sm">Upload</span>
+                      <input
+                        id="quick-file-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                        disabled={uploading}
+                      />
+                    </label>
+                    <button
+                      onClick={handleCameraCapture}
+                      className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-xl cursor-pointer hover:bg-orange-700 duration-300 shadow-md"
+                      disabled={uploading}
+                      data-testid="quick-camera-btn"
+                    >
+                      <Camera className="w-5 h-5" />
+                      <span className="font-semibold text-sm">Camera</span>
+                    </button>
+                  </div>
+                </div>
+                {uploading && (
+                  <div className="mt-4 text-center p-3 bg-white rounded-xl">
+                    <div className="animate-pulse text-orange-600 font-semibold text-sm">Processing receipt with AI...</div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Semester & Weekly Spending Card */}
             {semesterInfo && (
               <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-0 shadow-xl">
