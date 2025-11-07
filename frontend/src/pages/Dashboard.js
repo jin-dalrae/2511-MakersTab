@@ -152,31 +152,26 @@ const Dashboard = ({ user, onLogout }) => {
             {/* Budget Overview */}
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2" style={{fontFamily: 'Space Grotesk'}}>
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg" style={{fontFamily: 'Space Grotesk'}}>
                   <DollarSign className="w-5 h-5 text-green-600" />
                   Meal Plan Budget
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="text-sm text-gray-600">Spent</p>
-                    <p className="text-3xl font-bold text-green-600">${analytics?.total_spent.toFixed(2) || '0.00'}</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-3 bg-red-50 rounded-xl">
+                    <p className="text-xs sm:text-sm text-gray-600 mb-1">Total Spent</p>
+                    <p className="text-xl sm:text-3xl font-bold text-red-600">${analytics?.total_spent.toFixed(2) || '0.00'}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm text-gray-600">Remaining</p>
-                    <p className="text-3xl font-bold text-gray-800">${remainingBudget.toFixed(2)}</p>
+                  <div className="p-3 bg-green-50 rounded-xl">
+                    <p className="text-xs sm:text-sm text-gray-600 mb-1">Remaining</p>
+                    <p className={`text-xl sm:text-3xl font-bold ${user.meal_plan_amount < 50 ? 'text-red-600' : 'text-green-600'}`}>
+                      ${user.meal_plan_amount.toFixed(2)}
+                    </p>
                   </div>
                 </div>
-                <div>
-                  <div className="flex justify-between text-sm text-gray-600 mb-2">
-                    <span>Budget Usage</span>
-                    <span>{spentPercentage.toFixed(1)}%</span>
-                  </div>
-                  <Progress value={spentPercentage} className="h-3" />
-                </div>
-                <div className="text-xs text-gray-500">
-                  Total Budget: ${user.meal_plan_amount.toFixed(2)}
+                <div className="text-xs sm:text-sm text-gray-500 text-center p-2 bg-gray-50 rounded-lg">
+                  Original Budget: ${(user.meal_plan_amount + (analytics?.total_spent || 0)).toFixed(2)}
                 </div>
               </CardContent>
             </Card>
