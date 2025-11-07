@@ -144,7 +144,6 @@ const Dashboard = ({ user, onLogout }) => {
             <TabsTrigger value="overview" data-testid="overview-tab" className="text-xs sm:text-sm flex-1 sm:flex-initial">Overview</TabsTrigger>
             <TabsTrigger value="upload" data-testid="upload-tab" className="text-xs sm:text-sm flex-1 sm:flex-initial">Upload</TabsTrigger>
             <TabsTrigger value="history" data-testid="history-tab" className="text-xs sm:text-sm flex-1 sm:flex-initial">History</TabsTrigger>
-            <TabsTrigger value="analytics" data-testid="analytics-tab" className="text-xs sm:text-sm flex-1 sm:flex-initial">Analytics</TabsTrigger>
             <TabsTrigger value="menu" data-testid="menu-tab" className="text-xs sm:text-sm flex-1 sm:flex-initial">Menu</TabsTrigger>
           </TabsList>
 
