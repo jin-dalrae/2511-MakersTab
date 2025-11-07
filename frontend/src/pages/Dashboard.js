@@ -77,19 +77,52 @@ const Dashboard = ({ user, onLogout }) => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${API}/receipts/upload`, formData, {
+      const response = await axios.post(`${API}/receipts/preview`, formData, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
         }
       });
-      toast.success('Receipt processed successfully!');
-      fetchData();
+      
+      // Show preview modal with extracted data
+      setPreviewData(response.data);
+      setShowPreview(true);
+      setMemo('');
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to upload receipt');
+      toast.error(error.response?.data?.detail || 'Failed to process receipt');
     } finally {
       setUploading(false);
     }
+  };
+
+  const handleConfirmReceipt = async () => {
+    setUploading(true);
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${API}/receipts/confirm`, {
+        parsed_data: previewData.preview_data,
+        ocr_text: previewData.ocr_text,
+        memo: memo
+      }, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      toast.success('Receipt saved successfully!');
+      setShowPreview(false);
+      setPreviewData(null);
+      setMemo('');
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to save receipt');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleCancelPreview = () => {
+    setShowPreview(false);
+    setPreviewData(null);
+    setMemo('');
   };
 
   const handleCameraCapture = () => {
