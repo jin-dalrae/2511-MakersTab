@@ -288,6 +288,9 @@ async def upload_receipt(
             
             await db.transactions.insert_one(trans_doc)
         
+        # Remove _id field before returning (MongoDB ObjectId is not JSON serializable)
+        doc.pop('_id', None)
+        
         return {"success": True, "receipt": doc, "message": "Receipt processed successfully"}
         
     except Exception as e:
