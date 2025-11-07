@@ -368,53 +368,6 @@ const Dashboard = ({ user, onLogout }) => {
             </Card>
           </TabsContent>
 
-          {/* Analytics Tab */}
-          <TabsContent value="analytics" data-testid="analytics-content">
-            <div className="space-y-6">
-              {/* Spending Trend */}
-              {analytics && analytics.spending_trend.length > 0 && (
-                <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
-                  <CardHeader>
-                    <CardTitle className="text-base sm:text-lg" style={{fontFamily: 'Space Grotesk'}}>Spending Trend (Last 30 Days)</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ResponsiveContainer width="100%" height={250}>
-                      <LineChart data={analytics.spending_trend}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis dataKey="date" stroke="#6b7280" tick={{ fontSize: 10 }} />
-                        <YAxis stroke="#6b7280" tick={{ fontSize: 10 }} />
-                        <Tooltip />
-                        <Legend wrapperStyle={{ fontSize: '12px' }} />
-                        <Line type="monotone" dataKey="amount" stroke="#22c55e" strokeWidth={2} name="Amount ($)" />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Category Breakdown Bar Chart */}
-              {analytics && pieData.length > 0 && (
-                <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
-                  <CardHeader>
-                    <CardTitle className="text-base sm:text-lg" style={{fontFamily: 'Space Grotesk'}}>Category Breakdown</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ResponsiveContainer width="100%" height={250}>
-                      <BarChart data={pieData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis dataKey="name" stroke="#6b7280" tick={{ fontSize: 10 }} />
-                        <YAxis stroke="#6b7280" tick={{ fontSize: 10 }} />
-                        <Tooltip />
-                        <Legend wrapperStyle={{ fontSize: '12px' }} />
-                        <Bar dataKey="value" fill="#22c55e" name="Amount ($)" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          </TabsContent>
-
           {/* Menu Tab */}
           <TabsContent value="menu" data-testid="menu-content">
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
