@@ -77,6 +77,7 @@ class Receipt(BaseModel):
     total_amount: float
     items: List[Dict[str, Any]]
     receipt_date: datetime
+    memo: str = ""
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class Transaction(BaseModel):
