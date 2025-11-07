@@ -376,13 +376,14 @@ const Dashboard = ({ user, onLogout }) => {
                                 -${totalSpent.toFixed(2)}
                               </p>
                               <p className="text-xs text-gray-600 mt-1">
-                                Balance: <span className="font-semibold text-green-600">${Math.max(0, remainingAmount).toFixed(2)}</span>
+                                After: <span className="font-semibold text-green-600">${Math.max(0, runningBalance).toFixed(2)}</span>
                               </p>
                             </div>
                           </div>
                         </div>
                       );
-                    })}
+                      });
+                    })()}
                   </div>
                 )}
               </CardContent>
