@@ -33,6 +33,9 @@ const Dashboard = ({ user, onLogout }) => {
   const [menuItems, setMenuItems] = useState([]);
   const [semesterInfo, setSemesterInfo] = useState(null);
   const [loadingData, setLoadingData] = useState(true);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewData, setPreviewData] = useState(null);
+  const [memo, setMemo] = useState('');
 
   useEffect(() => {
     fetchData();
