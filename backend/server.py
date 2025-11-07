@@ -226,21 +226,32 @@ async def upload_receipt(
         import json
         import re
         
-        # Extract JSON from response
-        json_match = re.search(r'\{[^}]+\}', response.replace('\n', ' '), re.DOTALL)
+        # Extract JSON from response - handle nested JSON
+        json_match = re.search(r'\{.*\}', response, re.DOTALL)
         if json_match:
-            parsed_data = json.loads(json_match.group())
+            try:
+                parsed_data = json.loads(json_match.group())
+            except json.JSONDecodeError:
+                parsed_data = {
+                    "items": [],
+                    "total": 0.0,
+                    "date": datetime.now(timezone.utc).strftime('%Y-%m-%d'),
+                    "merchant": "Makers Cafe"
+                }
         else:
             # Fallback parsing
             parsed_data = {
                 "items": [],
                 "total": 0.0,
-                "date": datetime.now(timezone.utc).isoformat(),
+                "date": datetime.now(timezone.utc).strftime('%Y-%m-%d'),
                 "merchant": "Makers Cafe"
             }
         
         # Create receipt record
-        receipt_date = datetime.fromisoformat(parsed_data.get('date', datetime.now(timezone.utc).isoformat()))
+        try:
+            receipt_date = datetime.strptime(parsed_data.get('date', datetime.now(timezone.utc).strftime('%Y-%m-%d')), '%Y-%m-%d').replace(tzinfo=timezone.utc)
+        except:
+            receipt_date = datetime.now(timezone.utc)
         
         receipt_obj = Receipt(
             user_id=current_user['id'],
