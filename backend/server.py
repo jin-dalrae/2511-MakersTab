@@ -299,6 +299,13 @@ async def upload_receipt(
             
             await db.transactions.insert_one(trans_doc)
         
+        # Deduct receipt total from user's meal plan
+        total_amount = float(parsed_data.get('total', 0))
+        await db.users.update_one(
+            {"id": current_user['id']},
+            {"$inc": {"meal_plan_amount": -total_amount}}
+        )
+        
         # Remove _id field before returning (MongoDB ObjectId is not JSON serializable)
         doc.pop('_id', None)
         
