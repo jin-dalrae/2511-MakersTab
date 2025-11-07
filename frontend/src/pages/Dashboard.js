@@ -183,44 +183,44 @@ const Dashboard = ({ user, onLogout }) => {
             </Card>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
               <Card className="bg-gradient-to-br from-green-500 to-emerald-600 text-white border-0 shadow-xl">
-                <CardContent className="pt-6">
+                <CardContent className="pt-4 sm:pt-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm opacity-90">Total Transactions</p>
-                      <p className="text-3xl font-bold">{analytics?.transactions_count || 0}</p>
+                      <p className="text-xs sm:text-sm opacity-90">Total Transactions</p>
+                      <p className="text-2xl sm:text-3xl font-bold">{analytics?.transactions_count || 0}</p>
                     </div>
-                    <Receipt className="w-12 h-12 opacity-80" />
+                    <Receipt className="w-8 h-8 sm:w-12 sm:h-12 opacity-80" />
                   </div>
                 </CardContent>
               </Card>
 
               <Card className="bg-gradient-to-br from-orange-500 to-amber-600 text-white border-0 shadow-xl">
-                <CardContent className="pt-6">
+                <CardContent className="pt-4 sm:pt-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm opacity-90">Receipts Scanned</p>
-                      <p className="text-3xl font-bold">{receipts.length}</p>
+                      <p className="text-xs sm:text-sm opacity-90">Receipts Scanned</p>
+                      <p className="text-2xl sm:text-3xl font-bold">{receipts.length}</p>
                     </div>
-                    <Camera className="w-12 h-12 opacity-80" />
+                    <Camera className="w-8 h-8 sm:w-12 sm:h-12 opacity-80" />
                   </div>
                 </CardContent>
               </Card>
 
               <Card className="bg-gradient-to-br from-blue-500 to-cyan-600 text-white border-0 shadow-xl">
-                <CardContent className="pt-6">
+                <CardContent className="pt-4 sm:pt-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm opacity-90">Avg Per Day</p>
-                      <p className="text-3xl font-bold">
+                      <p className="text-xs sm:text-sm opacity-90">Avg Per Day</p>
+                      <p className="text-2xl sm:text-3xl font-bold">
                         ${analytics?.spending_trend.length > 0 
                           ? (analytics.total_spent / analytics.spending_trend.length).toFixed(2)
                           : '0.00'
                         }
                       </p>
                     </div>
-                    <TrendingUp className="w-12 h-12 opacity-80" />
+                    <TrendingUp className="w-8 h-8 sm:w-12 sm:h-12 opacity-80" />
                   </div>
                 </CardContent>
               </Card>
