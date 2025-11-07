@@ -129,15 +129,28 @@ const Dashboard = ({ user, onLogout }) => {
               <p className="text-xs text-gray-600 hidden sm:block">Welcome, {user.name}</p>
             </div>
           </div>
-          <Button 
-            variant="outline" 
-            onClick={onLogout}
-            className="gap-2 hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-sm"
-            data-testid="logout-button"
-          >
-            <LogOut className="w-4 h-4" />
-            <span className="hidden sm:inline">Logout</span>
-          </Button>
+          <div className="flex items-center gap-2">
+            {user.is_admin && (
+              <Button 
+                variant="outline" 
+                onClick={() => window.location.href = '/admin'}
+                className="gap-2 bg-purple-50 text-purple-700 hover:bg-purple-100 hover:border-purple-300 text-sm"
+                data-testid="admin-panel-button"
+              >
+                <Users className="w-4 h-4" />
+                <span className="hidden sm:inline">Admin Panel</span>
+              </Button>
+            )}
+            <Button 
+              variant="outline" 
+              onClick={onLogout}
+              className="gap-2 hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-sm"
+              data-testid="logout-button"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Logout</span>
+            </Button>
+          </div>
         </div>
       </div>
 
