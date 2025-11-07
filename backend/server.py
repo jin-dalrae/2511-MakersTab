@@ -350,6 +350,7 @@ async def upload_receipt(
             parsed_data = {
                 "items": [],
                 "total": 0.0,
+                "remaining_balance": 0.0,
                 "date": datetime.now(timezone.utc).strftime('%Y-%m-%d'),
                 "merchant": "Makers Cafe"
             }
