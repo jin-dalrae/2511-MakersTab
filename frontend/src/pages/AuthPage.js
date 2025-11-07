@@ -16,7 +16,8 @@ const AuthPage = ({ onLogin }) => {
     name: '',
     email: '',
     password: '',
-    meal_plan_amount: ''
+    meal_plan_amount: '',
+    semester: 'fall'
   });
 
   const [loginData, setLoginData] = useState({
