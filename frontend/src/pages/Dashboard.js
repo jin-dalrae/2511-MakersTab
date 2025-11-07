@@ -332,15 +332,19 @@ const Dashboard = ({ user, onLogout }) => {
                 ) : (
                   <div className="space-y-3 max-h-[600px] overflow-y-auto">
                     {(() => {
-                      // Calculate running balance from current meal plan back through transactions
-                      let runningBalance = user.meal_plan_amount;
+                      // Calculate initial balance (current amount + all spent)
+                      const totalSpentSoFar = transactions.reduce((sum, t) => sum + (t.price * t.quantity), 0);
+                      let startingBalance = user.meal_plan_amount + totalSpentSoFar;
                       
                       return transactions.map((transaction, index) => {
                         const IconComponent = categoryIcons[transaction.category] || ShoppingBag;
                         const totalSpent = transaction.price * transaction.quantity;
                         
-                        // This is the balance BEFORE this transaction
-                        const balanceBeforeTransaction = runningBalance + totalSpent;
+                        // Balance before this transaction
+                        const balanceBefore = startingBalance;
+                        // Subtract this transaction
+                        startingBalance -= totalSpent;
+                        const balanceAfter = startingBalance;
                         
                         return (
                         <div
@@ -376,7 +380,7 @@ const Dashboard = ({ user, onLogout }) => {
                                 -${totalSpent.toFixed(2)}
                               </p>
                               <p className="text-xs text-gray-600 mt-1">
-                                After: <span className="font-semibold text-green-600">${Math.max(0, runningBalance).toFixed(2)}</span>
+                                Remaining: <span className={`font-semibold ${balanceAfter < 50 ? 'text-red-600' : 'text-green-600'}`}>${Math.max(0, balanceAfter).toFixed(2)}</span>
                               </p>
                             </div>
                           </div>
