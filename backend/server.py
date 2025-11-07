@@ -48,6 +48,7 @@ class User(BaseModel):
     password_hash: str
     name: str
     meal_plan_amount: float
+    semester: str = "fall"  # fall, spring, summer
     is_admin: bool = False
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
