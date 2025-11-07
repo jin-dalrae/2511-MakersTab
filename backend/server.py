@@ -48,6 +48,7 @@ class User(BaseModel):
     password_hash: str
     name: str
     meal_plan_amount: float
+    is_admin: bool = False
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class UserSignup(BaseModel):
@@ -145,11 +146,16 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     except Exception as e:
         raise HTTPException(status_code=401, detail="Invalid token")
 
+async def get_admin_user(current_user: dict = Depends(get_current_user)):
+    if not current_user.get('is_admin', False):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return current_user
+
 # ============= Routes =============
 
 @api_router.get("/")
 async def root():
-    return {"message": "Meal Plan Tracker API"}
+    return {"message": "MakersTab API"}
 
 # Auth Routes
 @api_router.post("/auth/signup", response_model=AuthResponse)
@@ -162,6 +168,11 @@ async def signup(input: UserSignup):
     # Create user
     user_data = input.model_dump()
     user_data['password_hash'] = hash_password(user_data.pop('password'))
+    
+    # First user becomes admin
+    user_count = await db.users.count_documents({})
+    user_data['is_admin'] = (user_count == 0)
+    
     user_obj = User(**user_data)
     
     doc = user_obj.model_dump()
@@ -372,7 +383,7 @@ async def get_analytics(current_user: dict = Depends(get_current_user)):
 @api_router.post("/menu", response_model=MenuItem)
 async def create_menu_item(
     input: MenuItemCreate,
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_admin_user)
 ):
     item_data = input.model_dump()
     item_data['available_date'] = datetime.now(timezone.utc)
@@ -393,6 +404,120 @@ async def get_menu():
         {"_id": 0}
     ).sort("created_at", -1).to_list(100)
     return menu_items
+
+@api_router.delete("/menu/{item_id}")
+async def delete_menu_item(
+    item_id: str,
+    current_user: dict = Depends(get_admin_user)
+):
+    result = await db.menu_items.delete_one({"id": item_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Menu item not found")
+    return {"success": True, "message": "Menu item deleted"}
+
+# Admin Routes
+@api_router.get("/admin/users")
+async def get_all_users(current_user: dict = Depends(get_admin_user)):
+    users = await db.users.find(
+        {},
+        {"_id": 0, "password_hash": 0}
+    ).to_list(1000)
+    return users
+
+@api_router.get("/admin/today-expenses")
+async def get_today_expenses(current_user: dict = Depends(get_admin_user)):
+    today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    tomorrow = today + timedelta(days=1)
+    
+    transactions = await db.transactions.find(
+        {
+            "transaction_date": {
+                "$gte": today.isoformat(),
+                "$lt": tomorrow.isoformat()
+            }
+        },
+        {"_id": 0}
+    ).to_list(10000)
+    
+    total_today = sum(t['price'] * t['quantity'] for t in transactions)
+    
+    # Get user info for each transaction
+    user_ids = list(set(t['user_id'] for t in transactions))
+    users = await db.users.find(
+        {"id": {"$in": user_ids}},
+        {"_id": 0, "id": 1, "name": 1, "email": 1}
+    ).to_list(1000)
+    
+    user_map = {u['id']: u for u in users}
+    
+    # Add user info to transactions
+    for t in transactions:
+        t['user'] = user_map.get(t['user_id'], {"name": "Unknown"})
+    
+    return {
+        "transactions": transactions,
+        "total_amount": total_today,
+        "count": len(transactions)
+    }
+
+@api_router.get("/admin/statistics")
+async def get_admin_statistics(current_user: dict = Depends(get_admin_user)):
+    # Total users
+    total_users = await db.users.count_documents({})
+    
+    # Total transactions
+    total_transactions = await db.transactions.count_documents({})
+    
+    # Total revenue
+    all_transactions = await db.transactions.find({}, {"_id": 0, "price": 1, "quantity": 1}).to_list(100000)
+    total_revenue = sum(t['price'] * t['quantity'] for t in all_transactions)
+    
+    # Today's stats
+    today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    tomorrow = today + timedelta(days=1)
+    
+    today_transactions = await db.transactions.find(
+        {
+            "transaction_date": {
+                "$gte": today.isoformat(),
+                "$lt": tomorrow.isoformat()
+            }
+        },
+        {"_id": 0}
+    ).to_list(10000)
+    
+    today_revenue = sum(t['price'] * t['quantity'] for t in today_transactions)
+    
+    # Category breakdown
+    category_stats = {}
+    for t in all_transactions:
+        cat = await db.transactions.find_one({"id": t.get('id', '')}, {"_id": 0, "category": 1})
+        if cat:
+            category = cat.get('category', 'other')
+            if category not in category_stats:
+                category_stats[category] = {"count": 0, "revenue": 0}
+            category_stats[category]['count'] += 1
+            category_stats[category]['revenue'] += t['price'] * t['quantity']
+    
+    # Menu items count
+    menu_items_count = await db.menu_items.count_documents({})
+    
+    # Recent receipts
+    recent_receipts = await db.receipts.find(
+        {},
+        {"_id": 0}
+    ).sort("created_at", -1).limit(10).to_list(10)
+    
+    return {
+        "total_users": total_users,
+        "total_transactions": total_transactions,
+        "total_revenue": total_revenue,
+        "today_transactions": len(today_transactions),
+        "today_revenue": today_revenue,
+        "category_stats": category_stats,
+        "menu_items_count": menu_items_count,
+        "recent_receipts": recent_receipts
+    }
 
 # Include the router in the main app
 app.include_router(api_router)
