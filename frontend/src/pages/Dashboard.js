@@ -376,17 +376,17 @@ const Dashboard = ({ user, onLogout }) => {
               {analytics && analytics.spending_trend.length > 0 && (
                 <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
                   <CardHeader>
-                    <CardTitle style={{fontFamily: 'Space Grotesk'}}>Spending Trend (Last 30 Days)</CardTitle>
+                    <CardTitle className="text-base sm:text-lg" style={{fontFamily: 'Space Grotesk'}}>Spending Trend (Last 30 Days)</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
+                    <ResponsiveContainer width="100%" height={250}>
                       <LineChart data={analytics.spending_trend}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis dataKey="date" stroke="#6b7280" />
-                        <YAxis stroke="#6b7280" />
+                        <XAxis dataKey="date" stroke="#6b7280" tick={{ fontSize: 10 }} />
+                        <YAxis stroke="#6b7280" tick={{ fontSize: 10 }} />
                         <Tooltip />
-                        <Legend />
-                        <Line type="monotone" dataKey="amount" stroke="#22c55e" strokeWidth={3} name="Amount ($)" />
+                        <Legend wrapperStyle={{ fontSize: '12px' }} />
+                        <Line type="monotone" dataKey="amount" stroke="#22c55e" strokeWidth={2} name="Amount ($)" />
                       </LineChart>
                     </ResponsiveContainer>
                   </CardContent>
@@ -397,16 +397,16 @@ const Dashboard = ({ user, onLogout }) => {
               {analytics && pieData.length > 0 && (
                 <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
                   <CardHeader>
-                    <CardTitle style={{fontFamily: 'Space Grotesk'}}>Category Breakdown</CardTitle>
+                    <CardTitle className="text-base sm:text-lg" style={{fontFamily: 'Space Grotesk'}}>Category Breakdown</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
+                    <ResponsiveContainer width="100%" height={250}>
                       <BarChart data={pieData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis dataKey="name" stroke="#6b7280" />
-                        <YAxis stroke="#6b7280" />
+                        <XAxis dataKey="name" stroke="#6b7280" tick={{ fontSize: 10 }} />
+                        <YAxis stroke="#6b7280" tick={{ fontSize: 10 }} />
                         <Tooltip />
-                        <Legend />
+                        <Legend wrapperStyle={{ fontSize: '12px' }} />
                         <Bar dataKey="value" fill="#22c55e" name="Amount ($)" />
                       </BarChart>
                     </ResponsiveContainer>
