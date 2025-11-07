@@ -539,6 +539,95 @@ const Dashboard = ({ user, onLogout }) => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Receipt Preview Modal */}
+      {showPreview && previewData && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" data-testid="receipt-preview-modal">
+          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-2xl">
+            <CardHeader className="border-b">
+              <CardTitle className="text-xl" style={{fontFamily: 'Space Grotesk'}}>Review Receipt</CardTitle>
+              <CardDescription>Please review the extracted information and add a memo</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-6">
+              {/* Receipt Details */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                  <span className="text-sm text-gray-600">Merchant</span>
+                  <span className="font-semibold text-gray-800">{previewData.preview_data.merchant}</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                  <span className="text-sm text-gray-600">Date</span>
+                  <span className="font-semibold text-gray-800">{previewData.preview_data.date}</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                  <span className="text-sm text-gray-600">Total</span>
+                  <span className="font-bold text-red-600 text-lg">${previewData.preview_data.total.toFixed(2)}</span>
+                </div>
+                {previewData.preview_data.remaining_balance > 0 && (
+                  <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg border border-green-200">
+                    <span className="text-sm text-gray-600">Remaining Balance</span>
+                    <span className="font-bold text-green-600 text-lg">${previewData.preview_data.remaining_balance.toFixed(2)}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Items List */}
+              <div>
+                <h3 className="font-semibold text-gray-800 mb-3">Items ({previewData.preview_data.items.length})</h3>
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {previewData.preview_data.items.map((item, index) => (
+                    <div key={index} className="flex justify-between items-center p-3 bg-white border border-gray-200 rounded-lg">
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-800">{item.name}</p>
+                        <div className="flex gap-2 mt-1">
+                          <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded capitalize">{item.category}</span>
+                          <span className="text-xs text-gray-600">Qty: {item.quantity}</span>
+                        </div>
+                      </div>
+                      <span className="font-semibold text-gray-800">${(item.price * item.quantity).toFixed(2)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Memo Input */}
+              <div>
+                <Label htmlFor="memo" className="text-sm font-semibold">Add Memo (Optional)</Label>
+                <textarea
+                  id="memo"
+                  data-testid="receipt-memo-input"
+                  className="w-full mt-2 px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-green-500"
+                  rows="3"
+                  placeholder="Add notes about this purchase..."
+                  value={memo}
+                  onChange={(e) => setMemo(e.target.value)}
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={handleCancelPreview}
+                  className="flex-1"
+                  disabled={uploading}
+                  data-testid="cancel-receipt-button"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleConfirmReceipt}
+                  className="flex-1 bg-green-600 hover:bg-green-700"
+                  disabled={uploading}
+                  data-testid="confirm-receipt-button"
+                >
+                  {uploading ? 'Saving...' : 'Confirm & Save'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };
