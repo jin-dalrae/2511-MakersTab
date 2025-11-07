@@ -294,6 +294,156 @@ async def get_semester_info(current_user: dict = Depends(get_current_user)):
     }
 
 # Receipt Routes
+@api_router.post("/receipts/preview")
+async def preview_receipt(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    """Preview receipt data without saving - for user review"""
+    try:
+        # Read image file
+        contents = await file.read()
+        base64_image = base64.b64encode(contents).decode('utf-8')
+        
+        # Use OpenAI Vision for OCR
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=f"receipt-preview-{uuid.uuid4()}",
+            system_message="You are an expert at reading receipts and extracting structured data. Extract item names, prices, quantities, categories (meal/salad/drinks/convenience store), and total amount."
+        ).with_model("openai", "gpt-4o")
+        
+        image_content = ImageContent(image_base64=base64_image)
+        user_message = UserMessage(
+            text="""Please analyze this receipt and extract the following information in JSON format:
+            {
+                "items": [{"name": "item name", "price": 0.00, "quantity": 1, "category": "meal/salad/drinks/convenience"}],
+                "total": 0.00,
+                "remaining_balance": 0.00,
+                "date": "YYYY-MM-DD",
+                "merchant": "store name"
+            }
+            IMPORTANT: Look for the REMAINING BALANCE or MEAL PLAN BALANCE on the receipt (usually shown as "Balance", "Remaining", "New Balance", or "Meal Plan Balance"). Extract this exact amount for remaining_balance field.
+            Be as precise as possible. If you can't determine the category, use 'other'.""",
+            file_contents=[image_content]
+        )
+        
+        response = await chat.send_message(user_message)
+        
+        # Parse the response
+        import json
+        import re
+        
+        # Extract JSON from response - handle nested JSON
+        json_match = re.search(r'\{.*\}', response, re.DOTALL)
+        if json_match:
+            try:
+                parsed_data = json.loads(json_match.group())
+            except json.JSONDecodeError:
+                parsed_data = {
+                    "items": [],
+                    "total": 0.0,
+                    "remaining_balance": 0.0,
+                    "date": datetime.now(timezone.utc).strftime('%Y-%m-%d'),
+                    "merchant": "Makers Cafe"
+                }
+        else:
+            # Fallback parsing
+            parsed_data = {
+                "items": [],
+                "total": 0.0,
+                "remaining_balance": 0.0,
+                "date": datetime.now(timezone.utc).strftime('%Y-%m-%d'),
+                "merchant": "Makers Cafe"
+            }
+        
+        # Return preview data with base64 image for display
+        return {
+            "success": True,
+            "preview_data": parsed_data,
+            "image_base64": base64_image,
+            "ocr_text": response
+        }
+        
+    except Exception as e:
+        logging.error(f"Receipt preview error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to preview receipt: {str(e)}")
+
+@api_router.post("/receipts/confirm")
+async def confirm_receipt(
+    data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Confirm and save receipt with memo"""
+    try:
+        parsed_data = data.get('parsed_data', {})
+        memo = data.get('memo', '')
+        
+        # Create receipt record
+        try:
+            receipt_date = datetime.strptime(parsed_data.get('date', datetime.now(timezone.utc).strftime('%Y-%m-%d')), '%Y-%m-%d').replace(tzinfo=timezone.utc)
+        except:
+            receipt_date = datetime.now(timezone.utc)
+        
+        receipt_obj = Receipt(
+            user_id=current_user['id'],
+            image_url=f"receipt_{uuid.uuid4()}.jpg",
+            ocr_text=data.get('ocr_text', ''),
+            parsed_data=parsed_data,
+            total_amount=float(parsed_data.get('total', 0)),
+            items=parsed_data.get('items', []),
+            receipt_date=receipt_date
+        )
+        
+        doc = receipt_obj.model_dump()
+        doc['receipt_date'] = doc['receipt_date'].isoformat()
+        doc['created_at'] = doc['created_at'].isoformat()
+        doc['memo'] = memo  # Add memo field
+        
+        await db.receipts.insert_one(doc)
+        
+        # Create transactions for each item
+        for item in parsed_data.get('items', []):
+            transaction = Transaction(
+                user_id=current_user['id'],
+                receipt_id=receipt_obj.id,
+                item_name=item.get('name', 'Unknown'),
+                category=item.get('category', 'other'),
+                price=float(item.get('price', 0)),
+                quantity=int(item.get('quantity', 1)),
+                transaction_date=receipt_date
+            )
+            
+            trans_doc = transaction.model_dump()
+            trans_doc['transaction_date'] = trans_doc['transaction_date'].isoformat()
+            trans_doc['created_at'] = trans_doc['created_at'].isoformat()
+            
+            await db.transactions.insert_one(trans_doc)
+        
+        # Update meal plan amount to remaining balance from receipt
+        remaining_balance = parsed_data.get('remaining_balance', 0)
+        if remaining_balance and float(remaining_balance) > 0:
+            # Use the remaining balance shown on the receipt
+            await db.users.update_one(
+                {"id": current_user['id']},
+                {"$set": {"meal_plan_amount": float(remaining_balance)}}
+            )
+        else:
+            # Fallback: deduct total if no remaining balance found on receipt
+            total_amount = float(parsed_data.get('total', 0))
+            await db.users.update_one(
+                {"id": current_user['id']},
+                {"$inc": {"meal_plan_amount": -total_amount}}
+            )
+        
+        # Remove _id field before returning
+        doc.pop('_id', None)
+        
+        return {"success": True, "receipt": doc, "message": "Receipt saved successfully"}
+        
+    except Exception as e:
+        logging.error(f"Receipt confirm error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to save receipt: {str(e)}")
+
 @api_router.post("/receipts/upload")
 async def upload_receipt(
     file: UploadFile = File(...),
