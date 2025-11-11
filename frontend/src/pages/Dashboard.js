@@ -254,7 +254,8 @@ const Dashboard = ({ user, onLogout }) => {
             {/* Semester & Weekly Spending Card */}
             {semesterInfo && (
               <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-0 shadow-xl">
-                <CardContent className="pt-4 sm:pt-6">
+                <CardContent className="pt-4 sm:pt-6 space-y-4">
+                  {/* Header */}
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div>
                       <p className="text-xs sm:text-sm text-gray-600 mb-1">
@@ -272,6 +273,70 @@ const Dashboard = ({ user, onLogout }) => {
                       <p className="text-2xl sm:text-3xl font-bold text-blue-600">
                         ${semesterInfo.recommended_weekly_spending.toFixed(2)}
                       </p>
+                    </div>
+                  </div>
+
+                  {/* Budget Health Indicator */}
+                  <div className="pt-4 border-t border-blue-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs sm:text-sm font-semibold text-gray-700">Budget Health</span>
+                      <span className={`text-xs sm:text-sm font-semibold px-3 py-1 rounded-full ${
+                        semesterInfo.budget_status === 'on_track' ? 'bg-green-100 text-green-700' :
+                        semesterInfo.budget_status === 'over_budget' ? 'bg-red-100 text-red-700' :
+                        'bg-yellow-100 text-yellow-700'
+                      }`}>
+                        {semesterInfo.status_message}
+                      </span>
+                    </div>
+                    
+                    {/* Progress bars comparison */}
+                    <div className="grid grid-cols-2 gap-4 mt-3">
+                      <div>
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="text-gray-600">Time Passed</span>
+                          <span className="font-semibold text-gray-700">{semesterInfo.time_elapsed_percentage.toFixed(0)}%</span>
+                        </div>
+                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-blue-500 transition-all duration-500"
+                            style={{width: `${Math.min(semesterInfo.time_elapsed_percentage, 100)}%`}}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="text-gray-600">Budget Used</span>
+                          <span className="font-semibold text-gray-700">{semesterInfo.budget_used_percentage.toFixed(0)}%</span>
+                        </div>
+                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full transition-all duration-500 ${
+                              semesterInfo.budget_status === 'on_track' ? 'bg-green-500' :
+                              semesterInfo.budget_status === 'over_budget' ? 'bg-red-500' :
+                              'bg-yellow-500'
+                            }`}
+                            style={{width: `${Math.min(semesterInfo.budget_used_percentage, 100)}%`}}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Spending comparison */}
+                    <div className="grid grid-cols-2 gap-3 mt-4 text-xs">
+                      <div className="p-2 bg-white/60 rounded-lg">
+                        <p className="text-gray-600 mb-1">Ideal Weekly</p>
+                        <p className="font-bold text-gray-800">${semesterInfo.ideal_weekly_rate.toFixed(2)}</p>
+                      </div>
+                      <div className="p-2 bg-white/60 rounded-lg">
+                        <p className="text-gray-600 mb-1">Your Average</p>
+                        <p className={`font-bold ${
+                          semesterInfo.actual_weekly_rate > semesterInfo.ideal_weekly_rate ? 'text-red-600' :
+                          semesterInfo.actual_weekly_rate < semesterInfo.ideal_weekly_rate * 0.8 ? 'text-yellow-600' :
+                          'text-green-600'
+                        }`}>
+                          ${semesterInfo.actual_weekly_rate.toFixed(2)}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
