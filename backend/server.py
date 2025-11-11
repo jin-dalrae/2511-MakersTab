@@ -279,19 +279,77 @@ async def get_semester_info(current_user: dict = Depends(get_current_user)):
     semester = current_user.get('semester', 'fall')
     semester_info = get_current_semester_info(semester)
     
-    # Calculate recommended weekly spending
-    remaining_balance = current_user.get('meal_plan_amount', 0)
-    weeks_remaining = semester_info['weeks_remaining']
+    # Get spending data
+    total_transactions = await db.transactions.find(
+        {"user_id": current_user['id']},
+        {"_id": 0, "price": 1, "quantity": 1}
+    ).to_list(10000)
     
+    total_spent = sum(t['price'] * t['quantity'] for t in total_transactions)
+    
+    # Calculate budget metrics
+    remaining_balance = current_user.get('meal_plan_amount', 0)
+    original_budget = remaining_balance + total_spent
+    
+    weeks_remaining = semester_info['weeks_remaining']
+    total_weeks = semester_info['total_weeks']
+    weeks_elapsed = total_weeks - weeks_remaining
+    
+    # Calculate recommended weekly spending
     if weeks_remaining > 0:
         recommended_weekly = remaining_balance / weeks_remaining
     else:
         recommended_weekly = 0
     
+    # Calculate ideal/expected spending rate
+    if total_weeks > 0:
+        ideal_weekly_rate = original_budget / total_weeks
+    else:
+        ideal_weekly_rate = 0
+    
+    # Calculate actual spending rate
+    if weeks_elapsed > 0:
+        actual_weekly_rate = total_spent / weeks_elapsed
+    else:
+        actual_weekly_rate = 0
+    
+    # Determine budget status
+    if weeks_elapsed > 0:
+        expected_spent_by_now = ideal_weekly_rate * weeks_elapsed
+        spending_difference = total_spent - expected_spent_by_now
+        
+        if abs(spending_difference) < (ideal_weekly_rate * 0.2):  # Within 20%
+            budget_status = "on_track"
+            status_message = "You're on track!"
+        elif spending_difference > 0:
+            budget_status = "over_budget"
+            status_message = "Spending faster than planned"
+        else:
+            budget_status = "under_budget"
+            status_message = "Spending slower than planned"
+    else:
+        budget_status = "on_track"
+        status_message = "Semester just started"
+        spending_difference = 0
+    
+    # Calculate percentage of budget used vs time elapsed
+    budget_used_percentage = (total_spent / original_budget * 100) if original_budget > 0 else 0
+    time_elapsed_percentage = (weeks_elapsed / total_weeks * 100) if total_weeks > 0 else 0
+    
     return {
         **semester_info,
         "remaining_balance": remaining_balance,
-        "recommended_weekly_spending": round(recommended_weekly, 2)
+        "original_budget": original_budget,
+        "total_spent": total_spent,
+        "recommended_weekly_spending": round(recommended_weekly, 2),
+        "ideal_weekly_rate": round(ideal_weekly_rate, 2),
+        "actual_weekly_rate": round(actual_weekly_rate, 2),
+        "budget_status": budget_status,
+        "status_message": status_message,
+        "spending_difference": round(spending_difference, 2),
+        "budget_used_percentage": round(budget_used_percentage, 1),
+        "time_elapsed_percentage": round(time_elapsed_percentage, 1),
+        "weeks_elapsed": round(weeks_elapsed, 1)
     }
 
 # Receipt Routes
