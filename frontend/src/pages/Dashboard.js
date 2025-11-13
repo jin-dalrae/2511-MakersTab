@@ -58,8 +58,13 @@ const Dashboard = ({ user, onLogout }) => {
       ]);
 
       setAnalytics(analyticsRes.data);
-      setReceipts(receiptsRes.data.receipts || receiptsRes.data);
-      setTransactions(transactionsRes.data.transactions || transactionsRes.data);
+      
+      // Handle paginated responses - ensure we get arrays
+      const receiptsData = receiptsRes.data.receipts || (Array.isArray(receiptsRes.data) ? receiptsRes.data : []);
+      const transactionsData = transactionsRes.data.transactions || (Array.isArray(transactionsRes.data) ? transactionsRes.data : []);
+      
+      setReceipts(receiptsData);
+      setTransactions(transactionsData);
       setMenuItems(menuRes.data);
       setSemesterInfo(semesterRes.data);
     } catch (error) {
