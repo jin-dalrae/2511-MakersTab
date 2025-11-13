@@ -37,6 +37,7 @@ const Dashboard = ({ user, onLogout }) => {
   const [showPreview, setShowPreview] = useState(false);
   const [previewData, setPreviewData] = useState(null);
   const [memo, setMemo] = useState('');
+  const [groupBy, setGroupBy] = useState('day');
 
   useEffect(() => {
     fetchData();
