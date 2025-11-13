@@ -154,6 +154,73 @@ const Dashboard = ({ user, onLogout }) => {
     value: parseFloat(value.toFixed(2))
   })) : [];
 
+  // Group transactions by day, week, or month
+  const groupTransactions = (transactions, groupType) => {
+    const grouped = {};
+    
+    transactions.forEach(transaction => {
+      const date = new Date(transaction.transaction_date);
+      let key;
+      
+      if (groupType === 'day') {
+        key = date.toISOString().split('T')[0]; // YYYY-MM-DD
+      } else if (groupType === 'week') {
+        const year = date.getFullYear();
+        const weekNum = getWeekNumber(date);
+        key = `${year}-W${weekNum}`;
+      } else if (groupType === 'month') {
+        key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      }
+      
+      if (!grouped[key]) {
+        grouped[key] = [];
+      }
+      grouped[key].push(transaction);
+    });
+    
+    // Sort by key descending (most recent first)
+    const sortedKeys = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+    const sortedGrouped = {};
+    sortedKeys.forEach(key => {
+      sortedGrouped[key] = grouped[key];
+    });
+    
+    return sortedGrouped;
+  };
+
+  const getWeekNumber = (date) => {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  };
+
+  const formatGroupLabel = (key, groupType) => {
+    if (groupType === 'day') {
+      const date = new Date(key);
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      if (date.toDateString() === today.toDateString()) {
+        return 'Today';
+      } else if (date.toDateString() === yesterday.toDateString()) {
+        return 'Yesterday';
+      } else {
+        return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      }
+    } else if (groupType === 'week') {
+      const [year, week] = key.split('-W');
+      return `Week ${week}, ${year}`;
+    } else if (groupType === 'month') {
+      const [year, month] = key.split('-');
+      const date = new Date(year, parseInt(month) - 1);
+      return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    }
+    return key;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-lime-50">
       {/* Header */}
