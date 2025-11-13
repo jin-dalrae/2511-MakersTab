@@ -364,7 +364,9 @@ async def get_semester_info(current_user: dict = Depends(get_current_user)):
 
 # Receipt Routes
 @api_router.post("/receipts/preview")
+@limiter.limit("20/minute")  # Limit OCR requests
 async def preview_receipt(
+    request: Request,
     file: UploadFile = File(...),
     current_user: dict = Depends(get_current_user)
 ):
