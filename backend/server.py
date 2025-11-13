@@ -269,7 +269,8 @@ async def signup(request: Request, input: UserSignup):
     return {"token": token, "user": user_response}
 
 @api_router.post("/auth/login", response_model=AuthResponse)
-async def login(input: UserLogin):
+@limiter.limit("10/minute")  # Prevent brute force
+async def login(request: Request, input: UserLogin):
     user = await db.users.find_one({"email": input.email}, {"_id": 0})
     if not user or not verify_password(input.password, user['password_hash']):
         raise HTTPException(status_code=401, detail="Invalid credentials")
