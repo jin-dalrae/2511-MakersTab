@@ -272,6 +272,27 @@ async def get_admin_user(current_user: dict = Depends(get_current_user)):
 async def root():
     return {"message": "MakersTab API"}
 
+@api_router.get("/health")
+async def health_check():
+    """Health check endpoint for monitoring"""
+    try:
+        # Check database connection
+        await db.command("ping")
+        db_status = "healthy"
+    except Exception as e:
+        db_status = f"unhealthy: {str(e)}"
+    
+    # Check cache
+    cache_status = "healthy" if isinstance(cache_store, dict) else "unhealthy"
+    
+    return {
+        "status": "healthy" if db_status == "healthy" else "degraded",
+        "version": "1.0.0",
+        "database": db_status,
+        "cache": cache_status,
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+
 # Auth Routes
 @api_router.post("/auth/signup", response_model=AuthResponse)
 @limiter.limit("5/minute")  # Prevent signup spam
