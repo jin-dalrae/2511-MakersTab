@@ -985,6 +985,16 @@ async def get_admin_statistics(current_user: dict = Depends(get_admin_user)):
 # Include the router in the main app
 app.include_router(api_router)
 
+# API version endpoint
+@app.get("/api/version")
+async def get_api_version():
+    return {
+        "version": "1.0.0",
+        "api_versions": ["v1"],
+        "default": "v1",
+        "deprecated": []
+    }
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
