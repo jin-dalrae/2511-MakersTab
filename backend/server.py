@@ -642,12 +642,28 @@ async def upload_receipt(
         raise HTTPException(status_code=500, detail=f"Failed to process receipt: {str(e)}")
 
 @api_router.get("/receipts")
-async def get_receipts(current_user: dict = Depends(get_current_user)):
+async def get_receipts(
+    page: int = 1,
+    limit: int = 20,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get paginated receipts"""
+    skip = (page - 1) * limit
+    
     receipts = await db.receipts.find(
         {"user_id": current_user['id']},
         {"_id": 0}
-    ).sort("receipt_date", -1).to_list(100)
-    return receipts
+    ).sort("receipt_date", -1).skip(skip).limit(limit).to_list(limit)
+    
+    total_count = await db.receipts.count_documents({"user_id": current_user['id']})
+    
+    return {
+        "receipts": receipts,
+        "page": page,
+        "limit": limit,
+        "total": total_count,
+        "pages": (total_count + limit - 1) // limit
+    }
 
 # Transaction Routes
 @api_router.get("/transactions")
