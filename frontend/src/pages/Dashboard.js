@@ -343,12 +343,12 @@ const Dashboard = ({ user, onLogout }) => {
               </Card>
             )}
 
-            {/* Budget Overview */}
+            {/* Budget Overview with Transaction History */}
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base sm:text-lg" style={{fontFamily: 'Space Grotesk'}}>
                   <DollarSign className="w-5 h-5 text-green-600" />
-                  Meal Plan Budget
+                  Meal Plan Budget & History
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -367,6 +367,76 @@ const Dashboard = ({ user, onLogout }) => {
                 <div className="text-xs sm:text-sm text-gray-500 text-center p-2 bg-gray-50 rounded-lg">
                   Original Budget: ${(user.meal_plan_amount + (analytics?.total_spent || 0)).toFixed(2)}
                 </div>
+
+                {/* Transaction History */}
+                {transactions.length > 0 && (
+                  <div className="pt-4 border-t border-gray-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-semibold text-gray-800 text-sm sm:text-base">Recent Transactions</h3>
+                      <select
+                        className="text-xs sm:text-sm px-3 py-1 border border-gray-300 rounded-lg bg-white"
+                        value={activeTab === 'overview' ? groupBy : 'day'}
+                        onChange={(e) => setGroupBy(e.target.value)}
+                      >
+                        <option value="day">Group by Day</option>
+                        <option value="week">Group by Week</option>
+                        <option value="month">Group by Month</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-4 max-h-[500px] overflow-y-auto">
+                      {(() => {
+                        const grouped = groupTransactions(transactions, groupBy);
+                        
+                        return Object.entries(grouped).map(([groupKey, groupTransactions]) => {
+                          const groupTotal = groupTransactions.reduce((sum, t) => sum + (t.price * t.quantity), 0);
+                          
+                          return (
+                            <div key={groupKey} className="space-y-2">
+                              {/* Group Header */}
+                              <div className="flex items-center justify-between p-2 bg-gray-100 rounded-lg">
+                                <span className="text-xs sm:text-sm font-semibold text-gray-700">
+                                  {formatGroupLabel(groupKey, groupBy)}
+                                </span>
+                                <span className="text-xs sm:text-sm font-bold text-red-600">
+                                  -${groupTotal.toFixed(2)}
+                                </span>
+                              </div>
+
+                              {/* Transactions in Group */}
+                              <div className="space-y-1 pl-2 sm:pl-4">
+                                {groupTransactions.map((transaction) => {
+                                  const totalSpent = transaction.price * transaction.quantity;
+                                  
+                                  return (
+                                    <div
+                                      key={transaction.id}
+                                      className="flex items-center justify-between p-2 sm:p-3 bg-white border border-gray-200 rounded-lg hover:shadow-sm transition-shadow"
+                                    >
+                                      <div className="flex-1 min-w-0">
+                                        <p className="font-medium text-xs sm:text-sm text-gray-800 truncate">
+                                          {transaction.item_name}
+                                        </p>
+                                        <p className="text-xs text-gray-500">
+                                          {new Date(transaction.transaction_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                        </p>
+                                      </div>
+                                      <div className="text-right flex-shrink-0 ml-2">
+                                        <p className="text-xs sm:text-sm font-bold text-red-600">
+                                          -${totalSpent.toFixed(2)}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        });
+                      })()}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
