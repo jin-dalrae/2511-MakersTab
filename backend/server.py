@@ -44,6 +44,37 @@ limiter = Limiter(key_func=get_remote_address, default_limits=["200/minute"])
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+# Simple in-memory cache (for production, use Redis)
+cache_store = {}
+
+def cache_response(expire_seconds: int = 300):
+    """Simple cache decorator"""
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            # Create cache key from function name and user_id
+            current_user = kwargs.get('current_user')
+            if current_user:
+                cache_key = f"{func.__name__}:{current_user['id']}"
+                
+                # Check cache
+                if cache_key in cache_store:
+                    cached_data, timestamp = cache_store[cache_key]
+                    if (datetime.now(timezone.utc).timestamp() - timestamp) < expire_seconds:
+                        logger.info(f"Cache hit: {cache_key}")
+                        return cached_data
+                
+                # Execute function
+                result = await func(*args, **kwargs)
+                
+                # Store in cache
+                cache_store[cache_key] = (result, datetime.now(timezone.utc).timestamp())
+                return result
+            else:
+                return await func(*args, **kwargs)
+        return wrapper
+    return decorator
+
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
