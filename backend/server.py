@@ -894,6 +894,34 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+@app.on_event("startup")
+async def startup_db_client():
+    """Create database indexes for performance"""
+    try:
+        # Users collection indexes
+        await db.users.create_index("email", unique=True)
+        await db.users.create_index("id")
+        await db.users.create_index([("is_admin", 1)])
+        
+        # Receipts collection indexes
+        await db.receipts.create_index("id")
+        await db.receipts.create_index([("user_id", 1), ("created_at", -1)])
+        await db.receipts.create_index([("receipt_date", -1)])
+        
+        # Transactions collection indexes
+        await db.transactions.create_index("id")
+        await db.transactions.create_index([("user_id", 1), ("transaction_date", -1)])
+        await db.transactions.create_index([("user_id", 1), ("category", 1)])
+        await db.transactions.create_index("receipt_id")
+        
+        # Menu items collection indexes
+        await db.menu_items.create_index("id")
+        await db.menu_items.create_index([("available_date", -1)])
+        
+        logging.info("Database indexes created successfully")
+    except Exception as e:
+        logging.error(f"Error creating indexes: {str(e)}")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
