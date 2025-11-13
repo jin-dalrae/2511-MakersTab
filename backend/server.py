@@ -762,6 +762,7 @@ async def get_transaction_history(current_user: dict = Depends(get_current_user)
 
 # Analytics Routes
 @api_router.get("/analytics", response_model=AnalyticsData)
+@cache_response(expire_seconds=60)  # Cache for 1 minute
 async def get_analytics(current_user: dict = Depends(get_current_user)):
     # Get all transactions
     transactions = await db.transactions.find(
