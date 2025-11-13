@@ -652,14 +652,27 @@ async def get_receipts(current_user: dict = Depends(get_current_user)):
 # Transaction Routes
 @api_router.get("/transactions")
 async def get_transactions(
+    page: int = 1,
     limit: int = 50,
     current_user: dict = Depends(get_current_user)
 ):
+    """Get paginated transactions"""
+    skip = (page - 1) * limit
+    
     transactions = await db.transactions.find(
         {"user_id": current_user['id']},
         {"_id": 0}
-    ).sort("transaction_date", -1).limit(limit).to_list(limit)
-    return transactions
+    ).sort("transaction_date", -1).skip(skip).limit(limit).to_list(limit)
+    
+    total_count = await db.transactions.count_documents({"user_id": current_user['id']})
+    
+    return {
+        "transactions": transactions,
+        "page": page,
+        "limit": limit,
+        "total": total_count,
+        "pages": (total_count + limit - 1) // limit
+    }
 
 @api_router.get("/transactions/history")
 async def get_transaction_history(current_user: dict = Depends(get_current_user)):
