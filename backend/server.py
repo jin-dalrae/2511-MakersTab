@@ -928,12 +928,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configure logging
+# Configure logging with more detail
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format='%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('/var/log/supervisor/makerstab.log')
+    ]
 )
 logger = logging.getLogger(__name__)
+
+# Add exception handler for better error tracking
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Global exception: {str(exc)}", exc_info=True)
+    return HTTPException(
+        status_code=500,
+        detail="Internal server error. Please try again later."
+    )
 
 @app.on_event("startup")
 async def startup_db_client():
