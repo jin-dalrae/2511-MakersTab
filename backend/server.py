@@ -476,9 +476,12 @@ async def preview_receipt(
                 "total": 0.00,
                 "remaining_balance": 0.00,
                 "date": "YYYY-MM-DD",
+                "time": "HH:MM",
                 "merchant": "store name"
             }
-            IMPORTANT: Look for the REMAINING BALANCE or MEAL PLAN BALANCE on the receipt (usually shown as "Balance", "Remaining", "New Balance", or "Meal Plan Balance"). Extract this exact amount for remaining_balance field.
+            IMPORTANT: 
+            1. Look for the REMAINING BALANCE or MEAL PLAN BALANCE on the receipt (usually shown as "Balance", "Remaining", "New Balance", or "Meal Plan Balance"). Extract this exact amount for remaining_balance field.
+            2. Extract the TIME from the receipt (usually at the top near the date). Format as HH:MM (24-hour format).
             Be as precise as possible. If you can't determine the category, use 'other'.""",
             file_contents=[image_content]
         )
@@ -625,9 +628,12 @@ async def upload_receipt(
                 "total": 0.00,
                 "remaining_balance": 0.00,
                 "date": "YYYY-MM-DD",
+                "time": "HH:MM",
                 "merchant": "store name"
             }
-            IMPORTANT: Look for the REMAINING BALANCE or MEAL PLAN BALANCE on the receipt (usually shown as "Balance", "Remaining", "New Balance", or "Meal Plan Balance"). Extract this exact amount for remaining_balance field.
+            IMPORTANT: 
+            1. Look for the REMAINING BALANCE or MEAL PLAN BALANCE on the receipt (usually shown as "Balance", "Remaining", "New Balance", or "Meal Plan Balance"). Extract this exact amount for remaining_balance field.
+            2. Extract the TIME from the receipt (usually at the top near the date). Format as HH:MM (24-hour format).
             Be as precise as possible. If you can't determine the category, use 'other'.""",
             file_contents=[image_content]
         )
