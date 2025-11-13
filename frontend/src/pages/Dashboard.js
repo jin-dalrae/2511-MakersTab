@@ -136,6 +136,7 @@ const Dashboard = ({ user, onLogout }) => {
     salad: '#84cc16',
     drinks: '#06b6d4',
     convenience: '#f59e0b',
+    untracked: '#ef4444',
     other: '#8b5cf6'
   };
 
@@ -143,7 +144,8 @@ const Dashboard = ({ user, onLogout }) => {
     meal: Coffee,
     salad: Salad,
     drinks: Wine,
-    convenience: ShoppingBag
+    convenience: ShoppingBag,
+    untracked: Receipt
   };
 
   const spentPercentage = analytics ? (analytics.total_spent / user.meal_plan_amount) * 100 : 0;
