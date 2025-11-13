@@ -584,20 +584,75 @@ async def confirm_receipt(
             
             await db.transactions.insert_one(trans_doc)
         
-        # Update meal plan amount to remaining balance from receipt
+        # Detect untracked spending and create mock transactions
         remaining_balance = parsed_data.get('remaining_balance', 0)
+        receipt_total = float(parsed_data.get('total', 0))
+        current_balance = current_user.get('meal_plan_amount', 0)
+        
         if remaining_balance and float(remaining_balance) > 0:
+            remaining_balance = float(remaining_balance)
+            
+            # Calculate expected balance after this receipt
+            expected_balance = current_balance - receipt_total
+            
+            # If actual balance is lower than expected, there's untracked spending
+            untracked_amount = expected_balance - remaining_balance
+            
+            if untracked_amount > 0.01:  # More than 1 cent difference
+                logger.info(f"Detected untracked spending: ${untracked_amount:.2f}")
+                
+                # Get most recent receipt before this one
+                previous_receipt = await db.receipts.find_one(
+                    {"user_id": current_user['id']},
+                    {"_id": 0, "receipt_date": 1},
+                    sort=[("receipt_date", -1)]
+                )
+                
+                # Calculate time between receipts for mock transaction
+                if previous_receipt:
+                    prev_date = datetime.fromisoformat(previous_receipt['receipt_date']) if isinstance(previous_receipt['receipt_date'], str) else previous_receipt['receipt_date']
+                    # Place mock transaction halfway between receipts
+                    time_diff = receipt_date - prev_date
+                    mock_date = prev_date + (time_diff / 2)
+                else:
+                    # No previous receipt, place 1 hour before current
+                    mock_date = receipt_date - timedelta(hours=1)
+                
+                # Delete existing mock transactions that would be recalculated
+                await db.transactions.delete_many({
+                    "user_id": current_user['id'],
+                    "category": "untracked",
+                    "transaction_date": {"$gte": mock_date.isoformat(), "$lte": receipt_date.isoformat()}
+                })
+                
+                # Create mock transaction for untracked spending
+                mock_transaction = Transaction(
+                    user_id=current_user['id'],
+                    receipt_id=receipt_obj.id,
+                    item_name="Untracked Purchase (Cash/Other Receipt)",
+                    category="untracked",
+                    price=untracked_amount,
+                    quantity=1,
+                    transaction_date=mock_date
+                )
+                
+                mock_doc = mock_transaction.model_dump()
+                mock_doc['transaction_date'] = mock_doc['transaction_date'].isoformat()
+                mock_doc['created_at'] = mock_doc['created_at'].isoformat()
+                
+                await db.transactions.insert_one(mock_doc)
+                logger.info(f"Created mock transaction for ${untracked_amount:.2f} at {mock_date}")
+            
             # Use the remaining balance shown on the receipt
             await db.users.update_one(
                 {"id": current_user['id']},
-                {"$set": {"meal_plan_amount": float(remaining_balance)}}
+                {"$set": {"meal_plan_amount": remaining_balance}}
             )
         else:
             # Fallback: deduct total if no remaining balance found on receipt
-            total_amount = float(parsed_data.get('total', 0))
             await db.users.update_one(
                 {"id": current_user['id']},
-                {"$inc": {"meal_plan_amount": -total_amount}}
+                {"$inc": {"meal_plan_amount": -receipt_total}}
             )
         
         # Remove _id field before returning
