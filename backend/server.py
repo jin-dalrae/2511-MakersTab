@@ -537,11 +537,17 @@ async def confirm_receipt(
         parsed_data = data.get('parsed_data', {})
         memo = data.get('memo', '')
         
-        # Create receipt record
+        # Create receipt record with time
         try:
-            receipt_date = datetime.strptime(parsed_data.get('date', datetime.now(timezone.utc).strftime('%Y-%m-%d')), '%Y-%m-%d').replace(tzinfo=timezone.utc)
+            date_str = parsed_data.get('date', datetime.now(timezone.utc).strftime('%Y-%m-%d'))
+            time_str = parsed_data.get('time', '12:00')
+            
+            # Parse date and time
+            receipt_datetime = datetime.strptime(f"{date_str} {time_str}", '%Y-%m-%d %H:%M').replace(tzinfo=timezone.utc)
         except:
-            receipt_date = datetime.now(timezone.utc)
+            receipt_datetime = datetime.now(timezone.utc)
+        
+        receipt_date = receipt_datetime
         
         receipt_obj = Receipt(
             user_id=current_user['id'],
