@@ -372,9 +372,38 @@ async def preview_receipt(
 ):
     """Preview receipt data without saving - for user review"""
     try:
-        # Read image file
+        # Validate file type
+        if not file.content_type.startswith('image/'):
+            raise HTTPException(status_code=400, detail="File must be an image")
+        
+        # Validate file size (max 10MB)
         contents = await file.read()
+        if len(contents) > 10 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="File size must be less than 10MB")
+        
+        # Compress image if needed
+        from PIL import Image
+        import io
+        
+        img = Image.open(io.BytesIO(contents))
+        
+        # Resize if image is too large (max 2000px on longest side)
+        max_size = 2000
+        if max(img.size) > max_size:
+            ratio = max_size / max(img.size)
+            new_size = tuple(int(dim * ratio) for dim in img.size)
+            img = img.resize(new_size, Image.Resampling.LANCZOS)
+        
+        # Convert to JPEG and compress
+        output = io.BytesIO()
+        if img.mode in ('RGBA', 'LA', 'P'):
+            img = img.convert('RGB')
+        img.save(output, format='JPEG', quality=85, optimize=True)
+        contents = output.getvalue()
+        
         base64_image = base64.b64encode(contents).decode('utf-8')
+        
+        logger.info(f"Image processed: original size reduced to {len(contents)} bytes")
         
         # Use OpenAI Vision for OCR
         chat = LlmChat(
