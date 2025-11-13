@@ -75,8 +75,9 @@ def cache_response(expire_seconds: int = 300):
         return wrapper
     return decorator
 
-# Create a router with the /api prefix
-api_router = APIRouter(prefix="/api")
+# Create routers with versioning
+api_router = APIRouter(prefix="/api")  # Current version (v1)
+api_v1_router = APIRouter(prefix="/api/v1")  # Explicit v1
 
 security = HTTPBearer()
 
