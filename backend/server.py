@@ -318,6 +318,7 @@ async def get_me(current_user: dict = Depends(get_current_user)):
     return {k: v for k, v in current_user.items() if k != 'password_hash'}
 
 @api_router.get("/semester-info")
+@cache_response(expire_seconds=300)  # Cache for 5 minutes
 async def get_semester_info(current_user: dict = Depends(get_current_user)):
     semester = current_user.get('semester', 'fall')
     semester_info = get_current_semester_info(semester)
