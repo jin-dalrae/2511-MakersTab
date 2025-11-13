@@ -96,6 +96,7 @@ function App() {
             }
           />
         </Routes>
+        </Suspense>
       </BrowserRouter>
       <Toaster position="top-right" richColors />
     </div>
