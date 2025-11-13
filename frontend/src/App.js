@@ -50,18 +50,21 @@ function App() {
     setIsAuthenticated(false);
   };
 
+  const LoadingScreen = () => (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-orange-50 to-yellow-50">
+      <div className="text-xl font-medium text-green-700">Loading...</div>
+    </div>
+  );
+
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-orange-50 to-yellow-50">
-        <div className="text-xl font-medium text-green-700">Loading...</div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   return (
     <div className="App">
       <BrowserRouter>
-        <Routes>
+        <Suspense fallback={<LoadingScreen />}>
+          <Routes>
           <Route
             path="/"
             element={
