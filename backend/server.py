@@ -240,7 +240,8 @@ async def root():
 
 # Auth Routes
 @api_router.post("/auth/signup", response_model=AuthResponse)
-async def signup(input: UserSignup):
+@limiter.limit("5/minute")  # Prevent signup spam
+async def signup(request: Request, input: UserSignup):
     # Check if user exists
     existing = await db.users.find_one({"email": input.email})
     if existing:
