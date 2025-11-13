@@ -51,15 +51,15 @@ const Dashboard = ({ user, onLogout }) => {
 
       const [analyticsRes, receiptsRes, transactionsRes, menuRes, semesterRes] = await Promise.all([
         axios.get(`${API}/analytics`, { headers }),
-        axios.get(`${API}/receipts`, { headers }),
-        axios.get(`${API}/transactions`, { headers }),
+        axios.get(`${API}/receipts?page=1&limit=50`, { headers }),
+        axios.get(`${API}/transactions?page=1&limit=100`, { headers }),
         axios.get(`${API}/menu`),
         axios.get(`${API}/semester-info`, { headers })
       ]);
 
       setAnalytics(analyticsRes.data);
-      setReceipts(receiptsRes.data);
-      setTransactions(transactionsRes.data);
+      setReceipts(receiptsRes.data.receipts || receiptsRes.data);
+      setTransactions(transactionsRes.data.transactions || transactionsRes.data);
       setMenuItems(menuRes.data);
       setSemesterInfo(semesterRes.data);
     } catch (error) {
