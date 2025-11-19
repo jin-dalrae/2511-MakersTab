@@ -605,12 +605,40 @@ async def confirm_receipt(
             date_str = parsed_data.get('date', datetime.now(timezone.utc).strftime('%Y-%m-%d'))
             time_str = parsed_data.get('time', '12:00')
             
-            # Parse date and time
-            receipt_datetime = datetime.strptime(f"{date_str} {time_str}", '%Y-%m-%d %H:%M').replace(tzinfo=timezone.utc)
+            # Parse date and time - Use PST timezone (UTC-8)
+            receipt_datetime = datetime.strptime(f"{date_str} {time_str}", '%Y-%m-%d %H:%M')
+            # Convert to PST (UTC-8, no daylight saving)
+            pst_offset = timedelta(hours=-8)
+            receipt_datetime = receipt_datetime.replace(tzinfo=timezone(pst_offset))
         except:
-            receipt_datetime = datetime.now(timezone.utc)
+            # Use current PST time
+            pst_offset = timedelta(hours=-8)
+            receipt_datetime = datetime.now(timezone(pst_offset))
         
         receipt_date = receipt_datetime
+        total_amount = float(parsed_data.get('total', 0))
+        
+        # Check for duplicate receipt (same date, time, and total within 1 minute and $0.01)
+        time_window_start = receipt_date - timedelta(minutes=1)
+        time_window_end = receipt_date + timedelta(minutes=1)
+        
+        existing_receipt = await db.receipts.find_one({
+            "user_id": current_user['id'],
+            "receipt_date": {
+                "$gte": time_window_start.isoformat(),
+                "$lte": time_window_end.isoformat()
+            },
+            "total_amount": {
+                "$gte": total_amount - 0.01,
+                "$lte": total_amount + 0.01
+            }
+        })
+        
+        if existing_receipt:
+            raise HTTPException(
+                status_code=400, 
+                detail="This receipt already exists. Duplicate receipt detected based on date, time, and amount."
+            )
         
         receipt_obj = Receipt(
             user_id=current_user['id'],
