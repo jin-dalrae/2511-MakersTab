@@ -1193,7 +1193,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 @app.on_event("startup")
 async def startup_db_client():
-    """Create database indexes for performance"""
+    """Create database indexes for performance and initialize scheduler"""
     try:
         # Users collection indexes
         await db.users.create_index("email", unique=True)
@@ -1215,9 +1215,35 @@ async def startup_db_client():
         await db.menu_items.create_index("id")
         await db.menu_items.create_index([("available_date", -1)])
         
+        # Cafe menu items collection indexes
+        await db.cafe_menu_items.create_index([("date", -1), ("meal_period", 1)])
+        await db.cafe_menu_items.create_index("item_id")
+        await db.cafe_menu_items.create_index([("meal_period", 1)])
+        await db.cafe_menu_items.create_index([("station", 1)])
+        
         logging.info("Database indexes created successfully")
+        
+        # Initialize scheduler for menu scraping
+        scheduler = AsyncIOScheduler()
+        
+        # Check if auto-scraping is enabled
+        scraper_settings = await db.scraper_settings.find_one({'key': 'menu_scraper'})
+        if not scraper_settings or scraper_settings.get('auto_scrape_enabled', True):
+            # Schedule daily scraping at 4 AM
+            scheduler.add_job(
+                scheduled_menu_scrape,
+                CronTrigger(hour=4, minute=0),
+                id='daily_menu_scrape',
+                name='Daily Cafe Menu Scrape',
+                replace_existing=True
+            )
+            logging.info("Menu scraper scheduled for 4:00 AM daily")
+        
+        scheduler.start()
+        app.state.scheduler = scheduler
+        
     except Exception as e:
-        logging.error(f"Error creating indexes: {str(e)}")
+        logging.error(f"Error during startup: {str(e)}")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
