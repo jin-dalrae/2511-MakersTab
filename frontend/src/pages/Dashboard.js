@@ -346,16 +346,28 @@ const Dashboard = ({ user, onLogout }) => {
             </Button>
           </div>
         </div>
+        
+        {/* Tabs directly below header - no margin */}
+        <div className="max-w-7xl mx-auto px-4">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="bg-white/80 backdrop-blur-sm p-1 shadow-md w-full sm:w-auto overflow-x-auto flex border-t border-green-100">
+              <TabsTrigger value="overview" data-testid="overview-tab" className="text-xs sm:text-sm flex-1 sm:flex-initial">Overview</TabsTrigger>
+              <TabsTrigger value="analytics" data-testid="analytics-tab" className="text-xs sm:text-sm flex-1 sm:flex-initial">Analytics</TabsTrigger>
+              <TabsTrigger value="menu" data-testid="menu-tab" className="text-xs sm:text-sm flex-1 sm:flex-initial">Menu</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-4 sm:py-8">
+      <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
-          <TabsList className="bg-white/80 backdrop-blur-sm p-1 shadow-md w-full sm:w-auto overflow-x-auto flex">
-            <TabsTrigger value="overview" data-testid="overview-tab" className="text-xs sm:text-sm flex-1 sm:flex-initial">Overview</TabsTrigger>
-            <TabsTrigger value="upload" data-testid="upload-tab" className="text-xs sm:text-sm flex-1 sm:flex-initial">Upload</TabsTrigger>
-            <TabsTrigger value="history" data-testid="history-tab" className="text-xs sm:text-sm flex-1 sm:flex-initial">History</TabsTrigger>
-            <TabsTrigger value="menu" data-testid="menu-tab" className="text-xs sm:text-sm flex-1 sm:flex-initial">Menu</TabsTrigger>
-          </TabsList>
+          <div className="hidden">
+            <TabsList>
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              <TabsTrigger value="menu">Menu</TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6" data-testid="overview-content">
