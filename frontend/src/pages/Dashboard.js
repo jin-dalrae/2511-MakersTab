@@ -40,6 +40,8 @@ const Dashboard = ({ user, onLogout }) => {
   const [previewData, setPreviewData] = useState(null);
   const [memo, setMemo] = useState('');
   const [groupBy, setGroupBy] = useState('day');
+  const [uploadQueue, setUploadQueue] = useState([]);
+  const [currentUploadIndex, setCurrentUploadIndex] = useState(0);
 
   // Ensure transactions is always an array
   const safeTransactions = Array.isArray(transactions) ? transactions : [];
