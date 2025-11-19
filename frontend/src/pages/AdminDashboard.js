@@ -265,6 +265,10 @@ const AdminDashboard = ({ user, onLogout }) => {
               <MenuIcon className="w-4 h-4 sm:mr-2" />
               <span className="hidden sm:inline">Menu</span>
             </TabsTrigger>
+            <TabsTrigger value="cafe-menu" className="text-xs sm:text-sm" data-testid="cafe-menu-tab">
+              <Coffee className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Cafe Menu</span>
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
