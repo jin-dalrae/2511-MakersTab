@@ -375,10 +375,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Backend menu scraping functionality"
-    - "Time-based menu filtering"
-    - "Admin scraper controls"
-    - "Frontend cafe menu display"
+    - "OCR receipt extraction with improved accuracy"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
