@@ -73,6 +73,8 @@ const Dashboard = ({ user, onLogout }) => {
       setTransactions(transactionsData);
       setMenuItems(menuRes.data);
       setSemesterInfo(semesterRes.data);
+      setCafeMenu(cafeMenuRes.data.menu);
+      setCafeMenuMode(cafeMenuRes.data.display_mode);
     } catch (error) {
       toast.error('Failed to load data');
     } finally {
