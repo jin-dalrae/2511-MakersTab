@@ -97,6 +97,8 @@ function App() {
               )
             }
           />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
         </Routes>
         </Suspense>
       </BrowserRouter>
