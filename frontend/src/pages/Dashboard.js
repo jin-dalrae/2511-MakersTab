@@ -85,9 +85,24 @@ const Dashboard = ({ user, onLogout }) => {
   };
 
   const handleFileUpload = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
+    const files = Array.from(event.target.files);
+    if (files.length === 0) return;
 
+    // Reset file input
+    event.target.value = '';
+
+    if (files.length === 1) {
+      // Single file - show preview modal
+      await processSingleFile(files[0]);
+    } else {
+      // Multiple files - process in queue
+      setUploadQueue(files);
+      setCurrentUploadIndex(0);
+      await processMultipleFiles(files);
+    }
+  };
+
+  const processSingleFile = async (file) => {
     setUploading(true);
     const formData = new FormData();
     formData.append('file', file);
@@ -110,6 +125,60 @@ const Dashboard = ({ user, onLogout }) => {
     } finally {
       setUploading(false);
     }
+  };
+
+  const processMultipleFiles = async (files) => {
+    setUploading(true);
+    let successCount = 0;
+    let failCount = 0;
+
+    for (let i = 0; i < files.length; i++) {
+      setCurrentUploadIndex(i);
+      const file = files[i];
+      
+      try {
+        const token = localStorage.getItem('token');
+        const formData = new FormData();
+        formData.append('file', file);
+
+        // Get preview
+        const previewResponse = await axios.post(`${API}/receipts/preview`, formData, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+
+        // Auto-confirm without showing preview modal
+        await axios.post(`${API}/receipts/confirm`, {
+          parsed_data: previewResponse.data.preview_data,
+          ocr_text: previewResponse.data.ocr_text,
+          memo: `Auto-uploaded ${i + 1}/${files.length}`
+        }, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        successCount++;
+      } catch (error) {
+        console.error(`Failed to process ${file.name}:`, error);
+        failCount++;
+      }
+    }
+
+    setUploading(false);
+    setUploadQueue([]);
+    setCurrentUploadIndex(0);
+
+    // Show summary
+    if (successCount > 0) {
+      toast.success(`Successfully uploaded ${successCount} receipt${successCount > 1 ? 's' : ''}!`);
+    }
+    if (failCount > 0) {
+      toast.error(`Failed to upload ${failCount} receipt${failCount > 1 ? 's' : ''}`);
+    }
+
+    // Refresh data
+    fetchData();
   };
 
   const handleConfirmReceipt = async () => {
