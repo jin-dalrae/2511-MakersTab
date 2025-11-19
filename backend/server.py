@@ -1320,31 +1320,55 @@ async def get_cafe_menu(date: Optional[str] = None):
             'dinner': [item for item in all_items if item['meal_period'] == 'dinner']
         }
         
+        # Check if lunch and dinner are the same
+        lunch_items_set = {(item['name'], item['station']) for item in menu_by_period['lunch']}
+        dinner_items_set = {(item['name'], item['station']) for item in menu_by_period['dinner']}
+        lunch_dinner_same = lunch_items_set == dinner_items_set and len(lunch_items_set) > 0
+        
+        # If lunch and dinner are the same, combine them as "all_day"
+        if lunch_dinner_same:
+            menu_by_period['all_day'] = menu_by_period['lunch']
+            menu_by_period.pop('lunch', None)
+            menu_by_period.pop('dinner', None)
+        
         # Determine what to show based on time
-        if 11 <= hour < 14:
-            # Lunch time - show all meals
-            display_mode = "all"
-            displayed_menu = menu_by_period
-        elif 7 <= hour < 11:
-            # Breakfast time
-            display_mode = "breakfast"
-            displayed_menu = {'breakfast': menu_by_period['breakfast']}
-        elif 17 <= hour < 20:
-            # Dinner time
-            display_mode = "dinner"
-            displayed_menu = {'dinner': menu_by_period['dinner']}
-        elif hour < 7:
-            # Before breakfast - show breakfast
-            display_mode = "breakfast"
-            displayed_menu = {'breakfast': menu_by_period['breakfast']}
-        elif 14 <= hour < 17:
-            # Between lunch and dinner - show dinner
-            display_mode = "dinner"
-            displayed_menu = {'dinner': menu_by_period['dinner']}
+        if lunch_dinner_same:
+            # Same menu for lunch and dinner
+            if 11 <= hour < 20:
+                display_mode = "all_day"
+                displayed_menu = {'all_day': menu_by_period.get('all_day', []), 'breakfast': menu_by_period.get('breakfast', [])}
+            elif 7 <= hour < 11:
+                display_mode = "breakfast"
+                displayed_menu = {'breakfast': menu_by_period.get('breakfast', [])}
+            else:
+                display_mode = "all"
+                displayed_menu = menu_by_period
         else:
-            # After dinner - show tomorrow's breakfast or today's menu
-            display_mode = "all"
-            displayed_menu = menu_by_period
+            # Different lunch and dinner
+            if 11 <= hour < 14:
+                # Lunch time - show all meals
+                display_mode = "all"
+                displayed_menu = menu_by_period
+            elif 7 <= hour < 11:
+                # Breakfast time
+                display_mode = "breakfast"
+                displayed_menu = {'breakfast': menu_by_period['breakfast']}
+            elif 17 <= hour < 20:
+                # Dinner time
+                display_mode = "dinner"
+                displayed_menu = {'dinner': menu_by_period['dinner']}
+            elif hour < 7:
+                # Before breakfast - show breakfast
+                display_mode = "breakfast"
+                displayed_menu = {'breakfast': menu_by_period['breakfast']}
+            elif 14 <= hour < 17:
+                # Between lunch and dinner - show dinner
+                display_mode = "dinner"
+                displayed_menu = {'dinner': menu_by_period['dinner']}
+            else:
+                # After dinner - show tomorrow's breakfast or today's menu
+                display_mode = "all"
+                displayed_menu = menu_by_period
         
         return {
             "menu": displayed_menu,
