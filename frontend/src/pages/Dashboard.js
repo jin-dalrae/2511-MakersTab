@@ -402,7 +402,11 @@ const Dashboard = ({ user, onLogout }) => {
                 </div>
                 {uploading && (
                   <div className="mt-4 text-center p-3 bg-white rounded-xl">
-                    <div className="animate-pulse text-orange-600 font-semibold text-sm">Processing receipt with AI...</div>
+                    <div className="animate-pulse text-orange-600 font-semibold text-sm">
+                      {uploadQueue.length > 0 
+                        ? `Processing receipt ${currentUploadIndex + 1} of ${uploadQueue.length}...`
+                        : 'Processing receipt with AI...'}
+                    </div>
                   </div>
                 )}
               </CardContent>
