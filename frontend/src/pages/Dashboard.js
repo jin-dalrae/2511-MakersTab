@@ -39,6 +39,9 @@ const Dashboard = ({ user, onLogout }) => {
   const [memo, setMemo] = useState('');
   const [groupBy, setGroupBy] = useState('day');
 
+  // Ensure transactions is always an array
+  const safeTransactions = Array.isArray(transactions) ? transactions : [];
+
   useEffect(() => {
     fetchData();
   }, []);
