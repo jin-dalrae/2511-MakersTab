@@ -495,7 +495,7 @@ async def preview_receipt(
         
         image_content = ImageContent(image_base64=base64_image)
         user_message = UserMessage(
-            text="""Please analyze this receipt and extract the following information in JSON format:
+            text="""You are a precise OCR system. Analyze this receipt image and extract the following information in EXACT JSON format:
             {
                 "items": [{"name": "item name", "price": 0.00, "quantity": 1, "category": "meal/salad/drinks/convenience"}],
                 "total": 0.00,
@@ -504,10 +504,28 @@ async def preview_receipt(
                 "time": "HH:MM",
                 "merchant": "store name"
             }
-            IMPORTANT: 
-            1. Look for the REMAINING BALANCE or MEAL PLAN BALANCE on the receipt (usually shown as "Balance", "Remaining", "New Balance", or "Meal Plan Balance"). Extract this exact amount for remaining_balance field.
-            2. Extract the TIME from the receipt (usually at the top near the date). Format as HH:MM (24-hour format).
-            Be as precise as possible. If you can't determine the category, use 'other'.""",
+            
+            CRITICAL EXTRACTION RULES:
+            1. DATE: Look for the receipt date (e.g., "Date: 11/19/2025" or "11/19/2025"). Convert to YYYY-MM-DD format (e.g., "2025-11-19"). If you see MM/DD/YYYY, convert it correctly!
+            
+            2. TIME: Look for the time on the receipt (e.g., "Time: 12:20 PM" or just "12:20 PM"). Convert to 24-hour HH:MM format (e.g., "12:20" for 12:20 PM, "00:20" for 12:20 AM).
+            
+            3. REMAINING BALANCE: This is the MOST IMPORTANT field! Look for:
+               - "Remaining Balance"
+               - "Balance"
+               - "New Balance"
+               - "Meal Plan Balance"
+               - Usually appears at the bottom of the receipt
+               - Extract the EXACT dollar amount including cents (e.g., $731.38 should be 731.38, NOT 31.38)
+               - DO NOT confuse with the transaction total or subtotal
+            
+            4. TOTAL: The transaction total (what was charged this time)
+            
+            5. ITEMS: List each purchased item with name, price, quantity, and best-guess category
+            
+            6. MERCHANT: The store/cafe name at the top
+            
+            RESPOND WITH ONLY THE JSON OBJECT. NO EXPLANATION TEXT.""",
             file_contents=[image_content]
         )
         
@@ -708,7 +726,7 @@ async def upload_receipt(
         
         image_content = ImageContent(image_base64=base64_image)
         user_message = UserMessage(
-            text="""Please analyze this receipt and extract the following information in JSON format:
+            text="""You are a precise OCR system. Analyze this receipt image and extract the following information in EXACT JSON format:
             {
                 "items": [{"name": "item name", "price": 0.00, "quantity": 1, "category": "meal/salad/drinks/convenience"}],
                 "total": 0.00,
@@ -717,10 +735,28 @@ async def upload_receipt(
                 "time": "HH:MM",
                 "merchant": "store name"
             }
-            IMPORTANT: 
-            1. Look for the REMAINING BALANCE or MEAL PLAN BALANCE on the receipt (usually shown as "Balance", "Remaining", "New Balance", or "Meal Plan Balance"). Extract this exact amount for remaining_balance field.
-            2. Extract the TIME from the receipt (usually at the top near the date). Format as HH:MM (24-hour format).
-            Be as precise as possible. If you can't determine the category, use 'other'.""",
+            
+            CRITICAL EXTRACTION RULES:
+            1. DATE: Look for the receipt date (e.g., "Date: 11/19/2025" or "11/19/2025"). Convert to YYYY-MM-DD format (e.g., "2025-11-19"). If you see MM/DD/YYYY, convert it correctly!
+            
+            2. TIME: Look for the time on the receipt (e.g., "Time: 12:20 PM" or just "12:20 PM"). Convert to 24-hour HH:MM format (e.g., "12:20" for 12:20 PM, "00:20" for 12:20 AM).
+            
+            3. REMAINING BALANCE: This is the MOST IMPORTANT field! Look for:
+               - "Remaining Balance"
+               - "Balance"
+               - "New Balance"
+               - "Meal Plan Balance"
+               - Usually appears at the bottom of the receipt
+               - Extract the EXACT dollar amount including cents (e.g., $731.38 should be 731.38, NOT 31.38)
+               - DO NOT confuse with the transaction total or subtotal
+            
+            4. TOTAL: The transaction total (what was charged this time)
+            
+            5. ITEMS: List each purchased item with name, price, quantity, and best-guess category
+            
+            6. MERCHANT: The store/cafe name at the top
+            
+            RESPOND WITH ONLY THE JSON OBJECT. NO EXPLANATION TEXT.""",
             file_contents=[image_content]
         )
         
