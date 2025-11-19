@@ -1245,6 +1245,21 @@ async def startup_db_client():
     except Exception as e:
         logging.error(f"Error during startup: {str(e)}")
 
+async def scheduled_menu_scrape():
+    """Scheduled function to scrape menu daily at 4 AM"""
+    try:
+        logger.info("Starting scheduled menu scrape...")
+        result = scrape_and_save_menu(db)
+        
+        if result['success']:
+            logger.info(f"Scheduled scrape completed: {result.get('total_items', 0)} items")
+        else:
+            logger.error(f"Scheduled scrape failed: {result.get('error', 'Unknown error')}")
+    except Exception as e:
+        logger.error(f"Error in scheduled scrape: {str(e)}", exc_info=True)
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
+    if hasattr(app.state, 'scheduler'):
+        app.state.scheduler.shutdown()
     client.close()
