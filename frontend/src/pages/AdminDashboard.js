@@ -40,6 +40,9 @@ const AdminDashboard = ({ user, onLogout }) => {
     price: '',
     description: ''
   });
+  const [cafeItems, setCafeItems] = useState([]);
+  const [scraperSettings, setScraperSettings] = useState(null);
+  const [scraping, setScraping] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
