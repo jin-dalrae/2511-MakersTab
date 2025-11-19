@@ -644,6 +644,11 @@ def main():
     tester.test_get_transaction_history()
     tester.test_receipt_upload_without_file()
     
+    print("\n📋 OCR RECEIPT EXTRACTION TEST")
+    print("-"*60)
+    print("⚠️  Testing improved OCR with actual receipt image")
+    tester.test_ocr_receipt_extraction()
+    
     print("\n📋 ANALYTICS TESTS")
     print("-"*60)
     tester.test_get_analytics()
