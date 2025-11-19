@@ -175,6 +175,22 @@ class ScraperSettings(BaseModel):
     last_scrape_date: Optional[str] = None
     last_scrape_status: Optional[str] = None
 
+class Event(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    title: str
+    description: Optional[str] = None
+    what: Optional[str] = None  # What is happening
+    who: Optional[str] = None  # Who is organizing/involved
+    when: Optional[str] = None  # When it happens
+    where: Optional[str] = None  # Where it takes place
+    why: Optional[str] = None  # Why attend
+    how: Optional[str] = None  # How to participate/RSVP
+    event_date: Optional[datetime] = None  # Parsed date
+    image_url: Optional[str] = None  # Flyer image
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 class AnalyticsData(BaseModel):
     total_spent: float
     transactions_count: int
