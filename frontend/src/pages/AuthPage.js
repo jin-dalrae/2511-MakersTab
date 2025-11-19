@@ -59,61 +59,76 @@ const AuthPage = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-lime-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-6xl flex flex-col lg:flex-row gap-8 lg:gap-12 items-center">
-        {/* Left Side - Branding */}
-        <div className="flex-1 text-center lg:text-left space-y-6 w-full">
-          <div className="inline-flex items-center gap-3 bg-white/80 backdrop-blur-md px-6 py-3 rounded-full shadow-lg border border-gray-200">
-            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-              <img src={LOGO_URL} alt="MakersTab" className="w-7 h-7" />
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+      {/* Hero Section */}
+      <div className="container mx-auto px-4 py-8 sm:py-12">
+        {/* Logo and Title */}
+        <div className="text-center mb-8 sm:mb-12">
+          <div className="inline-flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white rounded-2xl flex items-center justify-center shadow-lg">
+              <img src={LOGO_URL} alt="MakersTab" className="w-8 h-8 sm:w-10 sm:h-10" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-green-800" style={{fontFamily: 'Space Grotesk'}}>MakersTab</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-800" style={{fontFamily: 'Space Grotesk'}}>
+              MakersTab
+            </h1>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 leading-tight" style={{fontFamily: 'Space Grotesk'}}>
-            CCA Students'
-            <br />
-            <span className="text-green-600">Meal Plan Management</span>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-4" style={{fontFamily: 'Space Grotesk'}}>
+            Your Smart Meal Plan Companion
           </h2>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-md leading-relaxed">
-            MakersTab helps California College of the Arts students effortlessly track their meal plan spending at Makers Cafe with AI-powered receipt scanning, real-time balance tracking, and smart budget recommendations.
+          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+            Track spending, stay on budget, and never miss a meal at CCA
           </p>
+        </div>
 
-          {/* Feature highlights */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-8">
-            <div className="bg-white/70 backdrop-blur-sm p-5 sm:p-6 rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-1 duration-300">
-              <Receipt className="w-10 h-10 sm:w-12 sm:h-12 text-orange-500 mb-3" />
-              <h3 className="font-semibold text-base sm:text-lg text-gray-800 mb-1">AI Receipt Scanner</h3>
-              <p className="text-sm sm:text-base text-gray-600">Instant OCR extraction with balance tracking</p>
+        {/* Feature Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12 max-w-6xl mx-auto">
+          {/* Scan Receipts */}
+          <div className="bg-gradient-to-br from-orange-400 to-amber-500 rounded-3xl p-6 text-white shadow-xl transform hover:scale-105 transition-all duration-300">
+            <div className="bg-white/20 rounded-2xl p-3 w-fit mb-4">
+              <Receipt className="w-8 h-8" />
             </div>
-            <div className="bg-white/70 backdrop-blur-sm p-5 sm:p-6 rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-1 duration-300">
-              <TrendingUp className="w-10 h-10 sm:w-12 sm:h-12 text-green-500 mb-3" />
-              <h3 className="font-semibold text-base sm:text-lg text-gray-800 mb-1">Smart Analytics</h3>
-              <p className="text-sm sm:text-base text-gray-600">Weekly budget recommendations & insights</p>
-            </div>
-            <div className="bg-white/70 backdrop-blur-sm p-5 sm:p-6 rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-1 duration-300">
-              <History className="w-10 h-10 sm:w-12 sm:h-12 text-blue-500 mb-3" />
-              <h3 className="font-semibold text-base sm:text-lg text-gray-800 mb-1">Live Cafe Menu</h3>
-              <p className="text-sm sm:text-base text-gray-600">Daily menu from Cafe Bon Appetit</p>
-            </div>
+            <h3 className="font-bold text-lg mb-2" style={{fontFamily: 'Space Grotesk'}}>Scan Receipts</h3>
+            <p className="text-sm text-white/90">Instant AI-powered receipt scanning. Just snap a photo!</p>
           </div>
 
-          {/* Footer Links */}
-          <div className="mt-8 text-center lg:text-left">
-            <p className="text-xs text-gray-500">
-              By signing up, you agree to our{' '}
-              <a href="/terms" className="text-green-600 hover:underline">Terms of Service</a>
-              {' '}and{' '}
-              <a href="/privacy" className="text-green-600 hover:underline">Privacy Policy</a>
-            </p>
+          {/* Track Balance */}
+          <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-3xl p-6 text-white shadow-xl transform hover:scale-105 transition-all duration-300">
+            <div className="bg-white/20 rounded-2xl p-3 w-fit mb-4">
+              <TrendingUp className="w-8 h-8" />
+            </div>
+            <h3 className="font-bold text-lg mb-2" style={{fontFamily: 'Space Grotesk'}}>Track Balance</h3>
+            <p className="text-sm text-white/90">Real-time balance updates. Know exactly what you have left.</p>
+          </div>
+
+          {/* View Menu */}
+          <div className="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-3xl p-6 text-white shadow-xl transform hover:scale-105 transition-all duration-300">
+            <div className="bg-white/20 rounded-2xl p-3 w-fit mb-4">
+              <History className="w-8 h-8" />
+            </div>
+            <h3 className="font-bold text-lg mb-2" style={{fontFamily: 'Space Grotesk'}}>Daily Menu</h3>
+            <p className="text-sm text-white/90">Check what's cooking at Makers Cafe today.</p>
+          </div>
+
+          {/* Stay Organized */}
+          <div className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl p-6 text-white shadow-xl transform hover:scale-105 transition-all duration-300">
+            <div className="bg-white/20 rounded-2xl p-3 w-fit mb-4">
+              <TrendingUp className="w-8 h-8" />
+            </div>
+            <h3 className="font-bold text-lg mb-2" style={{fontFamily: 'Space Grotesk'}}>Stay Organized</h3>
+            <p className="text-sm text-white/90">Weekly recommendations to keep you on track.</p>
           </div>
         </div>
 
-        {/* Right Side - Auth Forms */}
-        <div className="flex-1 w-full max-w-md">
-          <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-xl">
-            <CardHeader>
-              <CardTitle className="text-xl sm:text-2xl" style={{fontFamily: 'Space Grotesk'}}>Get Started</CardTitle>
-              <CardDescription className="text-sm">Create an account or sign in to continue</CardDescription>
+        {/* Auth Section */}
+        <div className="max-w-md mx-auto">
+          <Card className="shadow-2xl border-0 bg-white rounded-3xl overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-600 text-white pb-8">
+              <CardTitle className="text-2xl sm:text-3xl text-center" style={{fontFamily: 'Space Grotesk'}}>
+                Join MakersTab
+              </CardTitle>
+              <CardDescription className="text-center text-white/90 text-base">
+                Made for CCA students 🎨
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="signup" className="w-full">
