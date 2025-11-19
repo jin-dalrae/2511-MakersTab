@@ -372,6 +372,7 @@ const Dashboard = ({ user, onLogout }) => {
             <TabsList className="bg-white/80 backdrop-blur-sm p-1 shadow-md w-full sm:w-auto overflow-x-auto flex border-t border-green-100">
               <TabsTrigger value="overview" data-testid="overview-tab" className="text-xs sm:text-sm flex-1 sm:flex-initial">Overview</TabsTrigger>
               <TabsTrigger value="analytics" data-testid="analytics-tab" className="text-xs sm:text-sm flex-1 sm:flex-initial">Analytics</TabsTrigger>
+              <TabsTrigger value="events" data-testid="events-tab" className="text-xs sm:text-sm flex-1 sm:flex-initial">Events</TabsTrigger>
               <TabsTrigger value="menu" data-testid="menu-tab" className="text-xs sm:text-sm flex-1 sm:flex-initial">Menu</TabsTrigger>
             </TabsList>
           </Tabs>
