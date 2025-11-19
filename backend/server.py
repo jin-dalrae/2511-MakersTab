@@ -155,6 +155,26 @@ class MenuItemCreate(BaseModel):
     price: float
     description: Optional[str] = None
 
+class CafeMenuItem(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    item_id: str
+    name: str
+    description: str
+    station: str
+    meal_period: str  # breakfast, lunch, dinner
+    start_time: str
+    end_time: str
+    dietary_tags: List[str] = []
+    calories: Optional[int] = None
+    date: str  # YYYY-MM-DD
+    scraped_at: str
+
+class ScraperSettings(BaseModel):
+    auto_scrape_enabled: bool = True
+    scrape_time: str = "04:00"  # Time in HH:MM format
+    last_scrape_date: Optional[str] = None
+    last_scrape_status: Optional[str] = None
+
 class AnalyticsData(BaseModel):
     total_spent: float
     transactions_count: int
