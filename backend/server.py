@@ -1150,6 +1150,222 @@ async def get_admin_statistics(current_user: dict = Depends(get_admin_user)):
         "recent_receipts": recent_receipts
     }
 
+# Cafe Menu Routes
+@api_router.get("/cafe-menu")
+async def get_cafe_menu(date: Optional[str] = None):
+    """
+    Get cafe menu filtered by time of day
+    - At lunch time (11am-2pm): show all meals for the day
+    - At breakfast time (7am-10:30am): show only breakfast
+    - At dinner time (5pm-8pm): show only dinner
+    - Outside meal times: show next upcoming meal
+    """
+    try:
+        now = datetime.now(timezone.utc)
+        hour = now.hour
+        
+        # Use today's date if not specified
+        menu_date = date or now.strftime('%Y-%m-%d')
+        
+        # Get all menu items for the date
+        all_items = await db.cafe_menu_items.find(
+            {"date": menu_date},
+            {"_id": 0}
+        ).to_list(1000)
+        
+        if not all_items:
+            return {
+                "menu": {},
+                "display_mode": "no_data",
+                "message": "No menu data available for this date"
+            }
+        
+        # Organize by meal period
+        menu_by_period = {
+            'breakfast': [item for item in all_items if item['meal_period'] == 'breakfast'],
+            'lunch': [item for item in all_items if item['meal_period'] == 'lunch'],
+            'dinner': [item for item in all_items if item['meal_period'] == 'dinner']
+        }
+        
+        # Determine what to show based on time
+        if 11 <= hour < 14:
+            # Lunch time - show all meals
+            display_mode = "all"
+            displayed_menu = menu_by_period
+        elif 7 <= hour < 11:
+            # Breakfast time
+            display_mode = "breakfast"
+            displayed_menu = {'breakfast': menu_by_period['breakfast']}
+        elif 17 <= hour < 20:
+            # Dinner time
+            display_mode = "dinner"
+            displayed_menu = {'dinner': menu_by_period['dinner']}
+        elif hour < 7:
+            # Before breakfast - show breakfast
+            display_mode = "breakfast"
+            displayed_menu = {'breakfast': menu_by_period['breakfast']}
+        elif 14 <= hour < 17:
+            # Between lunch and dinner - show dinner
+            display_mode = "dinner"
+            displayed_menu = {'dinner': menu_by_period['dinner']}
+        else:
+            # After dinner - show tomorrow's breakfast or today's menu
+            display_mode = "all"
+            displayed_menu = menu_by_period
+        
+        return {
+            "menu": displayed_menu,
+            "display_mode": display_mode,
+            "date": menu_date,
+            "current_time": now.strftime('%H:%M')
+        }
+        
+    except Exception as e:
+        logger.error(f"Error fetching cafe menu: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/cafe-menu/all")
+async def get_all_cafe_menu_items(
+    date: Optional[str] = None,
+    meal_period: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get all cafe menu items (optionally filtered by date and meal period)"""
+    try:
+        query = {}
+        if date:
+            query['date'] = date
+        if meal_period:
+            query['meal_period'] = meal_period
+        
+        items = await db.cafe_menu_items.find(query, {"_id": 0}).sort("meal_period", 1).to_list(1000)
+        
+        return {
+            "items": items,
+            "count": len(items),
+            "date": date,
+            "meal_period": meal_period
+        }
+    except Exception as e:
+        logger.error(f"Error fetching all cafe menu items: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/admin/scrape-menu")
+async def manual_scrape_menu(
+    date: Optional[str] = None,
+    current_user: dict = Depends(get_admin_user)
+):
+    """Manually trigger menu scraping (admin only)"""
+    try:
+        logger.info(f"Manual menu scrape triggered by {current_user.get('email')}")
+        result = scrape_and_save_menu(db, date)
+        return result
+    except Exception as e:
+        logger.error(f"Error in manual scrape: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/admin/scraper-settings")
+async def get_scraper_settings(current_user: dict = Depends(get_admin_user)):
+    """Get scraper settings (admin only)"""
+    settings = await db.scraper_settings.find_one({'key': 'menu_scraper'}, {"_id": 0})
+    
+    if not settings:
+        settings = {
+            'key': 'menu_scraper',
+            'auto_scrape_enabled': True,
+            'scrape_time': '04:00'
+        }
+    
+    # Get last scrape metadata
+    last_scrape = await db.scrape_metadata.find_one({'key': 'last_menu_scrape'}, {"_id": 0})
+    if last_scrape:
+        settings['last_scrape_date'] = last_scrape.get('last_date')
+        settings['last_scraped'] = last_scrape.get('last_scraped')
+        settings['items_count'] = last_scrape.get('items_count', 0)
+    
+    return settings
+
+@api_router.post("/admin/scraper-settings")
+async def update_scraper_settings(
+    settings: ScraperSettings,
+    current_user: dict = Depends(get_admin_user)
+):
+    """Update scraper settings (admin only)"""
+    try:
+        await db.scraper_settings.update_one(
+            {'key': 'menu_scraper'},
+            {'$set': {
+                'key': 'menu_scraper',
+                'auto_scrape_enabled': settings.auto_scrape_enabled,
+                'scrape_time': settings.scrape_time,
+                'updated_at': datetime.now(timezone.utc).isoformat()
+            }},
+            upsert=True
+        )
+        
+        # Update scheduler if needed
+        if hasattr(app.state, 'scheduler'):
+            scheduler = app.state.scheduler
+            
+            # Remove existing job
+            if scheduler.get_job('daily_menu_scrape'):
+                scheduler.remove_job('daily_menu_scrape')
+            
+            # Add new job if auto-scrape is enabled
+            if settings.auto_scrape_enabled:
+                hour, minute = map(int, settings.scrape_time.split(':'))
+                scheduler.add_job(
+                    scheduled_menu_scrape,
+                    CronTrigger(hour=hour, minute=minute),
+                    id='daily_menu_scrape',
+                    name='Daily Cafe Menu Scrape',
+                    replace_existing=True
+                )
+                logger.info(f"Menu scraper rescheduled for {settings.scrape_time}")
+        
+        return {"success": True, "message": "Settings updated successfully"}
+    except Exception as e:
+        logger.error(f"Error updating scraper settings: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/admin/cafe-items-table")
+async def get_cafe_items_table(current_user: dict = Depends(get_admin_user)):
+    """Get table of all unique cafe menu items (admin only)"""
+    try:
+        # Get latest date's menu
+        latest_menu = await db.cafe_menu_items.find({}, {"_id": 0}).sort("date", -1).limit(500).to_list(500)
+        
+        # Get unique items grouped by name and station
+        items_dict = {}
+        for item in latest_menu:
+            key = f"{item['name']}_{item['station']}"
+            if key not in items_dict:
+                items_dict[key] = {
+                    'name': item['name'],
+                    'station': item['station'],
+                    'description': item.get('description', ''),
+                    'dietary_tags': item.get('dietary_tags', []),
+                    'calories': item.get('calories'),
+                    'meal_periods': [item['meal_period']]
+                }
+            else:
+                # Add meal period if not already included
+                if item['meal_period'] not in items_dict[key]['meal_periods']:
+                    items_dict[key]['meal_periods'].append(item['meal_period'])
+        
+        items_list = list(items_dict.values())
+        
+        # Sort by station and name
+        items_list.sort(key=lambda x: (x['station'], x['name']))
+        
+        return {
+            "items": items_list,
+            "count": len(items_list)
+        }
+    except Exception as e:
+        logger.error(f"Error fetching cafe items table: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Include the router in the main app
 app.include_router(api_router)
 
