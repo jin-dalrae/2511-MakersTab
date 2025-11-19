@@ -336,6 +336,26 @@ test_plan:
   test_all: false
   test_priority: "high_first"
 
+  - task: "Multiple receipt upload support"
+    implemented: true
+    working: true
+    file: "frontend/src/pages/Dashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: |
+          Added multiple file upload support:
+          - File inputs now accept multiple files with 'multiple' attribute
+          - Single file shows preview modal for review
+          - Multiple files auto-process in batch mode
+          - Progress indicator shows "Processing receipt X of Y"
+          - Auto-saves all receipts with indexed memos
+          - Success/failure summary toast after batch completion
+          - Updated UI text to indicate multiple file support
+
 agent_communication:
   - agent: "main"
     message: |
