@@ -1462,6 +1462,161 @@ async def get_cafe_items_table(current_user: dict = Depends(get_admin_user)):
         logger.error(f"Error fetching cafe items table: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# Event Routes
+@api_router.post("/events/upload")
+async def upload_event_flyer(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    """Upload event flyer and extract 5W1H information"""
+    try:
+        # Read image
+        contents = await file.read()
+        img = Image.open(io.BytesIO(contents))
+        
+        # Convert to base64
+        buffered = io.BytesIO()
+        img.save(buffered, format="PNG")
+        img_base64 = base64.b64encode(buffered.getvalue()).decode()
+        
+        # Use LLM to extract event information
+        image_content = ImageContent(data=img_base64, media_type="image/png")
+        
+        user_message = UserMessage(
+            text="""Analyze this event flyer and extract information in JSON format:
+            {
+                "title": "Event title",
+                "what": "What is the event about",
+                "who": "Who is organizing or who should attend",
+                "when": "When does it happen (date and time)",
+                "where": "Where does it take place",
+                "why": "Why should people attend",
+                "how": "How to participate or RSVP",
+                "event_date": "YYYY-MM-DD HH:MM" (if date/time found, otherwise null)
+            }
+            
+            Extract all available information from the flyer. If some information is not available, use null.
+            RESPOND WITH ONLY THE JSON OBJECT.""",
+            file_contents=[image_content]
+        )
+        
+        llm = LlmChat(
+            model="gpt-4o",
+            api_key=os.environ.get('EMERGENT_LLM_KEY')
+        )
+        
+        response = llm.run([user_message])
+        event_data = json.loads(response.strip().strip('```json').strip('```'))
+        
+        # Create event
+        event_id = str(uuid.uuid4())
+        event_date_parsed = None
+        if event_data.get('event_date'):
+            try:
+                event_date_parsed = datetime.fromisoformat(event_data['event_date'].replace('Z', '+00:00'))
+            except:
+                pass
+        
+        event = {
+            "id": event_id,
+            "user_id": current_user['id'],
+            "title": event_data.get('title', 'Untitled Event'),
+            "description": event_data.get('what'),
+            "what": event_data.get('what'),
+            "who": event_data.get('who'),
+            "when": event_data.get('when'),
+            "where": event_data.get('where'),
+            "why": event_data.get('why'),
+            "how": event_data.get('how'),
+            "event_date": event_date_parsed.isoformat() if event_date_parsed else None,
+            "image_url": f"data:image/png;base64,{img_base64}",
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        await db.events.insert_one(event)
+        
+        return {
+            "success": True,
+            "event": event
+        }
+    except Exception as e:
+        logger.error(f"Error uploading event: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/events")
+async def get_events(
+    view: str = "week",  # day, week, month
+    current_user: dict = Depends(get_current_user)
+):
+    """Get events filtered by view (day/week/month)"""
+    try:
+        now = datetime.now(timezone.utc)
+        
+        # Determine date range based on view
+        if view == "day":
+            start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            end_date = start_date + timedelta(days=1)
+        elif view == "week":
+            start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            end_date = start_date + timedelta(days=7)
+        elif view == "month":
+            start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            end_date = start_date + timedelta(days=30)
+        else:
+            start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            end_date = start_date + timedelta(days=7)
+        
+        # Get events (show all users' events for community visibility)
+        query = {
+            "$or": [
+                {"event_date": {"$gte": start_date.isoformat(), "$lte": end_date.isoformat()}},
+                {"event_date": None}  # Include events without parsed dates
+            ]
+        }
+        
+        events = await db.events.find(query, {"_id": 0}).sort("event_date", 1).to_list(100)
+        
+        return {
+            "events": events,
+            "view": view,
+            "count": len(events)
+        }
+    except Exception as e:
+        logger.error(f"Error fetching events: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.delete("/events/{event_id}")
+async def delete_event(
+    event_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Delete an event"""
+    try:
+        # Verify the event belongs to the current user
+        event = await db.events.find_one({
+            "id": event_id,
+            "user_id": current_user['id']
+        })
+        
+        if not event:
+            raise HTTPException(status_code=404, detail="Event not found")
+        
+        # Delete the event
+        result = await db.events.delete_one({
+            "id": event_id,
+            "user_id": current_user['id']
+        })
+        
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Event not found")
+        
+        return {"success": True, "message": "Event deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting event: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to delete event")
+
 # Include the router in the main app
 app.include_router(api_router)
 
