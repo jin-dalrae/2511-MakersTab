@@ -466,7 +466,7 @@ const Dashboard = ({ user, onLogout }) => {
 
                     <div className="space-y-4 max-h-[500px] overflow-y-auto">
                       {(() => {
-                        const grouped = groupTransactions(transactions, groupBy);
+                        const grouped = groupTransactions(safeTransactions, groupBy);
                         
                         return Object.entries(grouped).map(([groupKey, groupTransactions]) => {
                           const groupTotal = groupTransactions.reduce((sum, t) => sum + (t.price * t.quantity), 0);
