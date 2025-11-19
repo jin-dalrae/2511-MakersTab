@@ -225,6 +225,53 @@ backend:
           - Items contain: item_id, name, description, station, meal_period, dietary_tags, calories
           - Database operations fast and efficient with proper indexing
 
+  - task: "OCR receipt extraction with improved accuracy"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "user"
+        comment: |
+          User reported OCR issues with receipt extraction:
+          - Date was extracted incorrectly (2023-10-19 instead of 2025-11-19)
+          - Remaining balance was wrong ($31.38 instead of $731.38)
+          - Time was not being extracted
+      - working: true
+        agent: "main"
+        comment: |
+          Updated OCR prompt with more specific instructions for:
+          - Date format conversion (MM/DD/YYYY → YYYY-MM-DD)
+          - Time extraction and 24-hour format conversion
+          - Critical remaining balance extraction with emphasis on accuracy
+          - Improved item identification and price extraction
+      - working: true
+        agent: "testing"
+        comment: |
+          ✅ COMPREHENSIVE OCR TESTING COMPLETED - ALL EXTRACTION WORKING PERFECTLY
+          
+          TESTED WITH ACTUAL RECEIPT IMAGE:
+          Receipt URL: https://customer-assets.emergentagent.com/job_menu-time-sync/artifacts/tbiqqw5y_IMG_6994.jpeg
+          
+          EXTRACTION RESULTS - ALL CORRECT:
+          - ✅ Merchant: "Maker's Cafe @ CCA" (correctly identified)
+          - ✅ Date: "2025-11-19" (correctly converted from 11/19/2025)
+          - ✅ Time: "12:20" (correctly extracted from 12:20 PM and converted to 24-hour)
+          - ✅ Total: $13.24 (exact match)
+          - ✅ Remaining Balance: $731.38 (CRITICAL FIX - was previously $31.38)
+          - ✅ Items: Found "Grilled Tofu" at $12.49 (correct item and price)
+          
+          VALIDATION SUMMARY:
+          - All 6 critical fields extracted with 100% accuracy
+          - Date format conversion working correctly
+          - Time extraction and conversion working
+          - Remaining balance extraction fixed (main issue resolved)
+          - Item identification and pricing accurate
+          - POST /api/receipts/preview endpoint fully functional
+
 frontend:
   - task: "Display time-based cafe menu in Dashboard"
     implemented: true
