@@ -670,7 +670,7 @@ const Dashboard = ({ user, onLogout }) => {
                   </div>
                 ) : (
                   <div className="space-y-3 max-h-[600px] overflow-y-auto">
-                    {transactions.map((transaction, index) => {
+                    {safeTransactions.map((transaction, index) => {
                       const IconComponent = categoryIcons[transaction.category] || ShoppingBag;
                       const totalSpent = transaction.price * transaction.quantity;
                       
