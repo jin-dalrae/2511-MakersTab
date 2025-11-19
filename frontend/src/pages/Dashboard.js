@@ -693,7 +693,8 @@ const Dashboard = ({ user, onLogout }) => {
                   >
                     <Upload className="w-12 h-12 text-green-600 mb-4" />
                     <p className="text-lg font-semibold text-gray-800 mb-2">Upload from Device</p>
-                    <p className="text-sm text-gray-600 text-center">Click to select a receipt image</p>
+                    <p className="text-sm text-gray-600 text-center">Click to select receipt image(s)</p>
+                    <p className="text-xs text-gray-500 text-center mt-1">Select multiple for batch upload</p>
                     <input
                       id="file-upload"
                       data-testid="file-upload-input"
