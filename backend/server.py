@@ -933,6 +933,50 @@ async def get_receipts(
         "pages": (total_count + limit - 1) // limit
     }
 
+@api_router.delete("/receipts/{receipt_id}")
+async def delete_receipt(
+    receipt_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Delete a receipt and its associated transactions"""
+    try:
+        # Verify the receipt belongs to the current user
+        receipt = await db.receipts.find_one({
+            "id": receipt_id,
+            "user_id": current_user['id']
+        })
+        
+        if not receipt:
+            raise HTTPException(status_code=404, detail="Receipt not found")
+        
+        # Delete all transactions associated with this receipt
+        delete_transactions_result = await db.transactions.delete_many({
+            "receipt_id": receipt_id,
+            "user_id": current_user['id']
+        })
+        
+        # Delete the receipt
+        delete_receipt_result = await db.receipts.delete_one({
+            "id": receipt_id,
+            "user_id": current_user['id']
+        })
+        
+        if delete_receipt_result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Receipt not found")
+        
+        logger.info(f"Deleted receipt {receipt_id} and {delete_transactions_result.deleted_count} transactions for user {current_user['id']}")
+        
+        return {
+            "success": True,
+            "message": "Receipt and associated transactions deleted successfully",
+            "transactions_deleted": delete_transactions_result.deleted_count
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting receipt: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to delete receipt")
+
 # Transaction Routes
 @api_router.get("/transactions")
 async def get_transactions(
