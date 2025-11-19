@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-11-07T22:14:57.136352",
-  "total_tests": 10,
-  "passed": 10,
+  "timestamp": "2025-11-19T21:08:48.681101",
+  "total_tests": 17,
+  "passed": 17,
   "failed": 0,
   "success_rate": "100.0%",
   "results": [
@@ -10,7 +10,19 @@
       "passed": true,
       "message": "",
       "response": {
-        "message": "Meal Plan Tracker API"
+        "message": "MakersTab API"
+      }
+    },
+    {
+      "test": "Health Check",
+      "passed": true,
+      "message": "",
+      "response": {
+        "status": "healthy",
+        "version": "1.0.0",
+        "database": "healthy",
+        "cache": "healthy",
+        "timestamp": "2025-11-19T21:08:47.516461+00:00"
       }
     },
     {
@@ -18,13 +30,15 @@
       "passed": true,
       "message": "",
       "response": {
-        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZmUzNTU1NmYtZmE1MS00ZDk0LWE3NjktMmIyNWUwYjgwNjM2IiwiZXhwIjoxNzY1MTQ1Njk2fQ.-6v0Jnxy-B7CcdxvPm_8ErV8p5ogAE1uv2cRRQhpMF4",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNmIxYjdlNjctNjkyOC00ZmViLTkwYmMtM2ZhYTFjZmZkODlhIiwiZXhwIjoxNzY2MTc4NTI3fQ.Fl0FSbrRV-Tvb9ABe--DXRnSpmZ7VfXetCEG6xZo86o",
         "user": {
-          "id": "fe35556f-fa51-4d94-a769-2b25e0b80636",
-          "email": "test221456@example.com",
-          "name": "Test User 221456",
+          "id": "6b1b7e67-6928-4feb-90bc-3faa1cffd89a",
+          "email": "test210847@example.com",
+          "name": "Test User 210847",
           "meal_plan_amount": 500.0,
-          "created_at": "2025-11-07T22:14:56.698658+00:00"
+          "semester": "fall",
+          "is_admin": true,
+          "created_at": "2025-11-19T21:08:47.783255+00:00"
         }
       }
     },
@@ -33,24 +47,96 @@
       "passed": true,
       "message": "",
       "response": {
-        "id": "fe35556f-fa51-4d94-a769-2b25e0b80636",
-        "email": "test221456@example.com",
-        "name": "Test User 221456",
+        "id": "6b1b7e67-6928-4feb-90bc-3faa1cffd89a",
+        "email": "test210847@example.com",
+        "name": "Test User 210847",
         "meal_plan_amount": 500.0,
-        "created_at": "2025-11-07T22:14:56.698658+00:00"
+        "semester": "fall",
+        "is_admin": true,
+        "created_at": "2025-11-19T21:08:47.783255+00:00"
+      }
+    },
+    {
+      "test": "Get Cafe Menu (Public)",
+      "passed": true,
+      "message": "",
+      "response": {
+        "menu": {},
+        "display_mode": "no_data",
+        "message": "No menu data available for this date"
+      }
+    },
+    {
+      "test": "Get All Cafe Menu Items",
+      "passed": true,
+      "message": "",
+      "response": {
+        "items": [],
+        "count": 0,
+        "date": null,
+        "meal_period": null
+      }
+    },
+    {
+      "test": "Get Scraper Settings",
+      "passed": true,
+      "message": "",
+      "response": {
+        "key": "menu_scraper",
+        "auto_scrape_enabled": true,
+        "scrape_time": "04:00"
+      }
+    },
+    {
+      "test": "Manual Menu Scraping",
+      "passed": true,
+      "message": "",
+      "response": {
+        "success": false,
+        "error": "Failed to save to database: Cannot run the event loop while another loop is running"
+      }
+    },
+    {
+      "test": "Update Scraper Settings",
+      "passed": true,
+      "message": "",
+      "response": {
+        "success": true,
+        "message": "Settings updated successfully"
+      }
+    },
+    {
+      "test": "Get Cafe Items Table",
+      "passed": true,
+      "message": "",
+      "response": {
+        "items": [],
+        "count": 0
       }
     },
     {
       "test": "Get Receipts",
       "passed": true,
       "message": "",
-      "response": []
+      "response": {
+        "receipts": [],
+        "page": 1,
+        "limit": 20,
+        "total": 0,
+        "pages": 0
+      }
     },
     {
       "test": "Get Transactions",
       "passed": true,
       "message": "",
-      "response": []
+      "response": {
+        "transactions": [],
+        "page": 1,
+        "limit": 50,
+        "total": 0,
+        "pages": 0
+      }
     },
     {
       "test": "Get Transaction History",
@@ -90,13 +176,13 @@
       "passed": true,
       "message": "",
       "response": {
-        "id": "14dbf567-2faf-4f23-bf60-8f63ba2a754f",
+        "id": "67240c2e-3c3d-4b2d-9adf-73ab19d0a672",
         "name": "Test Coffee",
         "category": "drinks",
         "price": 3.5,
         "description": "Test coffee item",
-        "available_date": "2025-11-07T22:14:57.065881Z",
-        "created_at": "2025-11-07T22:14:57.065908Z"
+        "available_date": "2025-11-19T21:08:48.676124Z",
+        "created_at": "2025-11-19T21:08:48.676153Z"
       }
     }
   ]
