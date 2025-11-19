@@ -183,9 +183,9 @@ const AuthPage = ({ onLogin }) => {
                         onChange={(e) => setSignupData({ ...signupData, semester: e.target.value })}
                         required
                       >
-                        <option value="fall">Fall Term (Jul 10 - Sep 1)</option>
-                        <option value="spring">Spring Term (Dec 1 - Jan 18)</option>
-                        <option value="summer">Summer Term (May 1 - May 16)</option>
+                        <option value="fall">Fall Semester (Aug 25 - Jan 19)</option>
+                        <option value="spring">Spring Semester (Jan 20 - May 17)</option>
+                        <option value="summer">Summer Semester (May 18 - Aug 16)</option>
                       </select>
                     </div>
                     <Button
