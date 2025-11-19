@@ -385,6 +385,7 @@ const Dashboard = ({ user, onLogout }) => {
             <TabsList>
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              <TabsTrigger value="events">Events</TabsTrigger>
               <TabsTrigger value="menu">Menu</TabsTrigger>
             </TabsList>
           </div>
