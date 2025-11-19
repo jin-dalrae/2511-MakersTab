@@ -370,27 +370,74 @@ const Dashboard = ({ user, onLogout }) => {
           </div>
 
           {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6" data-testid="overview-content">
-            {/* Quick Upload Receipt Section */}
-            <Card className="bg-gradient-to-br from-orange-50 to-amber-50 border-0 shadow-xl">
-              <CardContent className="pt-4 sm:pt-6">
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="text-center sm:text-left">
-                    <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-1" style={{fontFamily: 'Space Grotesk'}}>
-                      Quick Upload Receipt(s)
-                    </h3>
-                    <p className="text-xs sm:text-sm text-gray-600">
-                      Scan receipts instantly with AI-powered OCR • Select multiple for batch upload
-                    </p>
+          <TabsContent value="overview" className="space-y-4" data-testid="overview-content">
+            {/* Current Balance & Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Current Balance */}
+              <Card className="bg-gradient-to-br from-green-500 to-emerald-600 text-white border-0 shadow-xl">
+                <CardContent className="pt-6">
+                  <div className="space-y-2">
+                    <p className="text-sm opacity-90">Current Balance</p>
+                    <p className="text-4xl font-bold">${user.meal_plan_amount?.toFixed(2) || '0.00'}</p>
+                    {receipts.length > 0 && (
+                      <p className="text-xs opacity-75">
+                        Last purchase: {new Date(receipts[0].receipt_date).toLocaleDateString()} {new Date(receipts[0].receipt_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                      </p>
+                    )}
                   </div>
-                  <div className="flex gap-3">
+                </CardContent>
+              </Card>
+
+              {/* Weekly Recommendation */}
+              {semesterInfo && (
+                <Card className="bg-gradient-to-br from-blue-500 to-cyan-600 text-white border-0 shadow-xl">
+                  <CardContent className="pt-6">
+                    <div className="space-y-2">
+                      <p className="text-sm opacity-90">Recommended This Week</p>
+                      <p className="text-4xl font-bold">
+                        ${(() => {
+                          const now = new Date();
+                          const sunday = new Date(now);
+                          sunday.setDate(now.getDate() + (7 - now.getDay()));
+                          const daysUntilSunday = Math.ceil((sunday - now) / (1000 * 60 * 60 * 24));
+                          const weeklyBudget = semesterInfo.recommended_weekly_spending || 0;
+                          const dailyRate = weeklyBudget / 7;
+                          const remainingThisWeek = dailyRate * daysUntilSunday;
+                          return remainingThisWeek.toFixed(2);
+                        })()}
+                      </p>
+                      <p className="text-xs opacity-75">
+                        Expected balance by Sunday: ${(() => {
+                          const now = new Date();
+                          const sunday = new Date(now);
+                          sunday.setDate(now.getDate() + (7 - now.getDay()));
+                          const daysUntilSunday = Math.ceil((sunday - now) / (1000 * 60 * 60 * 24));
+                          const weeklyBudget = semesterInfo.recommended_weekly_spending || 0;
+                          const dailyRate = weeklyBudget / 7;
+                          const remainingThisWeek = dailyRate * daysUntilSunday;
+                          const expectedBalance = (user.meal_plan_amount || 0) - remainingThisWeek;
+                          return expectedBalance.toFixed(2);
+                        })()}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {/* Slim Quick Upload Section */}
+            <Card className="bg-gradient-to-r from-orange-50 to-amber-50 border-0 shadow-md">
+              <CardContent className="py-3">
+                <div className="flex items-center justify-between gap-4">
+                  <p className="text-sm font-semibold text-gray-700">Quick Upload Receipt(s)</p>
+                  <div className="flex gap-2">
                     <label
                       htmlFor="quick-file-upload"
-                      className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-orange-300 rounded-xl cursor-pointer hover:bg-orange-50 hover:border-orange-400 duration-300 shadow-md"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-orange-300 rounded-lg cursor-pointer hover:bg-orange-50 duration-200 text-sm"
                       data-testid="quick-file-upload-btn"
                     >
-                      <Upload className="w-5 h-5 text-orange-600" />
-                      <span className="font-semibold text-orange-700 text-sm">Upload</span>
+                      <Upload className="w-4 h-4 text-orange-600" />
+                      <span className="font-medium text-orange-700">Upload</span>
                       <input
                         id="quick-file-upload"
                         type="file"
@@ -403,21 +450,21 @@ const Dashboard = ({ user, onLogout }) => {
                     </label>
                     <button
                       onClick={handleCameraCapture}
-                      className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-xl cursor-pointer hover:bg-orange-700 duration-300 shadow-md"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 duration-200 text-sm"
                       disabled={uploading}
                       data-testid="quick-camera-btn"
                     >
-                      <Camera className="w-5 h-5" />
-                      <span className="font-semibold text-sm">Camera</span>
+                      <Camera className="w-4 h-4" />
+                      <span className="font-medium">Camera</span>
                     </button>
                   </div>
                 </div>
                 {uploading && (
-                  <div className="mt-4 text-center p-3 bg-white rounded-xl">
-                    <div className="animate-pulse text-orange-600 font-semibold text-sm">
+                  <div className="mt-2 text-center">
+                    <div className="animate-pulse text-orange-600 font-medium text-xs">
                       {uploadQueue.length > 0 
-                        ? `Processing receipt ${currentUploadIndex + 1} of ${uploadQueue.length}...`
-                        : 'Processing receipt with AI...'}
+                        ? `Processing ${currentUploadIndex + 1}/${uploadQueue.length}...`
+                        : 'Processing...'}
                     </div>
                   </div>
                 )}
