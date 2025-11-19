@@ -250,6 +250,144 @@ class MealPlanTrackerAPITester:
             return True
         return False
 
+    def test_cafe_menu_public(self):
+        """Test public cafe menu endpoint (no auth required)"""
+        success, response = self.run_test(
+            "Get Cafe Menu (Public)",
+            "GET",
+            "cafe-menu",
+            200
+        )
+        
+        if success:
+            print(f"   ✓ Display mode: {response.get('display_mode', 'N/A')}")
+            print(f"   ✓ Date: {response.get('date', 'N/A')}")
+            print(f"   ✓ Current time: {response.get('current_time', 'N/A')}")
+            menu = response.get('menu', {})
+            total_items = sum(len(items) for items in menu.values() if isinstance(items, list))
+            print(f"   ✓ Total menu items: {total_items}")
+            return True
+        return False
+
+    def test_cafe_menu_all(self):
+        """Test get all cafe menu items (requires auth)"""
+        success, response = self.run_test(
+            "Get All Cafe Menu Items",
+            "GET",
+            "cafe-menu/all",
+            200
+        )
+        
+        if success:
+            items = response.get('items', [])
+            print(f"   ✓ Total items: {response.get('count', 0)}")
+            print(f"   ✓ Items array length: {len(items)}")
+            if items:
+                print(f"   ✓ Sample item: {items[0].get('name', 'N/A')} at {items[0].get('station', 'N/A')}")
+            return True
+        return False
+
+    def test_admin_scrape_menu(self):
+        """Test manual menu scraping (admin only)"""
+        print(f"\n🔍 Testing Manual Menu Scraping (Admin)...")
+        print(f"   URL: {self.base_url}/admin/scrape-menu")
+        print(f"   Method: POST")
+        print(f"   ⚠️  This may take 10-15 seconds to scrape from live website...")
+        
+        success, response = self.run_test(
+            "Manual Menu Scraping",
+            "POST",
+            "admin/scrape-menu",
+            200
+        )
+        
+        if success:
+            print(f"   ✓ Scraping successful: {response.get('success', False)}")
+            print(f"   ✓ Total items scraped: {response.get('total_items', 0)}")
+            if response.get('menu'):
+                menu = response['menu']
+                print(f"   ✓ Breakfast items: {len(menu.get('breakfast', []))}")
+                print(f"   ✓ Lunch items: {len(menu.get('lunch', []))}")
+                print(f"   ✓ Dinner items: {len(menu.get('dinner', []))}")
+            return True
+        return False
+
+    def test_admin_scraper_settings_get(self):
+        """Test get scraper settings (admin only)"""
+        success, response = self.run_test(
+            "Get Scraper Settings",
+            "GET",
+            "admin/scraper-settings",
+            200
+        )
+        
+        if success:
+            print(f"   ✓ Auto scrape enabled: {response.get('auto_scrape_enabled', 'N/A')}")
+            print(f"   ✓ Scrape time: {response.get('scrape_time', 'N/A')}")
+            print(f"   ✓ Last scrape date: {response.get('last_scrape_date', 'N/A')}")
+            print(f"   ✓ Items count: {response.get('items_count', 0)}")
+            return True
+        return False
+
+    def test_admin_scraper_settings_update(self):
+        """Test update scraper settings (admin only)"""
+        settings_data = {
+            "auto_scrape_enabled": True,
+            "scrape_time": "04:00"
+        }
+        
+        success, response = self.run_test(
+            "Update Scraper Settings",
+            "POST",
+            "admin/scraper-settings",
+            200,
+            data=settings_data
+        )
+        
+        if success:
+            print(f"   ✓ Settings updated: {response.get('success', False)}")
+            print(f"   ✓ Message: {response.get('message', 'N/A')}")
+            return True
+        return False
+
+    def test_admin_cafe_items_table(self):
+        """Test get cafe items table (admin only)"""
+        success, response = self.run_test(
+            "Get Cafe Items Table",
+            "GET",
+            "admin/cafe-items-table",
+            200
+        )
+        
+        if success:
+            items = response.get('items', [])
+            print(f"   ✓ Unique items count: {response.get('count', 0)}")
+            print(f"   ✓ Items array length: {len(items)}")
+            if items:
+                sample_item = items[0]
+                print(f"   ✓ Sample item: {sample_item.get('name', 'N/A')}")
+                print(f"   ✓ Station: {sample_item.get('station', 'N/A')}")
+                print(f"   ✓ Meal periods: {sample_item.get('meal_periods', [])}")
+                print(f"   ✓ Dietary tags: {sample_item.get('dietary_tags', [])}")
+            return True
+        return False
+
+    def test_health_check(self):
+        """Test health check endpoint"""
+        success, response = self.run_test(
+            "Health Check",
+            "GET",
+            "health",
+            200
+        )
+        
+        if success:
+            print(f"   ✓ Status: {response.get('status', 'N/A')}")
+            print(f"   ✓ Database: {response.get('database', 'N/A')}")
+            print(f"   ✓ Version: {response.get('version', 'N/A')}")
+            return True
+        return False
+
     def test_receipt_upload_without_file(self):
         """Test receipt upload endpoint without file (should fail)"""
         print(f"\n🔍 Testing Receipt Upload Without File...")
