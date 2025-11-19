@@ -19,7 +19,8 @@ import {
   Salad,
   Wine,
   ShoppingBag,
-  Users
+  Users,
+  Trash2
 } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
