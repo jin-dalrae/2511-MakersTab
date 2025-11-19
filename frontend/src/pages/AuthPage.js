@@ -70,30 +70,30 @@ const AuthPage = ({ onLogin }) => {
             <h1 className="text-2xl sm:text-3xl font-bold text-green-800" style={{fontFamily: 'Space Grotesk'}}>MakersTab</h1>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 leading-tight" style={{fontFamily: 'Space Grotesk'}}>
-            Smart Meal Plan
+            CCA Students'
             <br />
-            <span className="text-green-600">Management for CCA</span>
+            <span className="text-green-600">Meal Plan Management</span>
           </h2>
-          <p className="text-base sm:text-lg text-gray-600 max-w-md leading-relaxed">
+          <p className="text-lg sm:text-xl text-gray-600 max-w-md leading-relaxed">
             MakersTab helps California College of the Arts students effortlessly track their meal plan spending at Makers Cafe with AI-powered receipt scanning, real-time balance tracking, and smart budget recommendations.
           </p>
 
           {/* Feature highlights */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
-            <div className="bg-white/70 backdrop-blur-sm p-4 rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-1 duration-300">
-              <Receipt className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500 mb-2" />
-              <h3 className="font-semibold text-sm sm:text-base text-gray-800">AI Receipt Scanner</h3>
-              <p className="text-xs sm:text-sm text-gray-600">Instant OCR extraction with balance tracking</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mt-8">
+            <div className="bg-white/70 backdrop-blur-sm p-5 sm:p-6 rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-1 duration-300">
+              <Receipt className="w-10 h-10 sm:w-12 sm:h-12 text-orange-500 mb-3" />
+              <h3 className="font-semibold text-base sm:text-lg text-gray-800 mb-1">AI Receipt Scanner</h3>
+              <p className="text-sm sm:text-base text-gray-600">Instant OCR extraction with balance tracking</p>
             </div>
-            <div className="bg-white/70 backdrop-blur-sm p-4 rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-1 duration-300">
-              <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-green-500 mb-2" />
-              <h3 className="font-semibold text-sm sm:text-base text-gray-800">Smart Analytics</h3>
-              <p className="text-xs sm:text-sm text-gray-600">Weekly budget recommendations & insights</p>
+            <div className="bg-white/70 backdrop-blur-sm p-5 sm:p-6 rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-1 duration-300">
+              <TrendingUp className="w-10 h-10 sm:w-12 sm:h-12 text-green-500 mb-3" />
+              <h3 className="font-semibold text-base sm:text-lg text-gray-800 mb-1">Smart Analytics</h3>
+              <p className="text-sm sm:text-base text-gray-600">Weekly budget recommendations & insights</p>
             </div>
-            <div className="bg-white/70 backdrop-blur-sm p-4 rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-1 duration-300">
-              <History className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 mb-2" />
-              <h3 className="font-semibold text-sm sm:text-base text-gray-800">Live Cafe Menu</h3>
-              <p className="text-xs sm:text-sm text-gray-600">Daily menu from Cafe Bon Appetit</p>
+            <div className="bg-white/70 backdrop-blur-sm p-5 sm:p-6 rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-1 duration-300">
+              <History className="w-10 h-10 sm:w-12 sm:h-12 text-blue-500 mb-3" />
+              <h3 className="font-semibold text-base sm:text-lg text-gray-800 mb-1">Live Cafe Menu</h3>
+              <p className="text-sm sm:text-base text-gray-600">Daily menu from Cafe Bon Appetit</p>
             </div>
           </div>
 
