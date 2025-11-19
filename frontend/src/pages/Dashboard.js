@@ -212,6 +212,24 @@ const Dashboard = ({ user, onLogout }) => {
     setMemo('');
   };
 
+  const handleDeleteReceipt = async (receiptId) => {
+    if (!window.confirm('Are you sure you want to delete this receipt? This will also delete all associated transactions. This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${API}/receipts/${receiptId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      toast.success('Receipt deleted successfully!');
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to delete receipt');
+    }
+  };
+
   const handleCameraCapture = () => {
     document.getElementById('camera-input').click();
   };
