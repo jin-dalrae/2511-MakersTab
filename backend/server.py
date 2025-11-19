@@ -1258,7 +1258,7 @@ async def manual_scrape_menu(
     """Manually trigger menu scraping (admin only)"""
     try:
         logger.info(f"Manual menu scrape triggered by {current_user.get('email')}")
-        result = scrape_and_save_menu(db, date)
+        result = await scrape_and_save_menu_async(db, date)
         return result
     except Exception as e:
         logger.error(f"Error in manual scrape: {str(e)}")
