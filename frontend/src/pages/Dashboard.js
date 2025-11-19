@@ -383,6 +383,7 @@ const Dashboard = ({ user, onLogout }) => {
                         id="quick-file-upload"
                         type="file"
                         accept="image/*"
+                        multiple
                         onChange={handleFileUpload}
                         className="hidden"
                         disabled={uploading}
