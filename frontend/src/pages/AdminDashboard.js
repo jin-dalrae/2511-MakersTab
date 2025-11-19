@@ -55,17 +55,21 @@ const AdminDashboard = ({ user, onLogout }) => {
       const token = localStorage.getItem('token');
       const headers = { Authorization: `Bearer ${token}` };
 
-      const [statsRes, usersRes, todayRes, menuRes] = await Promise.all([
+      const [statsRes, usersRes, todayRes, menuRes, cafeItemsRes, scraperSettingsRes] = await Promise.all([
         axios.get(`${API}/admin/statistics`, { headers }),
         axios.get(`${API}/admin/users`, { headers }),
         axios.get(`${API}/admin/today-expenses`, { headers }),
-        axios.get(`${API}/menu`)
+        axios.get(`${API}/menu`),
+        axios.get(`${API}/admin/cafe-items-table`, { headers }),
+        axios.get(`${API}/admin/scraper-settings`, { headers })
       ]);
 
       setStatistics(statsRes.data);
       setUsers(usersRes.data);
       setTodayExpenses(todayRes.data);
       setMenuItems(menuRes.data);
+      setCafeItems(cafeItemsRes.data.items || []);
+      setScraperSettings(scraperSettingsRes.data);
     } catch (error) {
       toast.error('Failed to load admin data');
       if (error.response?.status === 403) {
