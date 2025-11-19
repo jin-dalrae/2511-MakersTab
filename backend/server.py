@@ -191,13 +191,13 @@ def get_semester_dates(semester: str, year: int) -> tuple:
         start = datetime(year, 8, 25, tzinfo=timezone.utc)
         end = datetime(year + 1, 1, 19, 23, 59, 59, tzinfo=timezone.utc)
     elif semester == "spring":
-        # Spring Term: December 1 - January 18 (spans years)
-        start = datetime(year, 12, 1, tzinfo=timezone.utc)
-        end = datetime(year + 1, 1, 18, 23, 59, 59, tzinfo=timezone.utc)
+        # Spring Term: January 20 - May 17
+        start = datetime(year, 1, 20, tzinfo=timezone.utc)
+        end = datetime(year, 5, 17, 23, 59, 59, tzinfo=timezone.utc)
     elif semester == "summer":
-        # Summer Term: May 1 - May 16
-        start = datetime(year, 5, 1, tzinfo=timezone.utc)
-        end = datetime(year, 5, 16, 23, 59, 59, tzinfo=timezone.utc)
+        # Summer Term: May 18 - August 16
+        start = datetime(year, 5, 18, tzinfo=timezone.utc)
+        end = datetime(year, 8, 16, 23, 59, 59, tzinfo=timezone.utc)
     else:
         # Default to fall
         start = datetime(year, 8, 25, tzinfo=timezone.utc)
