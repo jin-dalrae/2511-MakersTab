@@ -365,10 +365,10 @@ const Dashboard = ({ user, onLogout }) => {
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="text-center sm:text-left">
                     <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-1" style={{fontFamily: 'Space Grotesk'}}>
-                      Quick Upload Receipt
+                      Quick Upload Receipt(s)
                     </h3>
                     <p className="text-xs sm:text-sm text-gray-600">
-                      Scan your receipt instantly with AI-powered OCR
+                      Scan receipts instantly with AI-powered OCR • Select multiple for batch upload
                     </p>
                   </div>
                   <div className="flex gap-3">
