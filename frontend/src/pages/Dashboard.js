@@ -798,65 +798,153 @@ const Dashboard = ({ user, onLogout }) => {
           </TabsContent>
 
           {/* History Tab */}
-          <TabsContent value="history" data-testid="history-content">
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
-              <CardHeader>
-                <CardTitle className="text-base sm:text-lg" style={{fontFamily: 'Space Grotesk'}}>Transaction History</CardTitle>
-                <CardDescription className="text-sm">Your recent purchases at Makers Cafe (Most Recent First)</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {transactions.length === 0 ? (
-                  <div className="text-center py-12 text-gray-500">
-                    <History className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                    <p>No transactions yet. Upload a receipt to get started!</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3 max-h-[600px] overflow-y-auto">
-                    {safeTransactions.map((transaction, index) => {
-                      const IconComponent = categoryIcons[transaction.category] || ShoppingBag;
-                      const totalSpent = transaction.price * transaction.quantity;
-                      
-                      return (
-                        <div
-                          key={transaction.id}
-                          className="p-3 sm:p-4 bg-white rounded-xl border border-gray-200 hover:shadow-md duration-300"
-                          data-testid="transaction-item"
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="flex items-start gap-3 flex-1 min-w-0">
-                              <div
-                                className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                                style={{ backgroundColor: `${categoryColors[transaction.category]}20` }}
-                              >
-                                <IconComponent className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: categoryColors[transaction.category] }} />
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" data-testid="analytics-content">
+            <div className="space-y-4">
+              {/* Spending Analytics Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card className="bg-white border-0 shadow-lg">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-600">Total Spent</p>
+                        <p className="text-2xl font-bold text-gray-800">${analytics?.total_spent?.toFixed(2) || '0.00'}</p>
+                      </div>
+                      <TrendingUp className="w-8 h-8 text-red-500" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white border-0 shadow-lg">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-600">Transactions</p>
+                        <p className="text-2xl font-bold text-gray-800">{analytics?.transactions_count || 0}</p>
+                      </div>
+                      <Receipt className="w-8 h-8 text-blue-500" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white border-0 shadow-lg">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-600">Avg Per Transaction</p>
+                        <p className="text-2xl font-bold text-gray-800">
+                          ${analytics?.transactions_count > 0 
+                            ? (analytics.total_spent / analytics.transactions_count).toFixed(2) 
+                            : '0.00'}
+                        </p>
+                      </div>
+                      <DollarSign className="w-8 h-8 text-green-500" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Spending by Category */}
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+                <CardHeader>
+                  <CardTitle style={{fontFamily: 'Space Grotesk'}}>Spending by Category</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {analytics?.spending_by_category && Object.keys(analytics.spending_by_category).length > 0 ? (
+                    <div className="space-y-3">
+                      {Object.entries(analytics.spending_by_category).map(([category, amount]) => {
+                        const percentage = (amount / analytics.total_spent) * 100;
+                        const IconComponent = categoryIcons[category] || ShoppingBag;
+                        return (
+                          <div key={category} className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <IconComponent 
+                                  className="w-5 h-5" 
+                                  style={{ color: categoryColors[category] }} 
+                                />
+                                <span className="text-sm font-medium capitalize">{category}</span>
                               </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="font-semibold text-sm sm:text-base text-gray-800">{transaction.item_name}</p>
-                                <div className="flex flex-wrap gap-2 mt-1 text-xs text-gray-600">
-                                  <span className="px-2 py-0.5 bg-gray-100 rounded capitalize">
-                                    {transaction.category}
-                                  </span>
-                                  <span>Qty: {transaction.quantity}</span>
-                                  <span className="hidden sm:inline">•</span>
-                                  <span>
-                                    {new Date(transaction.transaction_date).toLocaleDateString()} {new Date(transaction.transaction_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                                  </span>
-                                </div>
-                              </div>
+                              <span className="text-sm font-bold">${amount.toFixed(2)}</span>
                             </div>
-                            <div className="text-right flex-shrink-0">
-                              <p className="text-base sm:text-lg font-bold text-red-600">
-                                -${totalSpent.toFixed(2)}
-                              </p>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div
+                                className="h-2 rounded-full transition-all duration-500"
+                                style={{ 
+                                  width: `${percentage}%`,
+                                  backgroundColor: categoryColors[category]
+                                }}
+                              />
                             </div>
                           </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-center text-gray-500 py-8">No spending data available</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Transaction History */}
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+                <CardHeader>
+                  <CardTitle style={{fontFamily: 'Space Grotesk'}}>Recent Transactions</CardTitle>
+                  <CardDescription>Your recent purchases (Most Recent First)</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {transactions.length === 0 ? (
+                    <div className="text-center py-12 text-gray-500">
+                      <History className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                      <p>No transactions yet. Upload a receipt to get started!</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                      {safeTransactions.map((transaction) => {
+                        const IconComponent = categoryIcons[transaction.category] || ShoppingBag;
+                        const totalSpent = transaction.price * transaction.quantity;
+                        
+                        return (
+                          <div
+                            key={transaction.id}
+                            className="p-3 sm:p-4 bg-white rounded-xl border border-gray-200 hover:shadow-md duration-300"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex items-start gap-3 flex-1 min-w-0">
+                                <div
+                                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                                  style={{ backgroundColor: `${categoryColors[transaction.category]}20` }}
+                                >
+                                  <IconComponent className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: categoryColors[transaction.category] }} />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-semibold text-sm sm:text-base text-gray-800">{transaction.item_name}</p>
+                                  <div className="flex flex-wrap gap-2 mt-1 text-xs text-gray-600">
+                                    <span className="px-2 py-0.5 bg-gray-100 rounded capitalize">
+                                      {transaction.category}
+                                    </span>
+                                    <span>Qty: {transaction.quantity}</span>
+                                    <span className="hidden sm:inline">•</span>
+                                    <span>
+                                      {new Date(transaction.transaction_date).toLocaleDateString()} {new Date(transaction.transaction_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="text-right flex-shrink-0">
+                                <p className="text-base sm:text-lg font-bold text-red-600">
+                                  -${totalSpent.toFixed(2)}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Menu Tab */}
