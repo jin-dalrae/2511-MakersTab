@@ -32,6 +32,8 @@ const Dashboard = ({ user, onLogout }) => {
   const [receipts, setReceipts] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
+  const [cafeMenu, setCafeMenu] = useState(null);
+  const [cafeMenuMode, setCafeMenuMode] = useState('all');
   const [semesterInfo, setSemesterInfo] = useState(null);
   const [loadingData, setLoadingData] = useState(true);
   const [showPreview, setShowPreview] = useState(false);
