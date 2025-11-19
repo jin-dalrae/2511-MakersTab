@@ -165,10 +165,12 @@ const Dashboard = ({ user, onLogout }) => {
   })) : [];
 
   // Group transactions by day, week, or month
-  const groupTransactions = (transactions, groupType) => {
+  const groupTransactions = (transactionsList, groupType) => {
     const grouped = {};
     
-    transactions.forEach(transaction => {
+    if (!Array.isArray(transactionsList)) return {};
+    
+    transactionsList.forEach(transaction => {
       const date = new Date(transaction.transaction_date);
       let key;
       
