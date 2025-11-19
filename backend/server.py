@@ -26,7 +26,7 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 # Import menu scraper
-from menu_scraper import scrape_and_save_menu
+from menu_scraper import scrape_and_save_menu, scrape_and_save_menu_async
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
