@@ -176,17 +176,22 @@ const AuthPage = ({ onLogin }) => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="meal-plan" className="text-sm">Meal Plan Budget ($)</Label>
-                      <Input
+                      <Label htmlFor="meal-plan" className="text-sm">Meal Plan</Label>
+                      <select
                         id="meal-plan"
-                        data-testid="meal-plan-input"
-                        type="number"
-                        step="0.01"
-                        placeholder="500.00"
+                        data-testid="meal-plan-select"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white"
                         value={signupData.meal_plan_amount}
                         onChange={(e) => setSignupData({ ...signupData, meal_plan_amount: e.target.value })}
                         required
-                      />
+                      >
+                        <option value="">Select your meal plan</option>
+                        <option value="4005">Ultimate - $4,005</option>
+                        <option value="3466">Essential - $3,466</option>
+                        <option value="1865">Makers - $1,865</option>
+                        <option value="1031">Mini - $1,031</option>
+                        <option value="479">Micro - $479</option>
+                      </select>
                     </div>
                     <div>
                       <Label htmlFor="semester" className="text-sm">Semester</Label>
