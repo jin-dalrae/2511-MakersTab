@@ -695,6 +695,7 @@ const Dashboard = ({ user, onLogout }) => {
                       data-testid="file-upload-input"
                       type="file"
                       accept="image/*"
+                      multiple
                       onChange={handleFileUpload}
                       className="hidden"
                       disabled={uploading}
