@@ -736,68 +736,6 @@ const Dashboard = ({ user, onLogout }) => {
           </TabsContent>
 
           {/* Upload Tab */}
-          <TabsContent value="upload" data-testid="upload-content">
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
-              <CardHeader>
-                <CardTitle style={{fontFamily: 'Space Grotesk'}}>Scan Receipt</CardTitle>
-                <CardDescription>Upload a photo or take a picture of your receipt</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* File Upload */}
-                  <label
-                    htmlFor="file-upload"
-                    className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-green-300 rounded-2xl cursor-pointer hover:border-green-500 hover:bg-green-50/50 duration-300 bg-white"
-                    data-testid="file-upload-area"
-                  >
-                    <Upload className="w-12 h-12 text-green-600 mb-4" />
-                    <p className="text-lg font-semibold text-gray-800 mb-2">Upload from Device</p>
-                    <p className="text-sm text-gray-600 text-center">Click to select receipt image(s)</p>
-                    <p className="text-xs text-gray-500 text-center mt-1">Select multiple for batch upload</p>
-                    <input
-                      id="file-upload"
-                      data-testid="file-upload-input"
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={handleFileUpload}
-                      className="hidden"
-                      disabled={uploading}
-                    />
-                  </label>
-
-                  {/* Camera Capture */}
-                  <button
-                    onClick={handleCameraCapture}
-                    className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-orange-300 rounded-2xl cursor-pointer hover:border-orange-500 hover:bg-orange-50/50 duration-300 bg-white"
-                    disabled={uploading}
-                    data-testid="camera-capture-button"
-                  >
-                    <Camera className="w-12 h-12 text-orange-600 mb-4" />
-                    <p className="text-lg font-semibold text-gray-800 mb-2">Take Photo</p>
-                    <p className="text-sm text-gray-600 text-center">Use your camera to capture receipt</p>
-                  </button>
-                  <input
-                    id="camera-input"
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                    disabled={uploading}
-                  />
-                </div>
-
-                {uploading && (
-                  <div className="text-center p-8 bg-green-50 rounded-2xl">
-                    <div className="animate-pulse text-green-600 font-semibold">Processing receipt with AI...</div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* History Tab */}
           {/* Analytics Tab */}
           <TabsContent value="analytics" data-testid="analytics-content">
             <div className="space-y-4">
