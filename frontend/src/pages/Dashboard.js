@@ -254,10 +254,12 @@ const Dashboard = ({ user, onLogout }) => {
   const spentPercentage = analytics ? (analytics.total_spent / user.meal_plan_amount) * 100 : 0;
   const remainingBudget = user.meal_plan_amount - (analytics?.total_spent || 0);
 
-  const pieData = analytics ? Object.entries(analytics.spending_by_category).map(([key, value]) => ({
-    name: key.charAt(0).toUpperCase() + key.slice(1),
-    value: parseFloat(value.toFixed(2))
-  })) : [];
+  const pieData = analytics ? Object.entries(analytics.spending_by_category)
+    .filter(([key]) => key !== 'untracked')
+    .map(([key, value]) => ({
+      name: key.charAt(0).toUpperCase() + key.slice(1),
+      value: parseFloat(value.toFixed(2))
+    })) : [];
 
   // Group transactions by day, week, or month
   const groupTransactions = (transactionsList, groupType) => {
