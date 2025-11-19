@@ -95,6 +95,7 @@ class User(BaseModel):
     password_hash: str
     name: str
     meal_plan_amount: float
+    initial_meal_plan_amount: Optional[float] = None  # Store initial balance
     semester: str = "fall"  # fall, spring, summer
     is_admin: bool = False
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
