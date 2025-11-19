@@ -1,9 +1,9 @@
 {
-  "timestamp": "2025-11-19T21:08:48.681101",
+  "timestamp": "2025-11-19T21:11:13.376705",
   "total_tests": 17,
-  "passed": 17,
-  "failed": 0,
-  "success_rate": "100.0%",
+  "passed": 12,
+  "failed": 5,
+  "success_rate": "70.6%",
   "results": [
     {
       "test": "Root Endpoint",
@@ -22,7 +22,7 @@
         "version": "1.0.0",
         "database": "healthy",
         "cache": "healthy",
-        "timestamp": "2025-11-19T21:08:47.516461+00:00"
+        "timestamp": "2025-11-19T21:11:12.480776+00:00"
       }
     },
     {
@@ -30,15 +30,15 @@
       "passed": true,
       "message": "",
       "response": {
-        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNmIxYjdlNjctNjkyOC00ZmViLTkwYmMtM2ZhYTFjZmZkODlhIiwiZXhwIjoxNzY2MTc4NTI3fQ.Fl0FSbrRV-Tvb9ABe--DXRnSpmZ7VfXetCEG6xZo86o",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiOWQwZTNiZGYtNmZjZi00OTdjLTkxMmYtODYyZWFmODRkOTUyIiwiZXhwIjoxNzY2MTc4NjcyfQ.cKcpiSX3XNOvxLmHRALDUiLltWwCYdUrahGWtmx5Eoo",
         "user": {
-          "id": "6b1b7e67-6928-4feb-90bc-3faa1cffd89a",
-          "email": "test210847@example.com",
-          "name": "Test User 210847",
+          "id": "9d0e3bdf-6fcf-497c-912f-862eaf84d952",
+          "email": "test211112@example.com",
+          "name": "Test User 211112",
           "meal_plan_amount": 500.0,
           "semester": "fall",
-          "is_admin": true,
-          "created_at": "2025-11-19T21:08:47.783255+00:00"
+          "is_admin": false,
+          "created_at": "2025-11-19T21:11:12.783583+00:00"
         }
       }
     },
@@ -47,13 +47,13 @@
       "passed": true,
       "message": "",
       "response": {
-        "id": "6b1b7e67-6928-4feb-90bc-3faa1cffd89a",
-        "email": "test210847@example.com",
-        "name": "Test User 210847",
+        "id": "9d0e3bdf-6fcf-497c-912f-862eaf84d952",
+        "email": "test211112@example.com",
+        "name": "Test User 211112",
         "meal_plan_amount": 500.0,
         "semester": "fall",
-        "is_admin": true,
-        "created_at": "2025-11-19T21:08:47.783255+00:00"
+        "is_admin": false,
+        "created_at": "2025-11-19T21:11:12.783583+00:00"
       }
     },
     {
@@ -61,9 +61,631 @@
       "passed": true,
       "message": "",
       "response": {
-        "menu": {},
-        "display_mode": "no_data",
-        "message": "No menu data available for this date"
+        "menu": {
+          "breakfast": [
+            {
+              "item_id": "31831273",
+              "name": "Huevos Rancheros",
+              "description": "",
+              "station": "Breakfast Special",
+              "meal_period": "breakfast",
+              "start_time": "07:00",
+              "end_time": "10:00",
+              "dietary_tags": [
+                "gluten-free"
+              ],
+              "calories": null,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "31847999",
+              "name": "Oatmeal",
+              "description": "",
+              "station": "The Wharf (soup)",
+              "meal_period": "breakfast",
+              "start_time": "07:00",
+              "end_time": "10:00",
+              "dietary_tags": [
+                "vegan",
+                "gluten-free"
+              ],
+              "calories": null,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            }
+          ],
+          "lunch": [
+            {
+              "item_id": "31831283",
+              "name": "Alfredo Chicken Pizza",
+              "description": "",
+              "station": "North Beach (pizza)",
+              "meal_period": "lunch",
+              "start_time": "11:00",
+              "end_time": "14:00",
+              "dietary_tags": [],
+              "calories": null,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "31839444",
+              "name": "Maria's Pizza Pocket",
+              "description": "",
+              "station": "North Beach (pizza)",
+              "meal_period": "lunch",
+              "start_time": "11:00",
+              "end_time": "14:00",
+              "dietary_tags": [],
+              "calories": null,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "31870099",
+              "name": "Japanese Chicken Pork Potstickers",
+              "description": "",
+              "station": "Potrero Grill",
+              "meal_period": "lunch",
+              "start_time": "11:00",
+              "end_time": "14:00",
+              "dietary_tags": [],
+              "calories": null,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "31870102",
+              "name": "Japanese Vegan Potstickers",
+              "description": "",
+              "station": "Potrero Grill",
+              "meal_period": "lunch",
+              "start_time": "11:00",
+              "end_time": "14:00",
+              "dietary_tags": [
+                "vegan"
+              ],
+              "calories": null,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "31833638",
+              "name": "Grilled Salmon",
+              "description": "",
+              "station": "Mission Classic - Lunch",
+              "meal_period": "lunch",
+              "start_time": "11:00",
+              "end_time": "14:00",
+              "dietary_tags": [
+                "gluten-free",
+                "seafood-watch"
+              ],
+              "calories": null,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "31833679",
+              "name": "Grilled Tofu",
+              "description": "",
+              "station": "Mission Classic - Lunch",
+              "meal_period": "lunch",
+              "start_time": "11:00",
+              "end_time": "14:00",
+              "dietary_tags": [
+                "vegetarian",
+                "gluten-free"
+              ],
+              "calories": null,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "31881531",
+              "name": "Vegetable Chicken Soup",
+              "description": "",
+              "station": "The Wharf (soup)",
+              "meal_period": "lunch",
+              "start_time": "11:00",
+              "end_time": "14:00",
+              "dietary_tags": [
+                "gluten-free"
+              ],
+              "calories": null,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "31881538",
+              "name": "Potato & Veggie Soup",
+              "description": "",
+              "station": "The Wharf (soup)",
+              "meal_period": "lunch",
+              "start_time": "11:00",
+              "end_time": "14:00",
+              "dietary_tags": [
+                "vegan",
+                "gluten-free"
+              ],
+              "calories": null,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "31834379",
+              "name": "Pork Chicharr\u00f3n or Mushrooms in Green Sauce",
+              "description": "",
+              "station": "Simply Oasis",
+              "meal_period": "lunch",
+              "start_time": "11:00",
+              "end_time": "14:00",
+              "dietary_tags": [
+                "gluten-free"
+              ],
+              "calories": null,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "17284080",
+              "name": "Cheese Pizza",
+              "description": "",
+              "station": "North Beach (pizza)",
+              "meal_period": "lunch",
+              "start_time": "11:00",
+              "end_time": "14:00",
+              "dietary_tags": [
+                "vegetarian"
+              ],
+              "calories": 230,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "17284088",
+              "name": "Pepperoni Pizza",
+              "description": "",
+              "station": "North Beach (pizza)",
+              "meal_period": "lunch",
+              "start_time": "11:00",
+              "end_time": "14:00",
+              "dietary_tags": [],
+              "calories": 1440,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "23752925",
+              "name": "Ranch Dressing",
+              "description": "",
+              "station": "Golden Gate Greens",
+              "meal_period": "lunch",
+              "start_time": "11:00",
+              "end_time": "14:00",
+              "dietary_tags": [
+                "vegetarian",
+                "gluten-free"
+              ],
+              "calories": 70,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "23754891",
+              "name": "Balsamic Vinaigrette",
+              "description": "",
+              "station": "Golden Gate Greens",
+              "meal_period": "lunch",
+              "start_time": "11:00",
+              "end_time": "14:00",
+              "dietary_tags": [
+                "vegan",
+                "gluten-free"
+              ],
+              "calories": 170,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "15535569",
+              "name": "Cream Co. Meats Grass Fed Beef Patty",
+              "description": "",
+              "station": "Potrero Grill",
+              "meal_period": "lunch",
+              "start_time": "11:00",
+              "end_time": "14:00",
+              "dietary_tags": [
+                "gluten-free",
+                "farm-to-fork"
+              ],
+              "calories": 310,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "15535571",
+              "name": "Chicken Breast",
+              "description": "",
+              "station": "Potrero Grill",
+              "meal_period": "lunch",
+              "start_time": "11:00",
+              "end_time": "14:00",
+              "dietary_tags": [
+                "gluten-free"
+              ],
+              "calories": 110,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "17284122",
+              "name": "Chicken Apple Sausage",
+              "description": "",
+              "station": "Mission Classic - Lunch",
+              "meal_period": "lunch",
+              "start_time": "11:00",
+              "end_time": "14:00",
+              "dietary_tags": [
+                "gluten-free"
+              ],
+              "calories": 35,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "17284123",
+              "name": "Vegetarian Sausage",
+              "description": "",
+              "station": "Mission Classic - Lunch",
+              "meal_period": "lunch",
+              "start_time": "11:00",
+              "end_time": "14:00",
+              "dietary_tags": [
+                "vegetarian"
+              ],
+              "calories": 60,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "31817182",
+              "name": "Red Beets",
+              "description": "",
+              "station": "Golden Gate Greens",
+              "meal_period": "lunch",
+              "start_time": "11:00",
+              "end_time": "14:00",
+              "dietary_tags": [
+                "vegan",
+                "gluten-free"
+              ],
+              "calories": 10,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "31817183",
+              "name": "Yellow Beets",
+              "description": "",
+              "station": "Golden Gate Greens",
+              "meal_period": "lunch",
+              "start_time": "11:00",
+              "end_time": "14:00",
+              "dietary_tags": [
+                "vegan",
+                "gluten-free"
+              ],
+              "calories": 10,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            }
+          ],
+          "dinner": [
+            {
+              "item_id": "31831283",
+              "name": "Alfredo Chicken Pizza",
+              "description": "",
+              "station": "North Beach (pizza)",
+              "meal_period": "dinner",
+              "start_time": "17:00",
+              "end_time": "20:00",
+              "dietary_tags": [],
+              "calories": null,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "31839444",
+              "name": "Maria's Pizza Pocket",
+              "description": "",
+              "station": "North Beach (pizza)",
+              "meal_period": "dinner",
+              "start_time": "17:00",
+              "end_time": "20:00",
+              "dietary_tags": [],
+              "calories": null,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "31870099",
+              "name": "Japanese Chicken Pork Potstickers",
+              "description": "",
+              "station": "Potrero Grill",
+              "meal_period": "dinner",
+              "start_time": "17:00",
+              "end_time": "20:00",
+              "dietary_tags": [],
+              "calories": null,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "31870102",
+              "name": "Japanese Vegan Potstickers",
+              "description": "",
+              "station": "Potrero Grill",
+              "meal_period": "dinner",
+              "start_time": "17:00",
+              "end_time": "20:00",
+              "dietary_tags": [
+                "vegan"
+              ],
+              "calories": null,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "31839254",
+              "name": "Flank Steak with Chimichurri",
+              "description": "",
+              "station": "Mission Classics - Dinner",
+              "meal_period": "dinner",
+              "start_time": "17:00",
+              "end_time": "20:00",
+              "dietary_tags": [
+                "gluten-free"
+              ],
+              "calories": null,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "31839255",
+              "name": "Vegan Landlovers \"Beef\" with Chimichurri",
+              "description": "",
+              "station": "Mission Classics - Dinner",
+              "meal_period": "dinner",
+              "start_time": "17:00",
+              "end_time": "20:00",
+              "dietary_tags": [
+                "vegan"
+              ],
+              "calories": null,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "31881531",
+              "name": "Vegetable Chicken Soup",
+              "description": "",
+              "station": "The Wharf (soup)",
+              "meal_period": "dinner",
+              "start_time": "17:00",
+              "end_time": "20:00",
+              "dietary_tags": [
+                "gluten-free"
+              ],
+              "calories": null,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "31881538",
+              "name": "Potato & Veggie Soup",
+              "description": "",
+              "station": "The Wharf (soup)",
+              "meal_period": "dinner",
+              "start_time": "17:00",
+              "end_time": "20:00",
+              "dietary_tags": [
+                "vegan",
+                "gluten-free"
+              ],
+              "calories": null,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "31834379",
+              "name": "Pork Chicharr\u00f3n or Mushrooms in Green Sauce",
+              "description": "",
+              "station": "Simply Oasis",
+              "meal_period": "dinner",
+              "start_time": "17:00",
+              "end_time": "20:00",
+              "dietary_tags": [
+                "gluten-free"
+              ],
+              "calories": null,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "31808394",
+              "name": "Pick Your Own Tostada",
+              "description": "",
+              "station": "Simply Oasis",
+              "meal_period": "dinner",
+              "start_time": "17:00",
+              "end_time": "20:00",
+              "dietary_tags": [
+                "gluten-free"
+              ],
+              "calories": null,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "17284080",
+              "name": "Cheese Pizza",
+              "description": "",
+              "station": "North Beach (pizza)",
+              "meal_period": "dinner",
+              "start_time": "17:00",
+              "end_time": "20:00",
+              "dietary_tags": [
+                "vegetarian"
+              ],
+              "calories": 230,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "17284088",
+              "name": "Pepperoni Pizza",
+              "description": "",
+              "station": "North Beach (pizza)",
+              "meal_period": "dinner",
+              "start_time": "17:00",
+              "end_time": "20:00",
+              "dietary_tags": [],
+              "calories": 1440,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "23754891",
+              "name": "Balsamic Vinaigrette",
+              "description": "",
+              "station": "Golden Gate Greens",
+              "meal_period": "dinner",
+              "start_time": "17:00",
+              "end_time": "20:00",
+              "dietary_tags": [
+                "vegan",
+                "gluten-free"
+              ],
+              "calories": 170,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "23754895",
+              "name": "Italian Dressing",
+              "description": "",
+              "station": "Golden Gate Greens",
+              "meal_period": "dinner",
+              "start_time": "17:00",
+              "end_time": "20:00",
+              "dietary_tags": [
+                "vegan",
+                "gluten-free"
+              ],
+              "calories": 180,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "15535569",
+              "name": "Cream Co. Meats Grass Fed Beef Patty",
+              "description": "",
+              "station": "Potrero Grill",
+              "meal_period": "dinner",
+              "start_time": "17:00",
+              "end_time": "20:00",
+              "dietary_tags": [
+                "gluten-free",
+                "farm-to-fork"
+              ],
+              "calories": 310,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "15535571",
+              "name": "Chicken Breast",
+              "description": "",
+              "station": "Potrero Grill",
+              "meal_period": "dinner",
+              "start_time": "17:00",
+              "end_time": "20:00",
+              "dietary_tags": [
+                "gluten-free"
+              ],
+              "calories": 110,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "17284122",
+              "name": "Chicken Apple Sausage",
+              "description": "",
+              "station": "Mission Classic - Lunch",
+              "meal_period": "dinner",
+              "start_time": "17:00",
+              "end_time": "20:00",
+              "dietary_tags": [
+                "gluten-free"
+              ],
+              "calories": 35,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "17284123",
+              "name": "Vegetarian Sausage",
+              "description": "",
+              "station": "Mission Classic - Lunch",
+              "meal_period": "dinner",
+              "start_time": "17:00",
+              "end_time": "20:00",
+              "dietary_tags": [
+                "vegetarian"
+              ],
+              "calories": 60,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "31817182",
+              "name": "Red Beets",
+              "description": "",
+              "station": "Golden Gate Greens",
+              "meal_period": "dinner",
+              "start_time": "17:00",
+              "end_time": "20:00",
+              "dietary_tags": [
+                "vegan",
+                "gluten-free"
+              ],
+              "calories": 10,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            },
+            {
+              "item_id": "31817183",
+              "name": "Yellow Beets",
+              "description": "",
+              "station": "Golden Gate Greens",
+              "meal_period": "dinner",
+              "start_time": "17:00",
+              "end_time": "20:00",
+              "dietary_tags": [
+                "vegan",
+                "gluten-free"
+              ],
+              "calories": 10,
+              "date": "2025-11-19",
+              "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+            }
+          ]
+        },
+        "display_mode": "all",
+        "date": "2025-11-19",
+        "current_time": "21:11"
       }
     },
     {
@@ -71,47 +693,657 @@
       "passed": true,
       "message": "",
       "response": {
-        "items": [],
-        "count": 0,
+        "items": [
+          {
+            "item_id": "31831273",
+            "name": "Huevos Rancheros",
+            "description": "",
+            "station": "Breakfast Special",
+            "meal_period": "breakfast",
+            "start_time": "07:00",
+            "end_time": "10:00",
+            "dietary_tags": [
+              "gluten-free"
+            ],
+            "calories": null,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "31847999",
+            "name": "Oatmeal",
+            "description": "",
+            "station": "The Wharf (soup)",
+            "meal_period": "breakfast",
+            "start_time": "07:00",
+            "end_time": "10:00",
+            "dietary_tags": [
+              "vegan",
+              "gluten-free"
+            ],
+            "calories": null,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "31831283",
+            "name": "Alfredo Chicken Pizza",
+            "description": "",
+            "station": "North Beach (pizza)",
+            "meal_period": "dinner",
+            "start_time": "17:00",
+            "end_time": "20:00",
+            "dietary_tags": [],
+            "calories": null,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "31839444",
+            "name": "Maria's Pizza Pocket",
+            "description": "",
+            "station": "North Beach (pizza)",
+            "meal_period": "dinner",
+            "start_time": "17:00",
+            "end_time": "20:00",
+            "dietary_tags": [],
+            "calories": null,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "31870099",
+            "name": "Japanese Chicken Pork Potstickers",
+            "description": "",
+            "station": "Potrero Grill",
+            "meal_period": "dinner",
+            "start_time": "17:00",
+            "end_time": "20:00",
+            "dietary_tags": [],
+            "calories": null,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "31870102",
+            "name": "Japanese Vegan Potstickers",
+            "description": "",
+            "station": "Potrero Grill",
+            "meal_period": "dinner",
+            "start_time": "17:00",
+            "end_time": "20:00",
+            "dietary_tags": [
+              "vegan"
+            ],
+            "calories": null,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "31839254",
+            "name": "Flank Steak with Chimichurri",
+            "description": "",
+            "station": "Mission Classics - Dinner",
+            "meal_period": "dinner",
+            "start_time": "17:00",
+            "end_time": "20:00",
+            "dietary_tags": [
+              "gluten-free"
+            ],
+            "calories": null,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "31839255",
+            "name": "Vegan Landlovers \"Beef\" with Chimichurri",
+            "description": "",
+            "station": "Mission Classics - Dinner",
+            "meal_period": "dinner",
+            "start_time": "17:00",
+            "end_time": "20:00",
+            "dietary_tags": [
+              "vegan"
+            ],
+            "calories": null,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "31881531",
+            "name": "Vegetable Chicken Soup",
+            "description": "",
+            "station": "The Wharf (soup)",
+            "meal_period": "dinner",
+            "start_time": "17:00",
+            "end_time": "20:00",
+            "dietary_tags": [
+              "gluten-free"
+            ],
+            "calories": null,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "31881538",
+            "name": "Potato & Veggie Soup",
+            "description": "",
+            "station": "The Wharf (soup)",
+            "meal_period": "dinner",
+            "start_time": "17:00",
+            "end_time": "20:00",
+            "dietary_tags": [
+              "vegan",
+              "gluten-free"
+            ],
+            "calories": null,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "31834379",
+            "name": "Pork Chicharr\u00f3n or Mushrooms in Green Sauce",
+            "description": "",
+            "station": "Simply Oasis",
+            "meal_period": "dinner",
+            "start_time": "17:00",
+            "end_time": "20:00",
+            "dietary_tags": [
+              "gluten-free"
+            ],
+            "calories": null,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "31808394",
+            "name": "Pick Your Own Tostada",
+            "description": "",
+            "station": "Simply Oasis",
+            "meal_period": "dinner",
+            "start_time": "17:00",
+            "end_time": "20:00",
+            "dietary_tags": [
+              "gluten-free"
+            ],
+            "calories": null,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "17284080",
+            "name": "Cheese Pizza",
+            "description": "",
+            "station": "North Beach (pizza)",
+            "meal_period": "dinner",
+            "start_time": "17:00",
+            "end_time": "20:00",
+            "dietary_tags": [
+              "vegetarian"
+            ],
+            "calories": 230,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "17284088",
+            "name": "Pepperoni Pizza",
+            "description": "",
+            "station": "North Beach (pizza)",
+            "meal_period": "dinner",
+            "start_time": "17:00",
+            "end_time": "20:00",
+            "dietary_tags": [],
+            "calories": 1440,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "23754891",
+            "name": "Balsamic Vinaigrette",
+            "description": "",
+            "station": "Golden Gate Greens",
+            "meal_period": "dinner",
+            "start_time": "17:00",
+            "end_time": "20:00",
+            "dietary_tags": [
+              "vegan",
+              "gluten-free"
+            ],
+            "calories": 170,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "23754895",
+            "name": "Italian Dressing",
+            "description": "",
+            "station": "Golden Gate Greens",
+            "meal_period": "dinner",
+            "start_time": "17:00",
+            "end_time": "20:00",
+            "dietary_tags": [
+              "vegan",
+              "gluten-free"
+            ],
+            "calories": 180,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "15535569",
+            "name": "Cream Co. Meats Grass Fed Beef Patty",
+            "description": "",
+            "station": "Potrero Grill",
+            "meal_period": "dinner",
+            "start_time": "17:00",
+            "end_time": "20:00",
+            "dietary_tags": [
+              "gluten-free",
+              "farm-to-fork"
+            ],
+            "calories": 310,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "15535571",
+            "name": "Chicken Breast",
+            "description": "",
+            "station": "Potrero Grill",
+            "meal_period": "dinner",
+            "start_time": "17:00",
+            "end_time": "20:00",
+            "dietary_tags": [
+              "gluten-free"
+            ],
+            "calories": 110,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "17284122",
+            "name": "Chicken Apple Sausage",
+            "description": "",
+            "station": "Mission Classic - Lunch",
+            "meal_period": "dinner",
+            "start_time": "17:00",
+            "end_time": "20:00",
+            "dietary_tags": [
+              "gluten-free"
+            ],
+            "calories": 35,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "17284123",
+            "name": "Vegetarian Sausage",
+            "description": "",
+            "station": "Mission Classic - Lunch",
+            "meal_period": "dinner",
+            "start_time": "17:00",
+            "end_time": "20:00",
+            "dietary_tags": [
+              "vegetarian"
+            ],
+            "calories": 60,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "31817182",
+            "name": "Red Beets",
+            "description": "",
+            "station": "Golden Gate Greens",
+            "meal_period": "dinner",
+            "start_time": "17:00",
+            "end_time": "20:00",
+            "dietary_tags": [
+              "vegan",
+              "gluten-free"
+            ],
+            "calories": 10,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "31817183",
+            "name": "Yellow Beets",
+            "description": "",
+            "station": "Golden Gate Greens",
+            "meal_period": "dinner",
+            "start_time": "17:00",
+            "end_time": "20:00",
+            "dietary_tags": [
+              "vegan",
+              "gluten-free"
+            ],
+            "calories": 10,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "31831283",
+            "name": "Alfredo Chicken Pizza",
+            "description": "",
+            "station": "North Beach (pizza)",
+            "meal_period": "lunch",
+            "start_time": "11:00",
+            "end_time": "14:00",
+            "dietary_tags": [],
+            "calories": null,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "31839444",
+            "name": "Maria's Pizza Pocket",
+            "description": "",
+            "station": "North Beach (pizza)",
+            "meal_period": "lunch",
+            "start_time": "11:00",
+            "end_time": "14:00",
+            "dietary_tags": [],
+            "calories": null,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "31870099",
+            "name": "Japanese Chicken Pork Potstickers",
+            "description": "",
+            "station": "Potrero Grill",
+            "meal_period": "lunch",
+            "start_time": "11:00",
+            "end_time": "14:00",
+            "dietary_tags": [],
+            "calories": null,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "31870102",
+            "name": "Japanese Vegan Potstickers",
+            "description": "",
+            "station": "Potrero Grill",
+            "meal_period": "lunch",
+            "start_time": "11:00",
+            "end_time": "14:00",
+            "dietary_tags": [
+              "vegan"
+            ],
+            "calories": null,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "31833638",
+            "name": "Grilled Salmon",
+            "description": "",
+            "station": "Mission Classic - Lunch",
+            "meal_period": "lunch",
+            "start_time": "11:00",
+            "end_time": "14:00",
+            "dietary_tags": [
+              "gluten-free",
+              "seafood-watch"
+            ],
+            "calories": null,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "31833679",
+            "name": "Grilled Tofu",
+            "description": "",
+            "station": "Mission Classic - Lunch",
+            "meal_period": "lunch",
+            "start_time": "11:00",
+            "end_time": "14:00",
+            "dietary_tags": [
+              "vegetarian",
+              "gluten-free"
+            ],
+            "calories": null,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "31881531",
+            "name": "Vegetable Chicken Soup",
+            "description": "",
+            "station": "The Wharf (soup)",
+            "meal_period": "lunch",
+            "start_time": "11:00",
+            "end_time": "14:00",
+            "dietary_tags": [
+              "gluten-free"
+            ],
+            "calories": null,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "31881538",
+            "name": "Potato & Veggie Soup",
+            "description": "",
+            "station": "The Wharf (soup)",
+            "meal_period": "lunch",
+            "start_time": "11:00",
+            "end_time": "14:00",
+            "dietary_tags": [
+              "vegan",
+              "gluten-free"
+            ],
+            "calories": null,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "31834379",
+            "name": "Pork Chicharr\u00f3n or Mushrooms in Green Sauce",
+            "description": "",
+            "station": "Simply Oasis",
+            "meal_period": "lunch",
+            "start_time": "11:00",
+            "end_time": "14:00",
+            "dietary_tags": [
+              "gluten-free"
+            ],
+            "calories": null,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "17284080",
+            "name": "Cheese Pizza",
+            "description": "",
+            "station": "North Beach (pizza)",
+            "meal_period": "lunch",
+            "start_time": "11:00",
+            "end_time": "14:00",
+            "dietary_tags": [
+              "vegetarian"
+            ],
+            "calories": 230,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "17284088",
+            "name": "Pepperoni Pizza",
+            "description": "",
+            "station": "North Beach (pizza)",
+            "meal_period": "lunch",
+            "start_time": "11:00",
+            "end_time": "14:00",
+            "dietary_tags": [],
+            "calories": 1440,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "23752925",
+            "name": "Ranch Dressing",
+            "description": "",
+            "station": "Golden Gate Greens",
+            "meal_period": "lunch",
+            "start_time": "11:00",
+            "end_time": "14:00",
+            "dietary_tags": [
+              "vegetarian",
+              "gluten-free"
+            ],
+            "calories": 70,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "23754891",
+            "name": "Balsamic Vinaigrette",
+            "description": "",
+            "station": "Golden Gate Greens",
+            "meal_period": "lunch",
+            "start_time": "11:00",
+            "end_time": "14:00",
+            "dietary_tags": [
+              "vegan",
+              "gluten-free"
+            ],
+            "calories": 170,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "15535569",
+            "name": "Cream Co. Meats Grass Fed Beef Patty",
+            "description": "",
+            "station": "Potrero Grill",
+            "meal_period": "lunch",
+            "start_time": "11:00",
+            "end_time": "14:00",
+            "dietary_tags": [
+              "gluten-free",
+              "farm-to-fork"
+            ],
+            "calories": 310,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "15535571",
+            "name": "Chicken Breast",
+            "description": "",
+            "station": "Potrero Grill",
+            "meal_period": "lunch",
+            "start_time": "11:00",
+            "end_time": "14:00",
+            "dietary_tags": [
+              "gluten-free"
+            ],
+            "calories": 110,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "17284122",
+            "name": "Chicken Apple Sausage",
+            "description": "",
+            "station": "Mission Classic - Lunch",
+            "meal_period": "lunch",
+            "start_time": "11:00",
+            "end_time": "14:00",
+            "dietary_tags": [
+              "gluten-free"
+            ],
+            "calories": 35,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "17284123",
+            "name": "Vegetarian Sausage",
+            "description": "",
+            "station": "Mission Classic - Lunch",
+            "meal_period": "lunch",
+            "start_time": "11:00",
+            "end_time": "14:00",
+            "dietary_tags": [
+              "vegetarian"
+            ],
+            "calories": 60,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "31817182",
+            "name": "Red Beets",
+            "description": "",
+            "station": "Golden Gate Greens",
+            "meal_period": "lunch",
+            "start_time": "11:00",
+            "end_time": "14:00",
+            "dietary_tags": [
+              "vegan",
+              "gluten-free"
+            ],
+            "calories": 10,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          },
+          {
+            "item_id": "31817183",
+            "name": "Yellow Beets",
+            "description": "",
+            "station": "Golden Gate Greens",
+            "meal_period": "lunch",
+            "start_time": "11:00",
+            "end_time": "14:00",
+            "dietary_tags": [
+              "vegan",
+              "gluten-free"
+            ],
+            "calories": 10,
+            "date": "2025-11-19",
+            "scraped_at": "2025-11-19T21:10:00.587742+00:00"
+          }
+        ],
+        "count": 41,
         "date": null,
         "meal_period": null
       }
     },
     {
       "test": "Get Scraper Settings",
-      "passed": true,
-      "message": "",
+      "passed": false,
+      "message": "Expected 200, got 403",
       "response": {
-        "key": "menu_scraper",
-        "auto_scrape_enabled": true,
-        "scrape_time": "04:00"
+        "detail": "Admin access required"
       }
     },
     {
       "test": "Manual Menu Scraping",
-      "passed": true,
-      "message": "",
+      "passed": false,
+      "message": "Expected 200, got 403",
       "response": {
-        "success": false,
-        "error": "Failed to save to database: Cannot run the event loop while another loop is running"
+        "detail": "Admin access required"
       }
     },
     {
       "test": "Update Scraper Settings",
-      "passed": true,
-      "message": "",
+      "passed": false,
+      "message": "Expected 200, got 403",
       "response": {
-        "success": true,
-        "message": "Settings updated successfully"
+        "detail": "Admin access required"
       }
     },
     {
       "test": "Get Cafe Items Table",
-      "passed": true,
-      "message": "",
+      "passed": false,
+      "message": "Expected 200, got 403",
       "response": {
-        "items": [],
-        "count": 0
+        "detail": "Admin access required"
       }
     },
     {
@@ -169,20 +1401,24 @@
       "test": "Get Menu",
       "passed": true,
       "message": "",
-      "response": []
+      "response": [
+        {
+          "id": "67240c2e-3c3d-4b2d-9adf-73ab19d0a672",
+          "name": "Test Coffee",
+          "category": "drinks",
+          "price": 3.5,
+          "description": "Test coffee item",
+          "available_date": "2025-11-19T21:08:48.676124+00:00",
+          "created_at": "2025-11-19T21:08:48.676153+00:00"
+        }
+      ]
     },
     {
       "test": "Create Menu Item",
-      "passed": true,
-      "message": "",
+      "passed": false,
+      "message": "Expected 200, got 403",
       "response": {
-        "id": "67240c2e-3c3d-4b2d-9adf-73ab19d0a672",
-        "name": "Test Coffee",
-        "category": "drinks",
-        "price": 3.5,
-        "description": "Test coffee item",
-        "available_date": "2025-11-19T21:08:48.676124Z",
-        "created_at": "2025-11-19T21:08:48.676153Z"
+        "detail": "Admin access required"
       }
     }
   ]
