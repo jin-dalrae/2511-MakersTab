@@ -19,9 +19,14 @@ import bcrypt
 import jwt
 import base64
 from emergentintegrations.llm.chat import LlmChat, UserMessage, ImageContent
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
+
+# Import menu scraper
+from menu_scraper import scrape_and_save_menu
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
