@@ -444,16 +444,35 @@ def main():
     tester = MealPlanTrackerAPITester()
     
     # Run tests in order
-    print("\n📋 AUTHENTICATION TESTS")
+    print("\n📋 HEALTH & BASIC TESTS")
     print("-"*60)
     tester.test_root()
+    tester.test_health_check()
     
+    print("\n📋 AUTHENTICATION TESTS")
+    print("-"*60)
     if not tester.test_signup():
         print("\n❌ Signup failed - cannot continue with authenticated tests")
         tester.print_summary()
         return 1
     
     tester.test_get_me()
+    
+    print("\n📋 CAFE MENU TESTS (PUBLIC)")
+    print("-"*60)
+    tester.test_cafe_menu_public()
+    
+    print("\n📋 CAFE MENU TESTS (AUTHENTICATED)")
+    print("-"*60)
+    tester.test_cafe_menu_all()
+    
+    print("\n📋 ADMIN CAFE MENU TESTS")
+    print("-"*60)
+    print("⚠️  Note: These tests require admin privileges (first user is auto-admin)")
+    tester.test_admin_scraper_settings_get()
+    tester.test_admin_scrape_menu()  # This will populate the database
+    tester.test_admin_scraper_settings_update()
+    tester.test_admin_cafe_items_table()
     
     print("\n📋 RECEIPT & TRANSACTION TESTS")
     print("-"*60)
