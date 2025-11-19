@@ -1036,8 +1036,13 @@ async def get_analytics(current_user: dict = Depends(get_current_user)):
         {"_id": 0}
     ).to_list(10000)
     
-    # Calculate total spent
-    total_spent = sum(t['price'] * t['quantity'] for t in transactions)
+    # Get user's initial and current balance
+    user_doc = await db.users.find_one({"id": current_user['id']}, {"_id": 0})
+    initial_balance = user_doc.get('initial_meal_plan_amount', user_doc.get('meal_plan_amount', 0))
+    current_balance = user_doc.get('meal_plan_amount', 0)
+    
+    # Calculate total spent as: initial - current
+    total_spent = initial_balance - current_balance
     
     # Spending by category
     spending_by_category = {}
