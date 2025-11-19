@@ -347,6 +347,9 @@ async def signup(request: Request, input: UserSignup):
     user_data = input.model_dump()
     user_data['password_hash'] = hash_password(user_data.pop('password'))
     
+    # Store initial meal plan amount
+    user_data['initial_meal_plan_amount'] = user_data['meal_plan_amount']
+    
     # First user becomes admin
     user_count = await db.users.count_documents({})
     user_data['is_admin'] = (user_count == 0)
