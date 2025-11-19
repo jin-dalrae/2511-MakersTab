@@ -54,12 +54,13 @@ const Dashboard = ({ user, onLogout }) => {
       const token = localStorage.getItem('token');
       const headers = { Authorization: `Bearer ${token}` };
 
-      const [analyticsRes, receiptsRes, transactionsRes, menuRes, semesterRes] = await Promise.all([
+      const [analyticsRes, receiptsRes, transactionsRes, menuRes, semesterRes, cafeMenuRes] = await Promise.all([
         axios.get(`${API}/analytics`, { headers }),
         axios.get(`${API}/receipts?page=1&limit=50`, { headers }),
         axios.get(`${API}/transactions?page=1&limit=100`, { headers }),
         axios.get(`${API}/menu`),
-        axios.get(`${API}/semester-info`, { headers })
+        axios.get(`${API}/semester-info`, { headers }),
+        axios.get(`${API}/cafe-menu`)
       ]);
 
       setAnalytics(analyticsRes.data);
