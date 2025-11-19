@@ -253,6 +253,16 @@ const AuthPage = ({ onLogin }) => {
               </Tabs>
             </CardContent>
           </Card>
+
+          {/* Footer Links */}
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-600">
+              By signing up, you agree to our{' '}
+              <a href="/terms" className="text-green-600 hover:underline font-medium">Terms</a>
+              {' '}and{' '}
+              <a href="/privacy" className="text-green-600 hover:underline font-medium">Privacy Policy</a>
+            </p>
+          </div>
         </div>
       </div>
     </div>
