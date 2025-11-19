@@ -416,6 +416,169 @@ class MealPlanTrackerAPITester:
             self.log_test("Receipt Upload Without File", False, f"Error: {str(e)}")
             return False
 
+    def test_ocr_receipt_extraction(self):
+        """Test OCR receipt extraction with specific receipt image"""
+        print(f"\n🔍 Testing OCR Receipt Extraction with Actual Receipt...")
+        print(f"   URL: {self.base_url}/receipts/preview")
+        print(f"   Method: POST")
+        print(f"   ⚠️  This may take 10-15 seconds for OCR processing...")
+        
+        # Receipt image URL provided by user
+        receipt_image_url = "https://customer-assets.emergentagent.com/job_menu-time-sync/artifacts/tbiqqw5y_IMG_6994.jpeg"
+        
+        # Expected values from the receipt
+        expected_values = {
+            "merchant": "Maker's Cafe @ CCA",
+            "date": "2025-11-19",
+            "time": "12:20",
+            "total": 13.24,
+            "remaining_balance": 731.38,
+            "items": [{"name": "Grilled Tofu", "price": 12.49}]
+        }
+        
+        try:
+            # Download the image first
+            print(f"   📥 Downloading receipt image from: {receipt_image_url}")
+            image_response = requests.get(receipt_image_url, timeout=30)
+            if image_response.status_code != 200:
+                self.log_test("OCR Receipt Extraction", False, f"Failed to download image: {image_response.status_code}")
+                return False
+            
+            # Prepare the file for upload
+            files = {
+                'file': ('receipt.jpg', image_response.content, 'image/jpeg')
+            }
+            
+            headers = {'Authorization': f'Bearer {self.token}'}
+            
+            response = requests.post(
+                f"{self.base_url}/receipts/preview",
+                files=files,
+                headers=headers,
+                timeout=60  # Longer timeout for OCR processing
+            )
+            
+            print(f"   Status: {response.status_code}")
+            
+            if response.status_code != 200:
+                try:
+                    error_data = response.json()
+                    self.log_test("OCR Receipt Extraction", False, f"API Error: {error_data.get('detail', 'Unknown error')}")
+                except:
+                    self.log_test("OCR Receipt Extraction", False, f"HTTP {response.status_code}: {response.text[:200]}")
+                return False
+            
+            try:
+                response_data = response.json()
+            except:
+                self.log_test("OCR Receipt Extraction", False, "Invalid JSON response")
+                return False
+            
+            # Check if the response has the expected structure
+            if not response_data.get('success'):
+                self.log_test("OCR Receipt Extraction", False, "Response indicates failure")
+                return False
+            
+            preview_data = response_data.get('preview_data', {})
+            if not preview_data:
+                self.log_test("OCR Receipt Extraction", False, "No preview_data in response")
+                return False
+            
+            print(f"   📊 OCR Results:")
+            print(f"      Merchant: {preview_data.get('merchant', 'N/A')}")
+            print(f"      Date: {preview_data.get('date', 'N/A')}")
+            print(f"      Time: {preview_data.get('time', 'N/A')}")
+            print(f"      Total: ${preview_data.get('total', 0)}")
+            print(f"      Remaining Balance: ${preview_data.get('remaining_balance', 0)}")
+            print(f"      Items: {len(preview_data.get('items', []))}")
+            
+            # Validate extracted data against expected values
+            validation_results = []
+            
+            # Check merchant
+            extracted_merchant = preview_data.get('merchant', '').lower()
+            expected_merchant = expected_values['merchant'].lower()
+            if expected_merchant in extracted_merchant or extracted_merchant in expected_merchant:
+                validation_results.append(("Merchant", True, f"✓ {preview_data.get('merchant')}"))
+            else:
+                validation_results.append(("Merchant", False, f"✗ Expected '{expected_values['merchant']}', got '{preview_data.get('merchant')}'"))
+            
+            # Check date
+            extracted_date = preview_data.get('date')
+            if extracted_date == expected_values['date']:
+                validation_results.append(("Date", True, f"✓ {extracted_date}"))
+            else:
+                validation_results.append(("Date", False, f"✗ Expected '{expected_values['date']}', got '{extracted_date}'"))
+            
+            # Check time
+            extracted_time = preview_data.get('time')
+            if extracted_time == expected_values['time']:
+                validation_results.append(("Time", True, f"✓ {extracted_time}"))
+            else:
+                validation_results.append(("Time", False, f"✗ Expected '{expected_values['time']}', got '{extracted_time}'"))
+            
+            # Check total (allow small floating point differences)
+            extracted_total = float(preview_data.get('total', 0))
+            expected_total = expected_values['total']
+            if abs(extracted_total - expected_total) < 0.01:
+                validation_results.append(("Total", True, f"✓ ${extracted_total}"))
+            else:
+                validation_results.append(("Total", False, f"✗ Expected ${expected_total}, got ${extracted_total}"))
+            
+            # Check remaining balance (CRITICAL - this was the main issue)
+            extracted_balance = float(preview_data.get('remaining_balance', 0))
+            expected_balance = expected_values['remaining_balance']
+            if abs(extracted_balance - expected_balance) < 0.01:
+                validation_results.append(("Remaining Balance", True, f"✓ ${extracted_balance}"))
+            else:
+                validation_results.append(("Remaining Balance", False, f"✗ Expected ${expected_balance}, got ${extracted_balance}"))
+            
+            # Check items (at least one item with Grilled Tofu)
+            items = preview_data.get('items', [])
+            grilled_tofu_found = False
+            for item in items:
+                if 'grilled tofu' in item.get('name', '').lower():
+                    grilled_tofu_found = True
+                    item_price = float(item.get('price', 0))
+                    if abs(item_price - 12.49) < 0.01:
+                        validation_results.append(("Items", True, f"✓ Found Grilled Tofu at ${item_price}"))
+                    else:
+                        validation_results.append(("Items", False, f"✗ Found Grilled Tofu but price ${item_price} != $12.49"))
+                    break
+            
+            if not grilled_tofu_found:
+                validation_results.append(("Items", False, f"✗ Grilled Tofu not found in items: {[item.get('name') for item in items]}"))
+            
+            # Print validation results
+            print(f"   🔍 Validation Results:")
+            passed_validations = 0
+            total_validations = len(validation_results)
+            
+            for field, passed, message in validation_results:
+                print(f"      {message}")
+                if passed:
+                    passed_validations += 1
+            
+            # Overall test result
+            overall_success = passed_validations == total_validations
+            
+            if overall_success:
+                self.log_test("OCR Receipt Extraction", True, f"All {total_validations} validations passed", response_data)
+                print(f"   🎉 OCR extraction working perfectly!")
+            else:
+                failed_count = total_validations - passed_validations
+                self.log_test("OCR Receipt Extraction", False, f"{failed_count}/{total_validations} validations failed", response_data)
+                print(f"   ⚠️  {failed_count} validation(s) failed")
+            
+            return overall_success
+                
+        except requests.exceptions.Timeout:
+            self.log_test("OCR Receipt Extraction", False, "Request timeout during OCR processing")
+            return False
+        except Exception as e:
+            self.log_test("OCR Receipt Extraction", False, f"Error: {str(e)}")
+            return False
+
     def print_summary(self):
         """Print test summary"""
         print("\n" + "="*60)
