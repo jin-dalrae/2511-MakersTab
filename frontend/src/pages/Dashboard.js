@@ -843,56 +843,96 @@ const Dashboard = ({ user, onLogout }) => {
                 </CardContent>
               </Card>
 
-              {/* Transaction History */}
+              {/* Receipt History */}
               <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
                 <CardHeader>
-                  <CardTitle style={{fontFamily: 'Space Grotesk'}}>Recent Transactions</CardTitle>
-                  <CardDescription>Your recent purchases (Most Recent First)</CardDescription>
+                  <CardTitle style={{fontFamily: 'Space Grotesk'}}>Receipt History</CardTitle>
+                  <CardDescription>Your recent receipts (Most Recent First)</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {transactions.length === 0 ? (
+                  {receipts.length === 0 ? (
                     <div className="text-center py-12 text-gray-500">
                       <History className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                      <p>No transactions yet. Upload a receipt to get started!</p>
+                      <p>No receipts yet. Upload a receipt to get started!</p>
                     </div>
                   ) : (
-                    <div className="space-y-3 max-h-[600px] overflow-y-auto">
-                      {safeTransactions.map((transaction) => {
-                        const IconComponent = categoryIcons[transaction.category] || ShoppingBag;
-                        const totalSpent = transaction.price * transaction.quantity;
+                    <div className="space-y-4 max-h-[600px] overflow-y-auto">
+                      {receipts.map((receipt) => {
+                        // Get transactions for this receipt
+                        const receiptTransactions = safeTransactions.filter(t => t.receipt_id === receipt.id);
+                        const receiptTotal = receiptTransactions.reduce((sum, t) => sum + (t.price * t.quantity), 0);
                         
                         return (
                           <div
-                            key={transaction.id}
-                            className="p-3 sm:p-4 bg-white rounded-xl border border-gray-200 hover:shadow-md duration-300"
+                            key={receipt.id}
+                            className="bg-white rounded-xl border border-gray-200 hover:shadow-md duration-300 overflow-hidden"
                           >
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="flex items-start gap-3 flex-1 min-w-0">
-                                <div
-                                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                                  style={{ backgroundColor: `${categoryColors[transaction.category]}20` }}
-                                >
-                                  <IconComponent className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: categoryColors[transaction.category] }} />
+                            {/* Receipt Header */}
+                            <div className="p-3 sm:p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-200 flex justify-between items-start">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <Receipt className="w-4 h-4 text-green-600" />
+                                  <p className="font-semibold text-gray-800">
+                                    {new Date(receipt.receipt_date).toLocaleDateString()} {new Date(receipt.receipt_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                  </p>
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="font-semibold text-sm sm:text-base text-gray-800">{transaction.item_name}</p>
-                                  <div className="flex flex-wrap gap-2 mt-1 text-xs text-gray-600">
-                                    <span className="px-2 py-0.5 bg-gray-100 rounded capitalize">
-                                      {transaction.category}
-                                    </span>
-                                    <span>Qty: {transaction.quantity}</span>
-                                    <span className="hidden sm:inline">•</span>
-                                    <span>
-                                      {new Date(transaction.transaction_date).toLocaleDateString()} {new Date(transaction.transaction_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="text-right flex-shrink-0">
-                                <p className="text-base sm:text-lg font-bold text-red-600">
-                                  -${totalSpent.toFixed(2)}
+                                {receipt.memo && (
+                                  <p className="text-xs text-gray-600 mt-1">📝 {receipt.memo}</p>
+                                )}
+                                <p className="text-sm text-gray-600 mt-1">
+                                  {receiptTransactions.length} item{receiptTransactions.length !== 1 ? 's' : ''}
                                 </p>
                               </div>
+                              <div className="flex items-center gap-3">
+                                <div className="text-right">
+                                  <p className="text-xs text-gray-500">Total</p>
+                                  <p className="text-lg font-bold text-red-600">-${receiptTotal.toFixed(2)}</p>
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteReceipt(receipt.id)}
+                                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                  title="Delete receipt"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+
+                            {/* Transaction Items */}
+                            <div className="p-3 space-y-2">
+                              {receiptTransactions.map((transaction) => {
+                                const IconComponent = categoryIcons[transaction.category] || ShoppingBag;
+                                const itemTotal = transaction.price * transaction.quantity;
+                                
+                                return (
+                                  <div
+                                    key={transaction.id}
+                                    className="flex items-center justify-between gap-3 py-2 border-b border-gray-100 last:border-0"
+                                  >
+                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                      <div
+                                        className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                                        style={{ backgroundColor: `${categoryColors[transaction.category]}20` }}
+                                      >
+                                        <IconComponent className="w-4 h-4" style={{ color: categoryColors[transaction.category] }} />
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-gray-800 truncate">{transaction.item_name}</p>
+                                        <div className="flex gap-2 text-xs text-gray-500">
+                                          <span className="capitalize">{transaction.category}</span>
+                                          <span>•</span>
+                                          <span>Qty: {transaction.quantity}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <p className="text-sm font-semibold text-gray-700">
+                                      ${itemTotal.toFixed(2)}
+                                    </p>
+                                  </div>
+                                );
+                              })}
                             </div>
                           </div>
                         );
