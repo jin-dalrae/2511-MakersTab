@@ -449,7 +449,7 @@ const Dashboard = ({ user, onLogout }) => {
                 </div>
 
                 {/* Transaction History */}
-                {transactions.length > 0 && (
+                {safeTransactions.length > 0 && (
                   <div className="pt-4 border-t border-gray-200">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="font-semibold text-gray-800 text-sm sm:text-base">Recent Transactions</h3>
