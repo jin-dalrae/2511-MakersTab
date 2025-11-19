@@ -602,6 +602,137 @@ const AdminDashboard = ({ user, onLogout }) => {
               </Card>
             </div>
           </TabsContent>
+
+          {/* Cafe Menu Tab */}
+          <TabsContent value="cafe-menu" className="space-y-4 sm:space-y-6" data-testid="cafe-menu-content">
+            {/* Scraper Controls */}
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+              <CardHeader>
+                <CardTitle style={{fontFamily: 'Space Grotesk'}}>Menu Scraper Controls</CardTitle>
+                <CardDescription>Manage automatic menu scraping from Cafe Bon Appetit</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <h4 className="font-semibold text-gray-700 mb-2">Auto-Scraping</h4>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Status: <span className={`font-semibold ${scraperSettings?.auto_scrape_enabled ? 'text-green-600' : 'text-red-600'}`}>
+                        {scraperSettings?.auto_scrape_enabled ? 'Enabled' : 'Disabled'}
+                      </span>
+                    </p>
+                    {scraperSettings?.scrape_time && (
+                      <p className="text-sm text-gray-600 mb-3">
+                        Scheduled Time: <span className="font-semibold">{scraperSettings.scrape_time}</span>
+                      </p>
+                    )}
+                    <Button
+                      onClick={handleToggleAutoScrape}
+                      className={scraperSettings?.auto_scrape_enabled ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}
+                    >
+                      {scraperSettings?.auto_scrape_enabled ? 'Disable' : 'Enable'} Auto-Scraping
+                    </Button>
+                  </div>
+
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <h4 className="font-semibold text-gray-700 mb-2">Manual Scrape</h4>
+                    {scraperSettings?.last_scrape_date && (
+                      <p className="text-sm text-gray-600 mb-2">
+                        Last Scraped: <span className="font-semibold">{scraperSettings.last_scrape_date}</span>
+                      </p>
+                    )}
+                    {scraperSettings?.items_count && (
+                      <p className="text-sm text-gray-600 mb-3">
+                        Items: <span className="font-semibold">{scraperSettings.items_count}</span>
+                      </p>
+                    )}
+                    <Button
+                      onClick={handleManualScrape}
+                      disabled={scraping}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      {scraping ? 'Scraping...' : 'Scrape Now'}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Cafe Items Table */}
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+              <CardHeader>
+                <CardTitle style={{fontFamily: 'Space Grotesk'}}>Cafe Menu Items</CardTitle>
+                <CardDescription>All items from Cafe Bon Appetit ({cafeItems.length} items)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {cafeItems.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500">
+                    <Coffee className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                    <p>No cafe menu items available. Try scraping the menu.</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-100 border-b-2 border-gray-200">
+                        <tr>
+                          <th className="text-left p-3 font-semibold">Name</th>
+                          <th className="text-left p-3 font-semibold">Station</th>
+                          <th className="text-left p-3 font-semibold">Meal Periods</th>
+                          <th className="text-left p-3 font-semibold">Dietary</th>
+                          <th className="text-right p-3 font-semibold">Calories</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {cafeItems.map((item, idx) => (
+                          <tr key={idx} className="border-b hover:bg-gray-50">
+                            <td className="p-3">
+                              <div>
+                                <div className="font-medium text-gray-800">{item.name}</div>
+                                {item.description && (
+                                  <div className="text-xs text-gray-500 mt-1 line-clamp-2">{item.description}</div>
+                                )}
+                              </div>
+                            </td>
+                            <td className="p-3 text-gray-600">{item.station}</td>
+                            <td className="p-3">
+                              <div className="flex flex-wrap gap-1">
+                                {item.meal_periods.map(period => (
+                                  <span 
+                                    key={period} 
+                                    className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full capitalize"
+                                  >
+                                    {period}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="p-3">
+                              {item.dietary_tags && item.dietary_tags.length > 0 ? (
+                                <div className="flex flex-wrap gap-1">
+                                  {item.dietary_tags.map(tag => (
+                                    <span 
+                                      key={tag} 
+                                      className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full"
+                                    >
+                                      {tag.replace('-', ' ')}
+                                    </span>
+                                  ))}
+                                </div>
+                              ) : (
+                                <span className="text-gray-400">-</span>
+                              )}
+                            </td>
+                            <td className="p-3 text-right text-gray-600">
+                              {item.calories || '-'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
     </div>
