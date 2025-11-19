@@ -727,31 +727,76 @@ const Dashboard = ({ user, onLogout }) => {
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl">
               <CardHeader>
                 <CardTitle style={{fontFamily: 'Space Grotesk'}}>Makers Cafe Menu</CardTitle>
-                <CardDescription>Available items today</CardDescription>
+                <CardDescription>
+                  {cafeMenuMode === 'all' && 'All meals for today'}
+                  {cafeMenuMode === 'breakfast' && 'Breakfast (7:00 AM - 10:00 AM)'}
+                  {cafeMenuMode === 'lunch' && 'Lunch (11:00 AM - 2:00 PM)'}
+                  {cafeMenuMode === 'dinner' && 'Dinner (5:00 PM - 8:00 PM)'}
+                  {cafeMenuMode === 'no_data' && 'Menu not yet updated'}
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                {menuItems.length === 0 ? (
+                {!cafeMenu || Object.keys(cafeMenu).length === 0 ? (
                   <div className="text-center py-12 text-gray-500">
                     <Coffee className="w-16 h-16 mx-auto mb-4 opacity-50" />
                     <p>No menu items available. Check back later!</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {menuItems.map((item) => (
-                      <div
-                        key={item.id}
-                        className="p-4 bg-white rounded-xl border border-gray-200 hover:shadow-lg duration-300"
-                        data-testid="menu-item"
-                      >
-                        <h3 className="font-semibold text-gray-800 mb-2">{item.name}</h3>
-                        <p className="text-sm text-gray-600 mb-2">{item.description}</p>
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full capitalize">
-                            {item.category}
-                          </span>
-                          <span className="font-bold text-green-600">${item.price.toFixed(2)}</span>
+                  <div className="space-y-8">
+                    {Object.entries(cafeMenu).map(([period, items]) => (
+                      items && items.length > 0 && (
+                        <div key={period}>
+                          <h3 className="text-xl font-bold capitalize mb-4 text-green-700 border-b-2 border-green-200 pb-2">
+                            {period}
+                          </h3>
+                          
+                          {/* Group items by station */}
+                          {(() => {
+                            const stations = {};
+                            items.forEach(item => {
+                              if (!stations[item.station]) stations[item.station] = [];
+                              stations[item.station].push(item);
+                            });
+                            
+                            return Object.entries(stations).map(([station, stationItems]) => (
+                              <div key={station} className="mb-6">
+                                <h4 className="text-md font-semibold text-gray-700 mb-3">{station}</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                  {stationItems.map((item, idx) => (
+                                    <div
+                                      key={`${item.item_id}-${idx}`}
+                                      className="p-4 bg-white rounded-xl border border-gray-200 hover:shadow-lg duration-300"
+                                      data-testid="menu-item"
+                                    >
+                                      <div className="flex justify-between items-start mb-2">
+                                        <h3 className="font-semibold text-gray-800 flex-1">{item.name}</h3>
+                                        {item.calories && (
+                                          <span className="text-xs text-gray-500 ml-2">{item.calories} cal</span>
+                                        )}
+                                      </div>
+                                      {item.description && (
+                                        <p className="text-sm text-gray-600 mb-2">{item.description}</p>
+                                      )}
+                                      {item.dietary_tags && item.dietary_tags.length > 0 && (
+                                        <div className="flex flex-wrap gap-1 mt-2">
+                                          {item.dietary_tags.map(tag => (
+                                            <span 
+                                              key={tag} 
+                                              className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full capitalize"
+                                            >
+                                              {tag.replace('-', ' ')}
+                                            </span>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ));
+                          })()}
                         </div>
-                      </div>
+                      )
                     ))}
                   </div>
                 )}
