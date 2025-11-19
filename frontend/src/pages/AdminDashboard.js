@@ -112,6 +112,44 @@ const AdminDashboard = ({ user, onLogout }) => {
     }
   };
 
+  const handleManualScrape = async () => {
+    setScraping(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(`${API}/admin/scrape-menu`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.data.success) {
+        toast.success(`Menu scraped successfully! ${response.data.total_items} items found.`);
+        fetchData();
+      } else {
+        toast.error(`Scraping failed: ${response.data.error}`);
+      }
+    } catch (error) {
+      toast.error('Failed to trigger menu scrape');
+    } finally {
+      setScraping(false);
+    }
+  };
+
+  const handleToggleAutoScrape = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${API}/admin/scraper-settings`, {
+        auto_scrape_enabled: !scraperSettings.auto_scrape_enabled,
+        scrape_time: scraperSettings.scrape_time || '04:00'
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      toast.success(`Auto-scraping ${!scraperSettings.auto_scrape_enabled ? 'enabled' : 'disabled'}`);
+      fetchData();
+    } catch (error) {
+      toast.error('Failed to update settings');
+    }
+  };
+
   const handleToggleAdmin = async (userId) => {
     try {
       const token = localStorage.getItem('token');
