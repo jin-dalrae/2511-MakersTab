@@ -198,9 +198,69 @@ class CafeMenuScraper:
             return None
 
 
+async def scrape_and_save_menu_async(db, date: Optional[str] = None) -> Dict:
+    """
+    Async version: Scrape menu and save to database
+    
+    Args:
+        db: Database instance
+        date: Date to scrape (YYYY-MM-DD), defaults to today
+    
+    Returns:
+        Dict with scrape results
+    """
+    scraper = CafeMenuScraper()
+    result = scraper.scrape_menu(date)
+    
+    if not result['success']:
+        return result
+    
+    try:
+        menu_data = result['menu']
+        scraped_date = menu_data['date']
+        
+        # Delete existing menu items for this date
+        await db.cafe_menu_items.delete_many({'date': scraped_date})
+        
+        # Prepare all items for insertion
+        all_items = []
+        for period in ['breakfast', 'lunch', 'dinner']:
+            for item in menu_data[period]:
+                item['date'] = scraped_date
+                item['scraped_at'] = menu_data['scraped_at']
+                all_items.append(item)
+        
+        if all_items:
+            await db.cafe_menu_items.insert_many(all_items)
+        
+        # Update last scrape metadata
+        await db.scrape_metadata.update_one(
+            {'key': 'last_menu_scrape'},
+            {
+                '$set': {
+                    'key': 'last_menu_scrape',
+                    'last_scraped': menu_data['scraped_at'],
+                    'last_date': scraped_date,
+                    'items_count': len(all_items),
+                    'success': True
+                }
+            },
+            upsert=True
+        )
+        
+        logger.info(f"Successfully saved {result['total_items']} menu items to database")
+        return result
+        
+    except Exception as e:
+        logger.error(f"Error saving menu to database: {str(e)}", exc_info=True)
+        return {
+            'success': False,
+            'error': f"Failed to save to database: {str(e)}"
+        }
+
 def scrape_and_save_menu(db, date: Optional[str] = None) -> Dict:
     """
-    Scrape menu and save to database
+    Sync wrapper for backward compatibility (used by scheduler)
     
     Args:
         db: Database instance
@@ -221,8 +281,21 @@ def scrape_and_save_menu(db, date: Optional[str] = None) -> Dict:
         
         # Delete existing menu items for this date
         import asyncio
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+        
+        # Check if we're already in an event loop
+        try:
+            loop = asyncio.get_running_loop()
+            # If we're in a loop, we can't use run_until_complete
+            # This should only be called from the scheduler which runs in a separate thread
+            logger.warning("scrape_and_save_menu called from within event loop - use async version instead")
+            return {
+                'success': False,
+                'error': "Cannot run sync version from within event loop"
+            }
+        except RuntimeError:
+            # No event loop running, safe to create one
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
         
         async def save_items():
             await db.cafe_menu_items.delete_many({'date': scraped_date})
