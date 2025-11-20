@@ -391,15 +391,15 @@ const Dashboard = ({ user, onLogout }) => {
           </div>
 
           {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-4" data-testid="overview-content">
+          <TabsContent value="overview" className="space-y-2" data-testid="overview-content">
             {/* Current Balance & Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {/* Current Balance */}
-              <Card className="bg-gradient-to-br from-green-500 to-emerald-600 text-white border-0 shadow-xl">
-                <CardContent className="pt-6">
-                  <div className="space-y-2">
-                    <p className="text-sm opacity-90">Current Balance</p>
-                    <p className="text-4xl font-bold">${user.meal_plan_amount?.toFixed(2) || '0.00'}</p>
+              <Card className="bg-gradient-to-br from-green-500 to-emerald-600 text-white border-0 shadow-lg">
+                <CardContent className="p-4">
+                  <div className="space-y-1">
+                    <p className="text-xs opacity-90">Current Balance</p>
+                    <p className="text-3xl font-bold">${user.meal_plan_amount?.toFixed(2) || '0.00'}</p>
                     {receipts.length > 0 && (
                       <p className="text-xs opacity-75">
                         Last purchase: {new Date(receipts[0].receipt_date).toLocaleDateString()} {new Date(receipts[0].receipt_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
@@ -411,11 +411,11 @@ const Dashboard = ({ user, onLogout }) => {
 
               {/* Weekly Recommendation */}
               {semesterInfo && (
-                <Card className="bg-gradient-to-br from-blue-500 to-cyan-600 text-white border-0 shadow-xl">
-                  <CardContent className="pt-6">
-                    <div className="space-y-2">
-                      <p className="text-sm opacity-90">Recommended This Week</p>
-                      <p className="text-4xl font-bold">
+                <Card className="bg-gradient-to-br from-blue-500 to-cyan-600 text-white border-0 shadow-lg">
+                  <CardContent className="p-4">
+                    <div className="space-y-1">
+                      <p className="text-xs opacity-90">Recommended This Week</p>
+                      <p className="text-3xl font-bold">
                         ${(() => {
                           const now = new Date();
                           const sunday = new Date(now);
