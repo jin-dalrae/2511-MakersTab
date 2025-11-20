@@ -180,6 +180,7 @@ class Event(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     user_id: str
+    user_name: Optional[str] = None  # Who submitted the event
     title: str
     description: Optional[str] = None
     what: Optional[str] = None  # What is happening
@@ -190,6 +191,7 @@ class Event(BaseModel):
     how: Optional[str] = None  # How to participate/RSVP
     event_date: Optional[datetime] = None  # Parsed date
     image_url: Optional[str] = None  # Flyer image
+    approved: bool = False  # Admin approval status
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class AnalyticsData(BaseModel):
