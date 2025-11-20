@@ -345,17 +345,15 @@ const Dashboard = ({ user, onLogout }) => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {user.is_admin && (
-              <Button 
-                variant="outline" 
-                onClick={() => window.location.href = '/admin'}
-                className="gap-2 bg-purple-50 text-purple-700 hover:bg-purple-100 hover:border-purple-300 text-sm"
-                data-testid="admin-panel-button"
-              >
-                <Users className="w-4 h-4" />
-                <span className="hidden sm:inline">Admin Panel</span>
-              </Button>
-            )}
+            <Button 
+              variant="outline" 
+              onClick={() => window.location.href = '/admin'}
+              className="gap-2 bg-purple-50 text-purple-700 hover:bg-purple-100 hover:border-purple-300 text-sm"
+              data-testid="admin-panel-button"
+            >
+              <Users className="w-4 h-4" />
+              <span className="hidden sm:inline">Admin Panel</span>
+            </Button>
             <Button 
               variant="outline" 
               onClick={onLogout}
