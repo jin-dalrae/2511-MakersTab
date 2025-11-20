@@ -1111,7 +1111,7 @@ async def get_analytics(current_user: dict = Depends(get_current_user)):
 @api_router.post("/menu", response_model=MenuItem)
 async def create_menu_item(
     input: MenuItemCreate,
-    current_user: dict = Depends(get_admin_user)
+    current_user: dict = Depends(get_current_user)
 ):
     item_data = input.model_dump()
     item_data['available_date'] = datetime.now(timezone.utc)
@@ -1136,7 +1136,7 @@ async def get_menu():
 @api_router.delete("/menu/{item_id}")
 async def delete_menu_item(
     item_id: str,
-    current_user: dict = Depends(get_admin_user)
+    current_user: dict = Depends(get_current_user)
 ):
     result = await db.menu_items.delete_one({"id": item_id})
     if result.deleted_count == 0:
@@ -1145,7 +1145,7 @@ async def delete_menu_item(
 
 # Admin Routes
 @api_router.get("/admin/users")
-async def get_all_users(current_user: dict = Depends(get_admin_user)):
+async def get_all_users(current_user: dict = Depends(get_current_user)):
     users = await db.users.find(
         {},
         {"_id": 0, "password_hash": 0}
@@ -1155,7 +1155,7 @@ async def get_all_users(current_user: dict = Depends(get_admin_user)):
 @api_router.patch("/admin/users/{user_id}/toggle-admin")
 async def toggle_user_admin(
     user_id: str,
-    current_user: dict = Depends(get_admin_user)
+    current_user: dict = Depends(get_current_user)
 ):
     user = await db.users.find_one({"id": user_id}, {"_id": 0})
     if not user:
@@ -1172,7 +1172,7 @@ async def toggle_user_admin(
 @api_router.delete("/admin/users/{user_id}")
 async def delete_user(
     user_id: str,
-    current_user: dict = Depends(get_admin_user)
+    current_user: dict = Depends(get_current_user)
 ):
     # Prevent self-deletion
     if user_id == current_user['id']:
@@ -1189,7 +1189,7 @@ async def delete_user(
     return {"success": True, "message": "User deleted successfully"}
 
 @api_router.get("/admin/today-expenses")
-async def get_today_expenses(current_user: dict = Depends(get_admin_user)):
+async def get_today_expenses(current_user: dict = Depends(get_current_user)):
     today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
     tomorrow = today + timedelta(days=1)
     
@@ -1225,7 +1225,7 @@ async def get_today_expenses(current_user: dict = Depends(get_admin_user)):
     }
 
 @api_router.get("/admin/statistics")
-async def get_admin_statistics(current_user: dict = Depends(get_admin_user)):
+async def get_admin_statistics(current_user: dict = Depends(get_current_user)):
     # Total users
     total_users = await db.users.count_documents({})
     
@@ -1410,7 +1410,7 @@ async def get_all_cafe_menu_items(
 @api_router.post("/admin/scrape-menu")
 async def manual_scrape_menu(
     date: Optional[str] = None,
-    current_user: dict = Depends(get_admin_user)
+    current_user: dict = Depends(get_current_user)
 ):
     """Manually trigger menu scraping (admin only)"""
     try:
@@ -1422,7 +1422,7 @@ async def manual_scrape_menu(
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/admin/scraper-settings")
-async def get_scraper_settings(current_user: dict = Depends(get_admin_user)):
+async def get_scraper_settings(current_user: dict = Depends(get_current_user)):
     """Get scraper settings (admin only)"""
     settings = await db.scraper_settings.find_one({'key': 'menu_scraper'}, {"_id": 0})
     
@@ -1445,7 +1445,7 @@ async def get_scraper_settings(current_user: dict = Depends(get_admin_user)):
 @api_router.post("/admin/scraper-settings")
 async def update_scraper_settings(
     settings: ScraperSettings,
-    current_user: dict = Depends(get_admin_user)
+    current_user: dict = Depends(get_current_user)
 ):
     """Update scraper settings (admin only)"""
     try:
@@ -1486,7 +1486,7 @@ async def update_scraper_settings(
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/admin/cafe-items-table")
-async def get_cafe_items_table(current_user: dict = Depends(get_admin_user)):
+async def get_cafe_items_table(current_user: dict = Depends(get_current_user)):
     """Get table of all unique cafe menu items (admin only)"""
     try:
         # Get latest date's menu
