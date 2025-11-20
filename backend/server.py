@@ -1631,8 +1631,9 @@ async def get_events(
             start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
             end_date = start_date + timedelta(days=7)
         
-        # Get events (show all users' events for community visibility)
+        # Get events (show only approved events to regular users)
         query = {
+            "approved": True,  # Only show approved events
             "$or": [
                 {"event_date": {"$gte": start_date.isoformat(), "$lte": end_date.isoformat()}},
                 {"event_date": None}  # Include events without parsed dates
