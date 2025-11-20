@@ -1656,7 +1656,7 @@ async def delete_event(
     event_id: str,
     current_user: dict = Depends(get_current_user)
 ):
-    """Delete an event"""
+    """Delete an event (user can delete their own)"""
     try:
         # Verify the event belongs to the current user
         event = await db.events.find_one({
@@ -1677,6 +1677,101 @@ async def delete_event(
             raise HTTPException(status_code=404, detail="Event not found")
         
         return {"success": True, "message": "Event deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting event: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to delete event")
+
+# Admin Event Management Routes
+@api_router.get("/admin/events/pending")
+async def get_pending_events(current_user: dict = Depends(get_current_user)):
+    """Get all pending events for admin approval"""
+    try:
+        events = await db.events.find(
+            {"approved": False},
+            {"_id": 0}
+        ).sort("created_at", -1).to_list(100)
+        
+        return {
+            "events": events,
+            "count": len(events)
+        }
+    except Exception as e:
+        logger.error(f"Error fetching pending events: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/admin/events/all")
+async def get_all_events(current_user: dict = Depends(get_current_user)):
+    """Get all events (approved and pending) for admin"""
+    try:
+        events = await db.events.find({}, {"_id": 0}).sort("created_at", -1).to_list(200)
+        
+        return {
+            "events": events,
+            "count": len(events)
+        }
+    except Exception as e:
+        logger.error(f"Error fetching all events: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.patch("/admin/events/{event_id}/approve")
+async def approve_event(
+    event_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Approve an event"""
+    try:
+        result = await db.events.update_one(
+            {"id": event_id},
+            {"$set": {"approved": True}}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Event not found")
+        
+        return {"success": True, "message": "Event approved"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error approving event: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to approve event")
+
+@api_router.patch("/admin/events/{event_id}/reject")
+async def reject_event(
+    event_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Reject (unapprove) an event"""
+    try:
+        result = await db.events.update_one(
+            {"id": event_id},
+            {"$set": {"approved": False}}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Event not found")
+        
+        return {"success": True, "message": "Event rejected"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error rejecting event: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to reject event")
+
+@api_router.delete("/admin/events/{event_id}")
+async def admin_delete_event(
+    event_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Admin delete any event"""
+    try:
+        result = await db.events.delete_one({"id": event_id})
+        
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Event not found")
+        
+        return {"success": True, "message": "Event deleted"}
     except HTTPException:
         raise
     except Exception as e:
