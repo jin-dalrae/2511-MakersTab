@@ -379,8 +379,8 @@ const Dashboard = ({ user, onLogout }) => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
+      <div className="max-w-7xl mx-auto px-4 py-2 sm:py-3">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-2 sm:space-y-3">
           <div className="hidden">
             <TabsList>
               <TabsTrigger value="overview">Overview</TabsTrigger>
