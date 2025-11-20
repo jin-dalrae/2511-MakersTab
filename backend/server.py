@@ -1583,6 +1583,7 @@ async def upload_event_flyer(
         event = {
             "id": event_id,
             "user_id": current_user['id'],
+            "user_name": current_user.get('name', 'Unknown'),
             "title": event_data.get('title', 'Untitled Event'),
             "description": event_data.get('what'),
             "what": event_data.get('what'),
@@ -1593,6 +1594,7 @@ async def upload_event_flyer(
             "how": event_data.get('how'),
             "event_date": event_date_parsed.isoformat() if event_date_parsed else None,
             "image_url": f"data:image/png;base64,{img_base64}",
+            "approved": False,  # Requires admin approval
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         
