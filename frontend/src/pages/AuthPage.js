@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
-import { API } from '../App';
+import { mockApi } from '@/services/mockApi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -31,7 +30,7 @@ const AuthPage = ({ onLogin }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post(`${API}/auth/signup`, {
+      const response = await mockApi.auth.signup({
         ...signupData,
         meal_plan_amount: parseFloat(signupData.meal_plan_amount)
       });
@@ -48,7 +47,7 @@ const AuthPage = ({ onLogin }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post(`${API}/auth/login`, loginData);
+      const response = await mockApi.auth.login(loginData);
       toast.success('Welcome back!');
       onLogin(response.data.token, response.data.user);
     } catch (error) {
@@ -68,11 +67,11 @@ const AuthPage = ({ onLogin }) => {
             <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white rounded-2xl flex items-center justify-center shadow-lg">
               <img src={LOGO_URL} alt="MakersTab" className="w-8 h-8 sm:w-10 sm:h-10" />
             </div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-800" style={{fontFamily: 'Space Grotesk'}}>
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-800" style={{ fontFamily: 'Space Grotesk' }}>
               MakersTab
             </h1>
           </div>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-4" style={{fontFamily: 'Space Grotesk'}}>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-4" style={{ fontFamily: 'Space Grotesk' }}>
             Your Smart Meal Plan Companion
           </h2>
           <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
@@ -87,7 +86,7 @@ const AuthPage = ({ onLogin }) => {
             <div className="bg-white/20 rounded-2xl p-3 w-fit mb-4">
               <Receipt className="w-8 h-8" />
             </div>
-            <h3 className="font-bold text-lg mb-2" style={{fontFamily: 'Space Grotesk'}}>Scan Receipts</h3>
+            <h3 className="font-bold text-lg mb-2" style={{ fontFamily: 'Space Grotesk' }}>Scan Receipts</h3>
             <p className="text-sm text-white/90">Instant AI-powered receipt scanning. Just snap a photo!</p>
           </div>
 
@@ -96,7 +95,7 @@ const AuthPage = ({ onLogin }) => {
             <div className="bg-white/20 rounded-2xl p-3 w-fit mb-4">
               <TrendingUp className="w-8 h-8" />
             </div>
-            <h3 className="font-bold text-lg mb-2" style={{fontFamily: 'Space Grotesk'}}>Track Balance</h3>
+            <h3 className="font-bold text-lg mb-2" style={{ fontFamily: 'Space Grotesk' }}>Track Balance</h3>
             <p className="text-sm text-white/90">Real-time balance updates. Know exactly what you have left.</p>
           </div>
 
@@ -105,7 +104,7 @@ const AuthPage = ({ onLogin }) => {
             <div className="bg-white/20 rounded-2xl p-3 w-fit mb-4">
               <History className="w-8 h-8" />
             </div>
-            <h3 className="font-bold text-lg mb-2" style={{fontFamily: 'Space Grotesk'}}>Daily Menu</h3>
+            <h3 className="font-bold text-lg mb-2" style={{ fontFamily: 'Space Grotesk' }}>Daily Menu</h3>
             <p className="text-sm text-white/90">Check what's cooking at Makers Cafe today.</p>
           </div>
 
@@ -114,7 +113,7 @@ const AuthPage = ({ onLogin }) => {
             <div className="bg-white/20 rounded-2xl p-3 w-fit mb-4">
               <TrendingUp className="w-8 h-8" />
             </div>
-            <h3 className="font-bold text-lg mb-2" style={{fontFamily: 'Space Grotesk'}}>Stay Organized</h3>
+            <h3 className="font-bold text-lg mb-2" style={{ fontFamily: 'Space Grotesk' }}>Stay Organized</h3>
             <p className="text-sm text-white/90">Weekly recommendations to keep you on track.</p>
           </div>
         </div>
@@ -123,7 +122,7 @@ const AuthPage = ({ onLogin }) => {
         <div className="max-w-md mx-auto">
           <Card className="shadow-2xl border-0 bg-white rounded-3xl overflow-hidden">
             <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-600 text-white pb-8">
-              <CardTitle className="text-2xl sm:text-3xl text-center" style={{fontFamily: 'Space Grotesk'}}>
+              <CardTitle className="text-2xl sm:text-3xl text-center" style={{ fontFamily: 'Space Grotesk' }}>
                 Join MakersTab
               </CardTitle>
               <CardDescription className="text-center text-white/90 text-base">
@@ -132,9 +131,10 @@ const AuthPage = ({ onLogin }) => {
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="signup" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsList className="grid w-full grid-cols-3 mb-6">
                   <TabsTrigger value="signup" data-testid="signup-tab">Sign Up</TabsTrigger>
                   <TabsTrigger value="login" data-testid="login-tab">Login</TabsTrigger>
+                  <TabsTrigger value="quick">Quick Access</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="signup">
@@ -254,6 +254,34 @@ const AuthPage = ({ onLogin }) => {
                       {loading ? 'Signing In...' : 'Sign In'}
                     </Button>
                   </form>
+                </TabsContent>
+
+                <TabsContent value="quick">
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="access-code" className="text-sm">Access Code</Label>
+                      <Input
+                        id="access-code"
+                        type="password"
+                        placeholder="Enter 4-digit code"
+                        onKeyDown={async (e) => {
+                          if (e.key === 'Enter') {
+                            setLoading(true);
+                            try {
+                              const response = await mockApi.auth.validatePasscode(e.target.value);
+                              toast.success('Access Granted');
+                              onLogin(response.data.token, response.data.user);
+                            } catch (error) {
+                              toast.error(error.response?.data?.detail || 'Invalid Code');
+                            } finally {
+                              setLoading(false);
+                            }
+                          }
+                        }}
+                      />
+                      <p className="text-xs text-gray-500 mt-2">Press Enter to submit</p>
+                    </div>
+                  </div>
                 </TabsContent>
               </Tabs>
             </CardContent>
