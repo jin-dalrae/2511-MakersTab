@@ -429,7 +429,8 @@ const Dashboard = ({ user, onLogout }) => {
                           const weeklyBudget = semesterInfo.recommended_weekly_spending || 0;
                           const dailyRate = weeklyBudget / 7;
                           const remainingThisWeek = dailyRate * daysUntilSunday;
-                          const expectedBalance = (user.meal_plan_amount || 0) - remainingThisWeek;
+                          const currentBalance = analytics?.current_balance || user.meal_plan_amount || 0;
+                          const expectedBalance = currentBalance - remainingThisWeek;
                           return expectedBalance.toFixed(2);
                         })()}
                       </p>

@@ -1,6 +1,6 @@
 
 
-const LATENCY = 200; // Simulate network delay
+const LATENCY = 50; // Simulate network delay
 
 const getStorage = (key, defaultVal) => {
     const stored = localStorage.getItem(key);
@@ -345,8 +345,9 @@ export const mockApi = {
                 const balancedReceipts = receipts.filter(r => r.payment && typeof r.payment.remainingBalance === 'number');
 
                 if (balancedReceipts.length > 0) {
-                    // Find the minimum remaining balance
-                    current_balance = Math.min(...balancedReceipts.map(r => r.payment.remainingBalance));
+                    // Sort by receipt date (newest first) to get the most recent balance
+                    balancedReceipts.sort((a, b) => new Date(b.receipt_date) - new Date(a.receipt_date));
+                    current_balance = balancedReceipts[0].payment.remainingBalance;
                 } else {
                     // Fallback if no receipts have balance info
                     current_balance = 1865 - total_spent;
@@ -440,7 +441,8 @@ export const mockApi = {
                     if (receipts.length > 0) {
                         const balancedReceipts = receipts.filter(r => r.payment && typeof r.payment.remainingBalance === 'number');
                         if (balancedReceipts.length > 0) {
-                            currentBalance = Math.min(...balancedReceipts.map(r => r.payment.remainingBalance));
+                            balancedReceipts.sort((a, b) => new Date(b.receipt_date) - new Date(a.receipt_date));
+                            currentBalance = balancedReceipts[0].payment.remainingBalance;
                         }
                     }
 
@@ -539,8 +541,8 @@ export const mockApi = {
                         items: newReceiptData.items
                     };
 
-                    allReceipts.unshift(newReceipt);
-                    setStorage('receipts', allReceipts);
+                    receipts.unshift(newReceipt);
+                    setStorage('receipts', receipts);
                     // No need to set transactions separately, we derive them dynamically now in mock
 
                     resolve({ data: { success: true } });
@@ -548,6 +550,7 @@ export const mockApi = {
             });
         },
         'delete': async (id) => {
+            const receipts = getSafeReceipts();
             const newReceipts = receipts.filter(r => r.id !== id);
             setStorage('receipts', newReceipts);
             return Promise.resolve({ data: { success: true } });
