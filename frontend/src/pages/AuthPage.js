@@ -82,11 +82,13 @@ const AuthPage = () => {
     '4005': { label: 'Ultimate · $4,005', desc: 'Larger appetites — multiple meals a day plus frequent snacks.' },
     '3466': { label: 'Essential · $3,466', desc: 'Average appetite — snacks and to-go items most days.' },
     '1865': { label: 'Makers · $1,865', desc: 'You cook your own meals roughly half the time.' },
+    '1466': { label: 'Summer · $1,466', desc: 'The summer-term plan — runs May 18 → Aug 17.' },
     '1031': { label: 'Mini · $1,031', desc: 'Commuter — you eat on campus pretty often.' },
     '479':  { label: 'Micro · $479', desc: 'Commuter — only the occasional on-campus meal.' },
   };
 
   // Eligibility per CCA portal. First entry is the "required / default" plan for that housing.
+  // Summer is short-term and uses a single dedicated plan — housing is moot in that case.
   const PLANS_BY_HOUSING = {
     commuter:     ['1031', '479', '4005'],            // Mini / Micro, Ultimate as upgrade
     founders_low: ['3466', '4005'],                   // Essential required, Ultimate as upgrade
@@ -95,7 +97,9 @@ const AuthPage = () => {
     other:        ['4005', '3466', '1865', '1031', '479'],
   };
 
-  const availablePlans = signupData.housing ? PLANS_BY_HOUSING[signupData.housing] : [];
+  const availablePlans = signupData.semester === 'summer'
+    ? ['1466']
+    : (signupData.housing ? PLANS_BY_HOUSING[signupData.housing] : []);
   const selectedPlanDesc = signupData.meal_plan_amount && PLANS[signupData.meal_plan_amount]?.desc;
 
   return (
@@ -209,21 +213,32 @@ const AuthPage = () => {
                     value={signupData.meal_plan_amount}
                     onChange={(e) => setSignupData({ ...signupData, meal_plan_amount: e.target.value })}
                     required
-                    disabled={!signupData.housing}
+                    disabled={availablePlans.length === 0}
                   >
                     <option value="">
-                      {signupData.housing ? 'Pick your plan' : 'Pick housing first'}
+                      {availablePlans.length === 0
+                        ? 'Pick housing first'
+                        : 'Pick your plan'}
                     </option>
-                    {availablePlans.map((amount, i) => (
-                      <option key={amount} value={amount}>
-                        {PLANS[amount].label}
-                        {signupData.housing !== 'commuter' && signupData.housing !== 'other' && i === 0
-                          ? ' · required for your housing'
-                          : amount === '4005' && signupData.housing && signupData.housing !== 'other'
-                            ? ' · optional upgrade'
-                            : ''}
-                      </option>
-                    ))}
+                    {availablePlans.map((amount, i) => {
+                      const isResidentHousing =
+                        signupData.housing &&
+                        signupData.housing !== 'commuter' &&
+                        signupData.housing !== 'other';
+                      const isSummer = signupData.semester === 'summer';
+                      let suffix = '';
+                      if (!isSummer && isResidentHousing && i === 0) {
+                        suffix = ' · required for your housing';
+                      } else if (!isSummer && amount === '4005' && isResidentHousing) {
+                        suffix = ' · optional upgrade';
+                      }
+                      return (
+                        <option key={amount} value={amount}>
+                          {PLANS[amount].label}
+                          {suffix}
+                        </option>
+                      );
+                    })}
                   </select>
                   {selectedPlanDesc && (
                     <p className="text-xs text-gray-600 mt-2 pl-1">{selectedPlanDesc}</p>
@@ -236,12 +251,18 @@ const AuthPage = () => {
                     data-testid="semester-select"
                     className={selectCls}
                     value={signupData.semester}
-                    onChange={(e) => setSignupData({ ...signupData, semester: e.target.value })}
+                    onChange={(e) =>
+                      setSignupData({
+                        ...signupData,
+                        semester: e.target.value,
+                        meal_plan_amount: '', // reset — summer has a different plan list
+                      })
+                    }
                     required
                   >
-                    <option value="fall">Fall (Aug 25 – Jan 19)</option>
-                    <option value="spring">Spring (Jan 20 – May 17)</option>
-                    <option value="summer">Summer (May 18 – Aug 16)</option>
+                    <option value="fall">Fall (Aug 18 – Jan 18)</option>
+                    <option value="spring">Spring (Jan 19 – May 18)</option>
+                    <option value="summer">Summer (May 18 – Aug 17)</option>
                   </select>
                 </div>
                 <Button
