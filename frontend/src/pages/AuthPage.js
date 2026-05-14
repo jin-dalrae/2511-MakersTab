@@ -26,6 +26,7 @@ const AuthPage = () => {
     name: '',
     email: '',
     password: '',
+    housing: '', // commuter | founders_low | founders_5 | blattner | other
     meal_plan_amount: '',
     semester: 'fall',
   });
@@ -76,6 +77,26 @@ const AuthPage = () => {
     'mt-1 rounded-2xl border-2 border-emerald-100 bg-white focus-visible:ring-emerald-400';
   const selectCls =
     'mt-1 w-full px-4 py-2 rounded-2xl border-2 border-emerald-100 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400';
+
+  const PLANS = {
+    '4005': { label: 'Ultimate · $4,005', desc: 'Larger appetites — multiple meals a day plus frequent snacks.' },
+    '3466': { label: 'Essential · $3,466', desc: 'Average appetite — snacks and to-go items most days.' },
+    '1865': { label: 'Makers · $1,865', desc: 'You cook your own meals roughly half the time.' },
+    '1031': { label: 'Mini · $1,031', desc: 'Commuter — you eat on campus pretty often.' },
+    '479':  { label: 'Micro · $479', desc: 'Commuter — only the occasional on-campus meal.' },
+  };
+
+  // Eligibility per CCA portal. First entry is the "required / default" plan for that housing.
+  const PLANS_BY_HOUSING = {
+    commuter:     ['1031', '479', '4005'],            // Mini / Micro, Ultimate as upgrade
+    founders_low: ['3466', '4005'],                   // Essential required, Ultimate as upgrade
+    founders_5:   ['1865', '4005'],                   // Makers required, Ultimate as upgrade
+    blattner:     ['1865', '4005'],                   // Makers required, Ultimate as upgrade
+    other:        ['4005', '3466', '1865', '1031', '479'],
+  };
+
+  const availablePlans = signupData.housing ? PLANS_BY_HOUSING[signupData.housing] : [];
+  const selectedPlanDesc = signupData.meal_plan_amount && PLANS[signupData.meal_plan_amount]?.desc;
 
   return (
     <div className={cls.pageBg}>
@@ -162,6 +183,24 @@ const AuthPage = () => {
                   />
                 </div>
                 <div>
+                  <Label htmlFor="housing" className="text-sm font-medium">Where do you live this term?</Label>
+                  <select
+                    id="housing"
+                    data-testid="housing-select"
+                    className={selectCls}
+                    value={signupData.housing}
+                    onChange={(e) => setSignupData({ ...signupData, housing: e.target.value, meal_plan_amount: '' })}
+                    required
+                  >
+                    <option value="">Choose…</option>
+                    <option value="commuter">Commuter (off-campus)</option>
+                    <option value="founders_low">Founders Hall · floors 1–4</option>
+                    <option value="founders_5">Founders Hall · floor 5</option>
+                    <option value="blattner">Blattner Hall</option>
+                    <option value="other">Other on-campus housing</option>
+                  </select>
+                </div>
+                <div>
                   <Label htmlFor="meal-plan" className="text-sm font-medium">Meal plan</Label>
                   <select
                     id="meal-plan"
@@ -170,14 +209,25 @@ const AuthPage = () => {
                     value={signupData.meal_plan_amount}
                     onChange={(e) => setSignupData({ ...signupData, meal_plan_amount: e.target.value })}
                     required
+                    disabled={!signupData.housing}
                   >
-                    <option value="">Pick your plan</option>
-                    <option value="4005">Ultimate · $4,005</option>
-                    <option value="3466">Essential · $3,466</option>
-                    <option value="1865">Makers · $1,865</option>
-                    <option value="1031">Mini · $1,031</option>
-                    <option value="479">Micro · $479</option>
+                    <option value="">
+                      {signupData.housing ? 'Pick your plan' : 'Pick housing first'}
+                    </option>
+                    {availablePlans.map((amount, i) => (
+                      <option key={amount} value={amount}>
+                        {PLANS[amount].label}
+                        {signupData.housing !== 'commuter' && signupData.housing !== 'other' && i === 0
+                          ? ' · required for your housing'
+                          : amount === '4005' && signupData.housing && signupData.housing !== 'other'
+                            ? ' · optional upgrade'
+                            : ''}
+                      </option>
+                    ))}
                   </select>
+                  {selectedPlanDesc && (
+                    <p className="text-xs text-gray-600 mt-2 pl-1">{selectedPlanDesc}</p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="semester" className="text-sm font-medium">Semester</Label>

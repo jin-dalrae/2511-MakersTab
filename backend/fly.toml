@@ -1,0 +1,44 @@
+app = "makerstab-backend"
+primary_region = "sjc"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "8000"
+
+[[services]]
+  internal_port = 8000
+  protocol = "tcp"
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+    force_https = true
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+
+  [services.concurrency]
+    type = "requests"
+    soft_limit = 25
+    hard_limit = 50
+
+  [[services.http_checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "30s"
+    method = "GET"
+    path = "/api/health"
+
+[[vm]]
+  # Playwright Chromium needs real memory headroom — at least 1GB, 2GB is safer.
+  size = "shared-cpu-2x"
+  memory = "2gb"
+
+# Keep at least one machine warm. OneCard scraping is interactive — cold-start
+# adds 20-40s of Playwright bootup, which times out the user's MFA push window.
+[deploy]
+  strategy = "rolling"
+  min_machines_running = 1

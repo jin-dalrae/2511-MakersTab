@@ -28,7 +28,7 @@ const TermsOfService = () => {
       <div className="relative z-10 max-w-4xl mx-auto px-4 py-8 sm:py-12">
         <div className={`${cls.card} p-6 sm:p-10`}>
           <h1 className="font-display text-5xl sm:text-6xl text-emerald-700 mb-2">terms of service</h1>
-          <p className="text-sm text-gray-500 mb-8">Last updated: November 19, 2025</p>
+          <p className="text-sm text-gray-500 mb-8">Last updated: May 14, 2026</p>
 
           <div className="prose prose-green max-w-none space-y-8">
             <section>
@@ -49,6 +49,8 @@ const TermsOfService = () => {
                 <li>Transaction history and spending analytics</li>
                 <li>Live cafe menu from Cafe Bon Appetit</li>
                 <li>Weekly spending recommendations</li>
+                <li>Optional, opt-in connection to your CCA OneCard via TouchNet OneWeb to surface live balance and transaction history</li>
+                <li>Convenience link to the CCA online ordering portal (operated by Zipthru / Bon Appétit, not MakersTab)</li>
               </ul>
             </section>
 
@@ -62,12 +64,12 @@ const TermsOfService = () => {
             <section>
               <h2 className="text-2xl font-bold text-gray-800 mb-4">User Accounts</h2>
               <p className="text-gray-700 leading-relaxed mb-3">
-                To access MakersTab, you must create an account by providing:
+                Account creation is managed through <strong>Firebase Authentication</strong>. You provide:
               </p>
               <ul className="list-disc list-inside text-gray-700 space-y-2">
                 <li>Your name</li>
                 <li>A valid email address</li>
-                <li>A secure password</li>
+                <li>A password (managed and stored by Firebase Authentication — MakersTab never sees your raw password)</li>
                 <li>Your meal plan budget amount</li>
                 <li>Your current semester information</li>
               </ul>
@@ -98,12 +100,31 @@ const TermsOfService = () => {
                 MakersTab relies on third-party services including but not limited to:
               </p>
               <ul className="list-disc list-inside text-gray-700 space-y-2 mt-3">
-                <li><strong>OpenAI:</strong> For AI-powered receipt OCR and data extraction</li>
-                <li><strong>MongoDB:</strong> For secure data storage</li>
-                <li><strong>Cafe Bon Appetit API:</strong> For live menu data</li>
+                <li><strong>Firebase (Google):</strong> Authentication and web hosting</li>
+                <li><strong>OpenAI:</strong> AI-powered receipt OCR and data extraction</li>
+                <li><strong>MongoDB:</strong> Server-side storage for receipts, transactions, and OneCard data</li>
+                <li><strong>Cafe Bon Appetit:</strong> Public menu data (scraped daily)</li>
+                <li><strong>TouchNet OneWeb (C20080 — CCA):</strong> Only when you opt in to the OneCard integration; we authenticate to TouchNet on your behalf using credentials you provide</li>
+                <li><strong>Zipthru / Bon Appétit ordering:</strong> The "Order online" link opens their portal directly; MakersTab does not handle orders or payments</li>
               </ul>
               <p className="text-gray-700 leading-relaxed mt-3">
                 We are not responsible for errors, outages, or data breaches originating from these external services. Each third-party service is governed by its own terms and privacy policies.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">OneCard Integration (Opt-In)</h2>
+              <p className="text-gray-700 leading-relaxed mb-3">
+                The OneCard integration is <strong>optional</strong> and requires you to explicitly acknowledge its risks before connecting. By enabling the integration, you represent and warrant that:
+              </p>
+              <ul className="list-disc list-inside text-gray-700 space-y-2">
+                <li>The CCA SSO credentials you provide belong to you, and you alone have authority to use them.</li>
+                <li>You understand MakersTab logs in to <em>secure.touchnet.net</em> on your behalf, and that automated access to TouchNet OneWeb may not be permitted by CCA's Acceptable Use Policy or TouchNet's Terms of Service.</li>
+                <li>You accept full responsibility for any action taken by CCA, TouchNet, or any third party in response to that access — including suspension of your CCA account.</li>
+                <li>You may disconnect at any time on the OneCard settings page. Disconnecting wipes your encrypted credentials and cached balance/transactions from MakersTab.</li>
+              </ul>
+              <p className="text-gray-700 leading-relaxed mt-3">
+                MakersTab is not affiliated with, endorsed by, or operated in partnership with TouchNet or California College of the Arts.
               </p>
             </section>
 

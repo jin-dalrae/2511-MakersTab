@@ -28,7 +28,7 @@ const PrivacyPolicy = () => {
       <div className="relative z-10 max-w-4xl mx-auto px-4 py-8 sm:py-12">
         <div className={`${cls.card} p-6 sm:p-10`}>
           <h1 className="font-display text-5xl sm:text-6xl text-emerald-700 mb-2">privacy policy</h1>
-          <p className="text-sm text-gray-500 mb-8">Last updated: November 19, 2025</p>
+          <p className="text-sm text-gray-500 mb-8">Last updated: May 14, 2026</p>
 
           <div className="prose prose-green max-w-none space-y-8">
             <section>
@@ -42,11 +42,15 @@ const PrivacyPolicy = () => {
               <h2 className="text-2xl font-bold text-gray-800 mb-4">Information We Collect</h2>
               
               <h3 className="text-xl font-semibold text-gray-800 mb-3 mt-4">1. Account Information</h3>
-              <p className="text-gray-700 leading-relaxed mb-2">When you create an account, we collect:</p>
+              <p className="text-gray-700 leading-relaxed mb-2">
+                Account credentials are managed by <strong>Firebase Authentication</strong> (Google).
+                MakersTab never sees or stores your raw password — Firebase issues us a signed ID token
+                that we verify server-side. From you we collect:
+              </p>
               <ul className="list-disc list-inside text-gray-700 space-y-2">
                 <li>Full name</li>
                 <li>Email address</li>
-                <li>Password (encrypted)</li>
+                <li>Firebase user ID (a stable opaque identifier we use as your account key)</li>
                 <li>Meal plan budget amount</li>
                 <li>Current semester (Fall/Spring/Summer)</li>
               </ul>
@@ -75,6 +79,19 @@ const PrivacyPolicy = () => {
               <p className="text-gray-700 leading-relaxed">
                 We scrape and display publicly available menu information from Cafe Bon Appetit's website. This data is stored temporarily and updated daily.
               </p>
+
+              <h3 className="text-xl font-semibold text-gray-800 mb-3 mt-6">5. OneCard Integration (only if you opt in)</h3>
+              <p className="text-gray-700 leading-relaxed mb-2">
+                If you connect your CCA OneCard on the OneCard settings page, we additionally collect and store:
+              </p>
+              <ul className="list-disc list-inside text-gray-700 space-y-2">
+                <li>The CCA SSO username and password you provide, <strong>encrypted at rest with Fernet (AES-128-CBC + HMAC)</strong> using a key held only by the backend server</li>
+                <li>TouchNet OneWeb session cookies, also encrypted at rest</li>
+                <li>Your OneCard balance(s) and recent transaction history pulled from <em>secure.touchnet.net</em> on your behalf</li>
+              </ul>
+              <p className="text-gray-700 leading-relaxed mt-3">
+                You can disconnect at any time. Disconnecting permanently wipes encrypted credentials, cookies, balances, and OneCard transactions from MakersTab's database.
+              </p>
             </section>
 
             <section>
@@ -98,10 +115,10 @@ const PrivacyPolicy = () => {
                 <strong>Security Measures:</strong> We implement industry-standard security practices including:
               </p>
               <ul className="list-disc list-inside text-gray-700 space-y-2">
-                <li>Password hashing with bcrypt</li>
-                <li>JWT token-based authentication</li>
-                <li>HTTPS encryption for data transmission</li>
-                <li>Regular security audits</li>
+                <li>Authentication delegated to Firebase Authentication (passwords never reach our servers)</li>
+                <li>Firebase ID token verification on every backend request</li>
+                <li>HTTPS encryption for all data transmission</li>
+                <li>OneCard credentials and session cookies encrypted at rest with Fernet</li>
               </ul>
               <p className="text-gray-700 leading-relaxed mt-3">
                 <strong>Limitations:</strong> While we take reasonable measures to protect your data, no internet-based service is 100% secure. We cannot guarantee absolute security against unauthorized access or data breaches.
@@ -127,6 +144,21 @@ const PrivacyPolicy = () => {
               <h3 className="text-xl font-semibold text-gray-800 mb-2 mt-4">Cafe Bon Appetit</h3>
               <p className="text-gray-700 leading-relaxed">
                 We scrape publicly available menu data from the Cafe Bon Appetit website. No personal user data is shared with them.
+              </p>
+
+              <h3 className="text-xl font-semibold text-gray-800 mb-2 mt-4">Firebase (Google)</h3>
+              <p className="text-gray-700 leading-relaxed">
+                Firebase Authentication handles login, password storage, and session tokens. Firebase Hosting serves the MakersTab web app. Google's privacy practices apply to data Firebase collects (sign-in IP, user agent, etc.).
+              </p>
+
+              <h3 className="text-xl font-semibold text-gray-800 mb-2 mt-4">TouchNet OneWeb (opt-in)</h3>
+              <p className="text-gray-700 leading-relaxed">
+                If you connect your CCA OneCard, MakersTab logs in to <em>secure.touchnet.net</em> as you, using credentials you provided, to read balance and transaction data. We do not transmit MakersTab user data <em>to</em> TouchNet.
+              </p>
+
+              <h3 className="text-xl font-semibold text-gray-800 mb-2 mt-4">Zipthru / Bon Appétit Online Ordering</h3>
+              <p className="text-gray-700 leading-relaxed">
+                The "Order online" link opens the Zipthru ordering portal in a new tab. MakersTab does not handle the order itself, does not pass any of your account data to them, and does not see what you order.
               </p>
 
               <p className="text-gray-700 leading-relaxed mt-4 font-semibold">
@@ -160,13 +192,13 @@ const PrivacyPolicy = () => {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Cookies & Tracking</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">Cookies & Local Storage</h2>
               <p className="text-gray-700 leading-relaxed">
-                MakersTab uses minimal cookies for essential functionality:
+                MakersTab uses minimal browser storage:
               </p>
               <ul className="list-disc list-inside text-gray-700 space-y-2 mt-3">
-                <li><strong>Authentication Token:</strong> Stored in localStorage to keep you logged in</li>
-                <li><strong>Session Data:</strong> Temporary data to maintain your session state</li>
+                <li><strong>Firebase Auth session:</strong> Firebase stores a signed token in <code>IndexedDB</code> so you stay logged in across visits</li>
+                <li><strong>Profile cache:</strong> Your name, meal plan, semester, and admin flag are kept in <code>localStorage</code> under <code>makerstab_profile_&lt;uid&gt;</code> so the dashboard works offline if the backend is unreachable</li>
               </ul>
               <p className="text-gray-700 leading-relaxed mt-3">
                 We do not use third-party advertising cookies or tracking pixels.

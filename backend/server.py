@@ -216,24 +216,29 @@ class AnalyticsData(BaseModel):
 # ============= Semester Utilities =============
 
 def get_semester_dates(semester: str, year: int) -> tuple:
-    """Get start and end dates for a semester"""
+    """
+    Get start and end dates for a CCA semester.
+
+    Dates match the CCA portal's OneCard load/wipe schedule
+    (https://portal.cca.edu/thriving/housing-dining-resed/makers-cafe/meal-plans/):
+      - Fall load: Aug 18 → Spring wipe: May 18 (the day before re-load)
+      - Spring load: ~Jan 19 → Spring wipe: May 18
+      - Summer load: May 18 → Summer wipe: Aug 18 (the day before fall re-load)
+    """
     if semester == "fall":
-        # Fall Term: August 25 - January 19 (spans years)
-        start = datetime(year, 8, 25, tzinfo=timezone.utc)
-        end = datetime(year + 1, 1, 19, 23, 59, 59, tzinfo=timezone.utc)
+        start = datetime(year, 8, 18, tzinfo=timezone.utc)
+        end = datetime(year + 1, 1, 18, 23, 59, 59, tzinfo=timezone.utc)
     elif semester == "spring":
-        # Spring Term: January 20 - May 17
-        start = datetime(year, 1, 20, tzinfo=timezone.utc)
-        end = datetime(year, 5, 17, 23, 59, 59, tzinfo=timezone.utc)
+        start = datetime(year, 1, 19, tzinfo=timezone.utc)
+        end = datetime(year, 5, 18, 12, 59, 59, tzinfo=timezone.utc)  # 1pm wipe per portal
     elif semester == "summer":
-        # Summer Term: May 18 - August 16
-        start = datetime(year, 5, 18, tzinfo=timezone.utc)
-        end = datetime(year, 8, 16, 23, 59, 59, tzinfo=timezone.utc)
+        start = datetime(year, 5, 18, 13, 0, 0, tzinfo=timezone.utc)  # loads right after spring wipe
+        end = datetime(year, 8, 17, 23, 59, 59, tzinfo=timezone.utc)
     else:
         # Default to fall
-        start = datetime(year, 8, 25, tzinfo=timezone.utc)
-        end = datetime(year + 1, 1, 19, 23, 59, 59, tzinfo=timezone.utc)
-    
+        start = datetime(year, 8, 18, tzinfo=timezone.utc)
+        end = datetime(year + 1, 1, 18, 23, 59, 59, tzinfo=timezone.utc)
+
     return start, end
 
 def get_current_semester_info(semester: str) -> dict:
@@ -490,6 +495,120 @@ async def get_semester_info(current_user: dict = Depends(get_current_user)):
         "weeks_elapsed": round(weeks_elapsed, 1)
     }
 
+# ============= Receipt OCR =============
+
+# Prompt sent to the Vision LLM. Kept verbose on purpose — small wording changes
+# (especially around REMAINING BALANCE) measurably affect extraction accuracy.
+# Used by both /receipts/preview and /receipts (upload).
+RECEIPT_OCR_PROMPT = """You are a precise OCR system. Analyze this receipt image and extract the following information in EXACT JSON format:
+            {
+                "items": [{"name": "item name", "price": 0.00, "quantity": 1, "category": "meal/salad/drinks/convenience"}],
+                "total": 0.00,
+                "remaining_balance": 0.00,
+                "date": "YYYY-MM-DD",
+                "time": "HH:MM",
+                "merchant": "store name"
+            }
+
+            CRITICAL EXTRACTION RULES:
+            1. DATE: Look for the receipt date (e.g., "Date: 11/19/2025" or "11/19/2025"). Convert to YYYY-MM-DD format (e.g., "2025-11-19"). If you see MM/DD/YYYY, convert it correctly!
+
+            2. TIME: Look for the time on the receipt (e.g., "Time: 12:20 PM" or just "12:20 PM"). Convert to 24-hour HH:MM format (e.g., "12:20" for 12:20 PM, "00:20" for 12:20 AM).
+
+            3. REMAINING BALANCE: This is the MOST IMPORTANT field! Look for:
+               - "Remaining Balance"
+               - "Balance"
+               - "New Balance"
+               - "Meal Plan Balance"
+               - Usually appears at the bottom of the receipt
+               - Extract the EXACT dollar amount including cents (e.g., $731.38 should be 731.38, NOT 31.38)
+               - DO NOT confuse with the transaction total or subtotal
+
+            4. TOTAL: The transaction total (what was charged this time)
+
+            5. ITEMS: List each purchased item with name, price, quantity, and best-guess category
+
+            6. MERCHANT: The store/cafe name at the top
+
+            RESPOND WITH ONLY THE JSON OBJECT. NO EXPLANATION TEXT."""
+
+
+async def reconcile_balance_from_receipt(
+    user: dict,
+    parsed_data: dict,
+    receipt_id: str,
+    receipt_date: datetime,
+) -> Optional[float]:
+    """
+    Given a newly parsed receipt, compare the balance MakersTab thinks the user has
+    against the balance printed on the receipt. If the printed balance is lower than
+    expected, insert a placeholder 'untracked' transaction for the gap (someone bought
+    something off-app), and update the user's stored balance to match the receipt.
+
+    Returns the new balance if the receipt had a usable remaining_balance, else None
+    (caller should fall back to a simple subtraction).
+    """
+    remaining_balance = parsed_data.get('remaining_balance', 0)
+    receipt_total = float(parsed_data.get('total', 0))
+    current_balance = user.get('meal_plan_amount', 0)
+
+    if not remaining_balance or float(remaining_balance) <= 0:
+        return None
+
+    remaining_balance = float(remaining_balance)
+    expected_balance = current_balance - receipt_total
+    untracked_amount = expected_balance - remaining_balance
+
+    if untracked_amount > 0.01:  # More than 1 cent gap
+        logger.info(f"Detected untracked spending: ${untracked_amount:.2f}")
+
+        previous_receipt = await db.receipts.find_one(
+            {"user_id": user['id']},
+            {"_id": 0, "receipt_date": 1},
+            sort=[("receipt_date", -1)],
+        )
+        if previous_receipt:
+            prev_date = previous_receipt['receipt_date']
+            if isinstance(prev_date, str):
+                prev_date = datetime.fromisoformat(prev_date)
+            time_diff = receipt_date - prev_date
+            mock_date = prev_date + (time_diff / 2)
+        else:
+            mock_date = receipt_date - timedelta(hours=1)
+
+        # Wipe any prior 'untracked' placeholders in this window so re-confirming
+        # the same receipt doesn't accumulate duplicate ghost spending.
+        await db.transactions.delete_many({
+            "user_id": user['id'],
+            "category": "untracked",
+            "transaction_date": {
+                "$gte": mock_date.isoformat(),
+                "$lte": receipt_date.isoformat(),
+            },
+        })
+
+        mock_transaction = Transaction(
+            user_id=user['id'],
+            receipt_id=receipt_id,
+            item_name="Untracked Purchase (Cash/Other Receipt)",
+            category="untracked",
+            price=untracked_amount,
+            quantity=1,
+            transaction_date=mock_date,
+        )
+        mock_doc = mock_transaction.model_dump()
+        mock_doc['transaction_date'] = mock_doc['transaction_date'].isoformat()
+        mock_doc['created_at'] = mock_doc['created_at'].isoformat()
+        await db.transactions.insert_one(mock_doc)
+        logger.info(f"Created mock transaction for ${untracked_amount:.2f} at {mock_date}")
+
+    await db.users.update_one(
+        {"id": user['id']},
+        {"$set": {"meal_plan_amount": remaining_balance}},
+    )
+    return remaining_balance
+
+
 # Receipt Routes
 @api_router.post("/receipts/preview")
 @limiter.limit("20/minute")  # Limit OCR requests
@@ -542,37 +661,7 @@ async def preview_receipt(
         
         image_content = ImageContent(image_base64=base64_image)
         user_message = UserMessage(
-            text="""You are a precise OCR system. Analyze this receipt image and extract the following information in EXACT JSON format:
-            {
-                "items": [{"name": "item name", "price": 0.00, "quantity": 1, "category": "meal/salad/drinks/convenience"}],
-                "total": 0.00,
-                "remaining_balance": 0.00,
-                "date": "YYYY-MM-DD",
-                "time": "HH:MM",
-                "merchant": "store name"
-            }
-            
-            CRITICAL EXTRACTION RULES:
-            1. DATE: Look for the receipt date (e.g., "Date: 11/19/2025" or "11/19/2025"). Convert to YYYY-MM-DD format (e.g., "2025-11-19"). If you see MM/DD/YYYY, convert it correctly!
-            
-            2. TIME: Look for the time on the receipt (e.g., "Time: 12:20 PM" or just "12:20 PM"). Convert to 24-hour HH:MM format (e.g., "12:20" for 12:20 PM, "00:20" for 12:20 AM).
-            
-            3. REMAINING BALANCE: This is the MOST IMPORTANT field! Look for:
-               - "Remaining Balance"
-               - "Balance"
-               - "New Balance"
-               - "Meal Plan Balance"
-               - Usually appears at the bottom of the receipt
-               - Extract the EXACT dollar amount including cents (e.g., $731.38 should be 731.38, NOT 31.38)
-               - DO NOT confuse with the transaction total or subtotal
-            
-            4. TOTAL: The transaction total (what was charged this time)
-            
-            5. ITEMS: List each purchased item with name, price, quantity, and best-guess category
-            
-            6. MERCHANT: The store/cafe name at the top
-            
-            RESPOND WITH ONLY THE JSON OBJECT. NO EXPLANATION TEXT.""",
+            text=RECEIPT_OCR_PROMPT,
             file_contents=[image_content]
         )
         
@@ -702,71 +791,10 @@ async def confirm_receipt(
             
             await db.transactions.insert_one(trans_doc)
         
-        # Detect untracked spending and create mock transactions
-        remaining_balance = parsed_data.get('remaining_balance', 0)
-        receipt_total = float(parsed_data.get('total', 0))
-        current_balance = current_user.get('meal_plan_amount', 0)
-        
-        if remaining_balance and float(remaining_balance) > 0:
-            remaining_balance = float(remaining_balance)
-            
-            # Calculate expected balance after this receipt
-            expected_balance = current_balance - receipt_total
-            
-            # If actual balance is lower than expected, there's untracked spending
-            untracked_amount = expected_balance - remaining_balance
-            
-            if untracked_amount > 0.01:  # More than 1 cent difference
-                logger.info(f"Detected untracked spending: ${untracked_amount:.2f}")
-                
-                # Get most recent receipt before this one
-                previous_receipt = await db.receipts.find_one(
-                    {"user_id": current_user['id']},
-                    {"_id": 0, "receipt_date": 1},
-                    sort=[("receipt_date", -1)]
-                )
-                
-                # Calculate time between receipts for mock transaction
-                if previous_receipt:
-                    prev_date = datetime.fromisoformat(previous_receipt['receipt_date']) if isinstance(previous_receipt['receipt_date'], str) else previous_receipt['receipt_date']
-                    # Place mock transaction halfway between receipts
-                    time_diff = receipt_date - prev_date
-                    mock_date = prev_date + (time_diff / 2)
-                else:
-                    # No previous receipt, place 1 hour before current
-                    mock_date = receipt_date - timedelta(hours=1)
-                
-                # Delete existing mock transactions that would be recalculated
-                await db.transactions.delete_many({
-                    "user_id": current_user['id'],
-                    "category": "untracked",
-                    "transaction_date": {"$gte": mock_date.isoformat(), "$lte": receipt_date.isoformat()}
-                })
-                
-                # Create mock transaction for untracked spending
-                mock_transaction = Transaction(
-                    user_id=current_user['id'],
-                    receipt_id=receipt_obj.id,
-                    item_name="Untracked Purchase (Cash/Other Receipt)",
-                    category="untracked",
-                    price=untracked_amount,
-                    quantity=1,
-                    transaction_date=mock_date
-                )
-                
-                mock_doc = mock_transaction.model_dump()
-                mock_doc['transaction_date'] = mock_doc['transaction_date'].isoformat()
-                mock_doc['created_at'] = mock_doc['created_at'].isoformat()
-                
-                await db.transactions.insert_one(mock_doc)
-                logger.info(f"Created mock transaction for ${untracked_amount:.2f} at {mock_date}")
-            
-            # Use the remaining balance shown on the receipt
-            await db.users.update_one(
-                {"id": current_user['id']},
-                {"$set": {"meal_plan_amount": remaining_balance}}
-            )
-        else:
+        new_balance = await reconcile_balance_from_receipt(
+            current_user, parsed_data, receipt_obj.id, receipt_date,
+        )
+        if new_balance is None:
             # Fallback: deduct total if no remaining balance found on receipt
             await db.users.update_one(
                 {"id": current_user['id']},
@@ -801,37 +829,7 @@ async def upload_receipt(
         
         image_content = ImageContent(image_base64=base64_image)
         user_message = UserMessage(
-            text="""You are a precise OCR system. Analyze this receipt image and extract the following information in EXACT JSON format:
-            {
-                "items": [{"name": "item name", "price": 0.00, "quantity": 1, "category": "meal/salad/drinks/convenience"}],
-                "total": 0.00,
-                "remaining_balance": 0.00,
-                "date": "YYYY-MM-DD",
-                "time": "HH:MM",
-                "merchant": "store name"
-            }
-            
-            CRITICAL EXTRACTION RULES:
-            1. DATE: Look for the receipt date (e.g., "Date: 11/19/2025" or "11/19/2025"). Convert to YYYY-MM-DD format (e.g., "2025-11-19"). If you see MM/DD/YYYY, convert it correctly!
-            
-            2. TIME: Look for the time on the receipt (e.g., "Time: 12:20 PM" or just "12:20 PM"). Convert to 24-hour HH:MM format (e.g., "12:20" for 12:20 PM, "00:20" for 12:20 AM).
-            
-            3. REMAINING BALANCE: This is the MOST IMPORTANT field! Look for:
-               - "Remaining Balance"
-               - "Balance"
-               - "New Balance"
-               - "Meal Plan Balance"
-               - Usually appears at the bottom of the receipt
-               - Extract the EXACT dollar amount including cents (e.g., $731.38 should be 731.38, NOT 31.38)
-               - DO NOT confuse with the transaction total or subtotal
-            
-            4. TOTAL: The transaction total (what was charged this time)
-            
-            5. ITEMS: List each purchased item with name, price, quantity, and best-guess category
-            
-            6. MERCHANT: The store/cafe name at the top
-            
-            RESPOND WITH ONLY THE JSON OBJECT. NO EXPLANATION TEXT.""",
+            text=RECEIPT_OCR_PROMPT,
             file_contents=[image_content]
         )
         
@@ -904,71 +902,10 @@ async def upload_receipt(
             
             await db.transactions.insert_one(trans_doc)
         
-        # Detect untracked spending and create mock transactions
-        remaining_balance = parsed_data.get('remaining_balance', 0)
-        receipt_total = float(parsed_data.get('total', 0))
-        current_balance = current_user.get('meal_plan_amount', 0)
-        
-        if remaining_balance and float(remaining_balance) > 0:
-            remaining_balance = float(remaining_balance)
-            
-            # Calculate expected balance after this receipt
-            expected_balance = current_balance - receipt_total
-            
-            # If actual balance is lower than expected, there's untracked spending
-            untracked_amount = expected_balance - remaining_balance
-            
-            if untracked_amount > 0.01:  # More than 1 cent difference
-                logger.info(f"Detected untracked spending: ${untracked_amount:.2f}")
-                
-                # Get most recent receipt before this one
-                previous_receipt = await db.receipts.find_one(
-                    {"user_id": current_user['id']},
-                    {"_id": 0, "receipt_date": 1},
-                    sort=[("receipt_date", -1)]
-                )
-                
-                # Calculate time between receipts for mock transaction
-                if previous_receipt:
-                    prev_date = datetime.fromisoformat(previous_receipt['receipt_date']) if isinstance(previous_receipt['receipt_date'], str) else previous_receipt['receipt_date']
-                    # Place mock transaction halfway between receipts
-                    time_diff = receipt_date - prev_date
-                    mock_date = prev_date + (time_diff / 2)
-                else:
-                    # No previous receipt, place 1 hour before current
-                    mock_date = receipt_date - timedelta(hours=1)
-                
-                # Delete existing mock transactions that would be recalculated
-                await db.transactions.delete_many({
-                    "user_id": current_user['id'],
-                    "category": "untracked",
-                    "transaction_date": {"$gte": mock_date.isoformat(), "$lte": receipt_date.isoformat()}
-                })
-                
-                # Create mock transaction for untracked spending
-                mock_transaction = Transaction(
-                    user_id=current_user['id'],
-                    receipt_id=receipt_obj.id,
-                    item_name="Untracked Purchase (Cash/Other Receipt)",
-                    category="untracked",
-                    price=untracked_amount,
-                    quantity=1,
-                    transaction_date=mock_date
-                )
-                
-                mock_doc = mock_transaction.model_dump()
-                mock_doc['transaction_date'] = mock_doc['transaction_date'].isoformat()
-                mock_doc['created_at'] = mock_doc['created_at'].isoformat()
-                
-                await db.transactions.insert_one(mock_doc)
-                logger.info(f"Created mock transaction for ${untracked_amount:.2f} at {mock_date}")
-            
-            # Use the remaining balance shown on the receipt
-            await db.users.update_one(
-                {"id": current_user['id']},
-                {"$set": {"meal_plan_amount": remaining_balance}}
-            )
-        else:
+        new_balance = await reconcile_balance_from_receipt(
+            current_user, parsed_data, receipt_obj.id, receipt_date,
+        )
+        if new_balance is None:
             # Fallback: deduct total if no remaining balance found on receipt
             await db.users.update_one(
                 {"id": current_user['id']},
