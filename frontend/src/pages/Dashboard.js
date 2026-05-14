@@ -21,11 +21,11 @@ import {
   ShoppingBag,
   Users,
   Trash2,
-  CreditCard
+  CreditCard,
+  ShoppingBag
 } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-
-const LOGO_URL = 'https://customer-assets.emergentagent.com/job_cafe-wallet-2/artifacts/d2wwykae_makerstab.svg';
+import { LOGO_URL, ORDER_URL } from '@/lib/theme';
 
 const Dashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -323,58 +323,67 @@ const Dashboard = ({ user, onLogout }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-lime-50">
+    <div className="min-h-screen cafeteria-bg">
       {/* Header */}
-      <div className="bg-white/70 backdrop-blur-lg border-b border-green-200 sticky top-0 z-50">
+      <div className="bg-white/60 backdrop-blur-lg border-b border-white/40 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4 flex justify-between items-center">
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-xl flex items-center justify-center shadow-lg border border-gray-200">
-              <img src={LOGO_URL} alt="MakersTab" className="w-5 h-5 sm:w-6 sm:h-6" />
+            <div className="w-10 h-10 sm:w-11 sm:h-11 bg-white rounded-2xl flex items-center justify-center sticker-shadow">
+              <img src={LOGO_URL} alt="MakersTab" className="w-6 h-6 sm:w-7 sm:h-7" />
             </div>
             <div>
-              <h1 className="text-lg sm:text-xl font-bold text-gray-800" style={{ fontFamily: 'Space Grotesk' }}>MakersTab</h1>
-              <p className="text-xs text-gray-600 hidden sm:block">Welcome, {user.name}</p>
+              <h1 className="font-display text-2xl sm:text-3xl text-emerald-700 leading-none">makerstab</h1>
+              <p className="text-xs text-gray-600 hidden sm:block mt-0.5">hey, {user.name} 👋</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
+            <a
+              href={ORDER_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full bg-violet-100 text-violet-700 font-medium px-4 py-2 text-sm hover:bg-violet-200 transition"
+              data-testid="order-button"
+            >
+              <ShoppingBag className="w-4 h-4" />
+              <span className="hidden sm:inline">Order</span>
+            </a>
+            <button
               onClick={() => navigate('/onecard')}
-              className="gap-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 text-sm"
+              className="inline-flex items-center gap-2 rounded-full bg-pink-100 text-pink-700 font-medium px-4 py-2 text-sm hover:bg-pink-200 transition"
               data-testid="onecard-button"
             >
               <CreditCard className="w-4 h-4" />
               <span className="hidden sm:inline">OneCard</span>
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => navigate('/admin')}
-              className="gap-2 bg-purple-50 text-purple-700 hover:bg-purple-100 hover:border-purple-300 text-sm"
-              data-testid="admin-panel-button"
-            >
-              <Users className="w-4 h-4" />
-              <span className="hidden sm:inline">Admin Panel</span>
-            </Button>
-            <Button
-              variant="outline"
+            </button>
+            {user?.is_admin && (
+              <button
+                onClick={() => navigate('/admin')}
+                className="inline-flex items-center gap-2 rounded-full bg-yellow-100 text-yellow-800 font-medium px-4 py-2 text-sm hover:bg-yellow-200 transition"
+                data-testid="admin-panel-button"
+              >
+                <Users className="w-4 h-4" />
+                <span className="hidden sm:inline">Admin</span>
+              </button>
+            )}
+            <button
               onClick={onLogout}
-              className="gap-2 hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-sm"
+              className="inline-flex items-center gap-2 rounded-full bg-white text-gray-700 font-medium px-4 py-2 text-sm border border-gray-200 hover:bg-gray-50 transition"
               data-testid="logout-button"
             >
               <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline">Logout</span>
-            </Button>
+              <span className="hidden sm:inline">Sign out</span>
+            </button>
           </div>
         </div>
 
         {/* Tabs directly below header - no margin */}
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4 pb-2">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="bg-white/80 backdrop-blur-sm p-1 shadow-md w-full sm:w-auto overflow-x-auto flex border-t border-green-100">
-              <TabsTrigger value="overview" data-testid="overview-tab" className="text-xs sm:text-sm flex-1 sm:flex-initial">Overview</TabsTrigger>
-              <TabsTrigger value="analytics" data-testid="analytics-tab" className="text-xs sm:text-sm flex-1 sm:flex-initial">Analytics</TabsTrigger>
-              <TabsTrigger value="events" data-testid="events-tab" className="text-xs sm:text-sm flex-1 sm:flex-initial">Events</TabsTrigger>
-              <TabsTrigger value="menu" data-testid="menu-tab" className="text-xs sm:text-sm flex-1 sm:flex-initial">Menu</TabsTrigger>
+            <TabsList className="bg-emerald-50/60 rounded-2xl p-1 shadow-sm w-full sm:w-auto overflow-x-auto flex">
+              <TabsTrigger value="overview" data-testid="overview-tab" className="rounded-xl text-xs sm:text-sm flex-1 sm:flex-initial data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow">Overview</TabsTrigger>
+              <TabsTrigger value="analytics" data-testid="analytics-tab" className="rounded-xl text-xs sm:text-sm flex-1 sm:flex-initial data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow">Analytics</TabsTrigger>
+              <TabsTrigger value="events" data-testid="events-tab" className="rounded-xl text-xs sm:text-sm flex-1 sm:flex-initial data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow">Events</TabsTrigger>
+              <TabsTrigger value="menu" data-testid="menu-tab" className="rounded-xl text-xs sm:text-sm flex-1 sm:flex-initial data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow">Menu</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -394,18 +403,18 @@ const Dashboard = ({ user, onLogout }) => {
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-2" data-testid="overview-content">
             {/* Current Balance & Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {/* Current Balance */}
-              <Card className="bg-gradient-to-br from-green-500 to-emerald-600 text-white border-0 shadow-lg">
-                <CardContent className="p-4">
+              <Card className="rounded-[2rem] bg-gradient-to-br from-emerald-500 to-emerald-700 text-white border-0 sticker-shadow">
+                <CardContent className="p-6">
                   <div className="space-y-1">
-                    <p className="text-xs opacity-90">Current Balance</p>
-                    <p className="text-3xl font-bold">
+                    <p className="uppercase tracking-[0.18em] text-[10px] font-semibold opacity-90">remaining</p>
+                    <p className="font-display text-5xl leading-none">
                       ${analytics?.current_balance?.toFixed(2) || user.meal_plan_amount?.toFixed(2) || '0.00'}
                     </p>
                     {receipts.length > 0 && (
-                      <p className="text-xs opacity-75">
-                        Last purchase: {new Date(receipts[0].receipt_date).toLocaleDateString()} {new Date(receipts[0].receipt_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      <p className="text-xs opacity-80 pt-2">
+                        last buy · {new Date(receipts[0].receipt_date).toLocaleDateString()} · {new Date(receipts[0].receipt_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     )}
                   </div>
@@ -414,11 +423,11 @@ const Dashboard = ({ user, onLogout }) => {
 
               {/* Weekly Recommendation */}
               {semesterInfo && (
-                <Card className="bg-gradient-to-br from-blue-500 to-cyan-600 text-white border-0 shadow-lg">
-                  <CardContent className="p-4">
+                <Card className="rounded-[2rem] bg-gradient-to-br from-orange-400 to-orange-500 text-white border-0 sticker-shadow">
+                  <CardContent className="p-6">
                     <div className="space-y-1">
-                      <p className="text-xs opacity-90">Recommended This Week</p>
-                      <p className="text-3xl font-bold">
+                      <p className="uppercase tracking-[0.18em] text-[10px] font-semibold opacity-90">this week's vibe</p>
+                      <p className="font-display text-5xl leading-none">
                         ${(() => {
                           const now = new Date();
                           const sunday = new Date(now);
@@ -430,8 +439,8 @@ const Dashboard = ({ user, onLogout }) => {
                           return remainingThisWeek.toFixed(2);
                         })()}
                       </p>
-                      <p className="text-xs opacity-75">
-                        Expected balance by Sunday: ${(() => {
+                      <p className="text-xs opacity-80 pt-2">
+                        Expected by Sunday: ${(() => {
                           const now = new Date();
                           const sunday = new Date(now);
                           sunday.setDate(now.getDate() + (7 - now.getDay()));

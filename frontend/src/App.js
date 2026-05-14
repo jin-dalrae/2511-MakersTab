@@ -5,6 +5,7 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { Toaster } from '@/components/ui/sonner';
 import { auth } from '@/lib/firebase';
 
+const Landing = lazy(() => import('./pages/Landing'));
 const AuthPage = lazy(() => import('./pages/AuthPage'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
@@ -72,11 +73,13 @@ function App() {
             <Route
               path="/"
               element={
-                isAuthenticated ? (
-                  <Navigate to="/dashboard" replace />
-                ) : (
-                  <AuthPage />
-                )
+                isAuthenticated ? <Navigate to="/dashboard" replace /> : <Landing />
+              }
+            />
+            <Route
+              path="/auth"
+              element={
+                isAuthenticated ? <Navigate to="/dashboard" replace /> : <AuthPage />
               }
             />
             <Route

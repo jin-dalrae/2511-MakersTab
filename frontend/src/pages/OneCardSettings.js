@@ -10,6 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ArrowLeft, RefreshCw, Unlink, AlertTriangle, ShieldAlert } from 'lucide-react';
+import { Blobs, cls } from '@/lib/theme';
 
 const formatCurrency = (n) =>
   typeof n === 'number' ? `$${n.toFixed(2)}` : '—';
@@ -42,8 +43,9 @@ const OneCardSettings = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-orange-50 to-yellow-50">
-        <div className="text-green-700">Loading OneCard…</div>
+      <div className={`${cls.pageBg} flex items-center justify-center`}>
+        <Blobs />
+        <div className="relative z-10 font-display text-3xl text-emerald-700">loading OneCard…</div>
       </div>
     );
   }
@@ -51,11 +53,20 @@ const OneCardSettings = () => {
   const connected = status?.connected;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-orange-50 to-yellow-50">
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        <Button variant="ghost" onClick={() => navigate('/dashboard')} className="mb-4">
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
-        </Button>
+    <div className={cls.pageBg}>
+      <Blobs />
+      <div className="relative z-10 max-w-3xl mx-auto px-4 py-8">
+        <button
+          onClick={() => navigate('/dashboard')}
+          className="inline-flex items-center gap-2 mb-6 text-sm text-gray-600 hover:text-emerald-700"
+        >
+          <ArrowLeft className="w-4 h-4" /> back to dashboard
+        </button>
+
+        <div className="mb-6">
+          <h1 className="font-display text-5xl text-emerald-700">your OneCard 💳</h1>
+          <p className="text-gray-600 mt-1">Live balance + transactions from CCA TouchNet.</p>
+        </div>
 
         <Card className="mb-4 border-amber-300 bg-amber-50">
           <CardHeader className="flex flex-row items-start gap-2 space-y-0">

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -7,13 +8,12 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Receipt, TrendingUp, History } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { auth } from '@/lib/firebase';
+import { Blobs, cls, LOGO_URL } from '@/lib/theme';
 
-const LOGO_URL = 'https://customer-assets.emergentagent.com/job_cafe-wallet-2/artifacts/d2wwykae_makerstab.svg';
 const PROFILE_KEY = (uid) => `makerstab_profile_${uid}`;
 const FIRST_USER_FLAG = 'makerstab_first_user_signed_up';
 
@@ -29,7 +29,6 @@ const AuthPage = () => {
     meal_plan_amount: '',
     semester: 'fall',
   });
-
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
 
@@ -37,11 +36,7 @@ const AuthPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const credential = await createUserWithEmailAndPassword(
-        auth,
-        signupData.email,
-        signupData.password,
-      );
+      const credential = await createUserWithEmailAndPassword(auth, signupData.email, signupData.password);
       await updateProfile(credential.user, { displayName: signupData.name });
 
       const isFirstUser = !localStorage.getItem(FIRST_USER_FLAG);
@@ -56,7 +51,7 @@ const AuthPage = () => {
         is_admin: isFirstUser,
       });
 
-      toast.success('Account created successfully!');
+      toast.success('Welcome to MakersTab ✨');
     } catch (error) {
       toast.error(prettyAuthError(error));
     } finally {
@@ -69,7 +64,7 @@ const AuthPage = () => {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, loginData.email, loginData.password);
-      toast.success('Welcome back!');
+      toast.success('Welcome back 👋');
     } catch (error) {
       toast.error(prettyAuthError(error));
     } finally {
@@ -77,210 +72,187 @@ const AuthPage = () => {
     }
   };
 
+  const fieldCls =
+    'mt-1 rounded-2xl border-2 border-emerald-100 bg-white focus-visible:ring-emerald-400';
+  const selectCls =
+    'mt-1 w-full px-4 py-2 rounded-2xl border-2 border-emerald-100 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400';
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
-      <div className="container mx-auto px-4 py-8 sm:py-12">
-        <div className="text-center mb-8 sm:mb-12">
-          <div className="inline-flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white rounded-2xl flex items-center justify-center shadow-lg">
-              <img src={LOGO_URL} alt="MakersTab" className="w-8 h-8 sm:w-10 sm:h-10" />
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-800" style={{ fontFamily: 'Space Grotesk' }}>
-              MakersTab
-            </h1>
+    <div className={cls.pageBg}>
+      <Blobs />
+
+      <header className="relative z-10 max-w-6xl mx-auto px-4 py-5 flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-3 hover-wobble">
+          <div className="w-11 h-11 rounded-2xl bg-white sticker-shadow flex items-center justify-center">
+            <img src={LOGO_URL} alt="MakersTab" className="w-7 h-7" />
           </div>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-4" style={{ fontFamily: 'Space Grotesk' }}>
-            Your Smart Meal Plan Companion
-          </h2>
-          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
-            Track spending, stay on budget, and never miss a meal at CCA
-          </p>
+          <span className="font-display text-3xl text-emerald-700">makerstab</span>
+        </Link>
+        <Link to="/" className="text-sm text-gray-600 hover:text-emerald-700 inline-flex items-center gap-1">
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </Link>
+      </header>
+
+      <section className="relative z-10 max-w-md mx-auto px-4 pt-2 pb-16">
+        <div className="text-center mb-8">
+          <h1 className="font-display text-5xl text-emerald-700 mb-2">say hi 🍊</h1>
+          <p className="text-gray-600">Let’s set up your tab.</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12 max-w-6xl mx-auto">
-          <div className="bg-gradient-to-br from-orange-400 to-amber-500 rounded-3xl p-6 text-white shadow-xl transform hover:scale-105 transition-all duration-300">
-            <div className="bg-white/20 rounded-2xl p-3 w-fit mb-4">
-              <Receipt className="w-8 h-8" />
-            </div>
-            <h3 className="font-bold text-lg mb-2" style={{ fontFamily: 'Space Grotesk' }}>Scan Receipts</h3>
-            <p className="text-sm text-white/90">Instant AI-powered receipt scanning. Just snap a photo!</p>
-          </div>
+        <div className={`${cls.card} p-2`}>
+          <Tabs defaultValue="signup" className="w-full">
+            <TabsList className="grid grid-cols-2 w-full bg-emerald-50/60 rounded-2xl p-1 mb-4">
+              <TabsTrigger
+                value="signup"
+                data-testid="signup-tab"
+                className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow"
+              >
+                New here
+              </TabsTrigger>
+              <TabsTrigger
+                value="login"
+                data-testid="login-tab"
+                className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow"
+              >
+                I have a tab
+              </TabsTrigger>
+            </TabsList>
 
-          <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-3xl p-6 text-white shadow-xl transform hover:scale-105 transition-all duration-300">
-            <div className="bg-white/20 rounded-2xl p-3 w-fit mb-4">
-              <TrendingUp className="w-8 h-8" />
-            </div>
-            <h3 className="font-bold text-lg mb-2" style={{ fontFamily: 'Space Grotesk' }}>Track Balance</h3>
-            <p className="text-sm text-white/90">Real-time balance updates. Know exactly what you have left.</p>
-          </div>
+            <TabsContent value="signup" className="px-4 pb-6">
+              <form onSubmit={handleSignup} className="space-y-4" data-testid="signup-form">
+                <div>
+                  <Label htmlFor="signup-name" className="text-sm font-medium">Your name</Label>
+                  <Input
+                    id="signup-name"
+                    data-testid="signup-name-input"
+                    type="text"
+                    placeholder="Rae Jin"
+                    value={signupData.name}
+                    onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
+                    required
+                    className={fieldCls}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="signup-email" className="text-sm font-medium">Email</Label>
+                  <Input
+                    id="signup-email"
+                    data-testid="signup-email-input"
+                    type="email"
+                    placeholder="you@cca.edu"
+                    value={signupData.email}
+                    onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
+                    required
+                    className={fieldCls}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="signup-password" className="text-sm font-medium">Password</Label>
+                  <Input
+                    id="signup-password"
+                    data-testid="signup-password-input"
+                    type="password"
+                    placeholder="At least 6 characters"
+                    value={signupData.password}
+                    onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
+                    required
+                    minLength={6}
+                    className={fieldCls}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="meal-plan" className="text-sm font-medium">Meal plan</Label>
+                  <select
+                    id="meal-plan"
+                    data-testid="meal-plan-select"
+                    className={selectCls}
+                    value={signupData.meal_plan_amount}
+                    onChange={(e) => setSignupData({ ...signupData, meal_plan_amount: e.target.value })}
+                    required
+                  >
+                    <option value="">Pick your plan</option>
+                    <option value="4005">Ultimate · $4,005</option>
+                    <option value="3466">Essential · $3,466</option>
+                    <option value="1865">Makers · $1,865</option>
+                    <option value="1031">Mini · $1,031</option>
+                    <option value="479">Micro · $479</option>
+                  </select>
+                </div>
+                <div>
+                  <Label htmlFor="semester" className="text-sm font-medium">Semester</Label>
+                  <select
+                    id="semester"
+                    data-testid="semester-select"
+                    className={selectCls}
+                    value={signupData.semester}
+                    onChange={(e) => setSignupData({ ...signupData, semester: e.target.value })}
+                    required
+                  >
+                    <option value="fall">Fall (Aug 25 – Jan 19)</option>
+                    <option value="spring">Spring (Jan 20 – May 17)</option>
+                    <option value="summer">Summer (May 18 – Aug 16)</option>
+                  </select>
+                </div>
+                <Button
+                  type="submit"
+                  className={`${cls.btnPrimary} w-full mt-2`}
+                  disabled={loading}
+                  data-testid="signup-submit-button"
+                >
+                  {loading ? 'Making your tab…' : 'Make my tab'}
+                </Button>
+              </form>
+            </TabsContent>
 
-          <div className="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-3xl p-6 text-white shadow-xl transform hover:scale-105 transition-all duration-300">
-            <div className="bg-white/20 rounded-2xl p-3 w-fit mb-4">
-              <History className="w-8 h-8" />
-            </div>
-            <h3 className="font-bold text-lg mb-2" style={{ fontFamily: 'Space Grotesk' }}>Daily Menu</h3>
-            <p className="text-sm text-white/90">Check what's cooking at Makers Cafe today.</p>
-          </div>
-
-          <div className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl p-6 text-white shadow-xl transform hover:scale-105 transition-all duration-300">
-            <div className="bg-white/20 rounded-2xl p-3 w-fit mb-4">
-              <TrendingUp className="w-8 h-8" />
-            </div>
-            <h3 className="font-bold text-lg mb-2" style={{ fontFamily: 'Space Grotesk' }}>Stay Organized</h3>
-            <p className="text-sm text-white/90">Weekly recommendations to keep you on track.</p>
-          </div>
+            <TabsContent value="login" className="px-4 pb-6">
+              <form onSubmit={handleLogin} className="space-y-4" data-testid="login-form">
+                <div>
+                  <Label htmlFor="login-email" className="text-sm font-medium">Email</Label>
+                  <Input
+                    id="login-email"
+                    data-testid="login-email-input"
+                    type="email"
+                    placeholder="you@cca.edu"
+                    value={loginData.email}
+                    onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                    required
+                    className={fieldCls}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="login-password" className="text-sm font-medium">Password</Label>
+                  <Input
+                    id="login-password"
+                    data-testid="login-password-input"
+                    type="password"
+                    placeholder="••••••••"
+                    value={loginData.password}
+                    onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                    required
+                    className={fieldCls}
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  className={`${cls.btnPrimary} w-full mt-2`}
+                  disabled={loading}
+                  data-testid="login-submit-button"
+                >
+                  {loading ? 'Signing in…' : 'Sign in'}
+                </Button>
+              </form>
+            </TabsContent>
+          </Tabs>
         </div>
 
-        <div className="max-w-md mx-auto">
-          <Card className="shadow-2xl border-0 bg-white rounded-3xl overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-600 text-white pb-8">
-              <CardTitle className="text-2xl sm:text-3xl text-center" style={{ fontFamily: 'Space Grotesk' }}>
-                Join MakersTab
-              </CardTitle>
-              <CardDescription className="text-center text-white/90 text-base">
-                Made for CCA students 🎨
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="signup" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-6">
-                  <TabsTrigger value="signup" data-testid="signup-tab">Sign Up</TabsTrigger>
-                  <TabsTrigger value="login" data-testid="login-tab">Login</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="signup">
-                  <form onSubmit={handleSignup} className="space-y-4" data-testid="signup-form">
-                    <div>
-                      <Label htmlFor="signup-name" className="text-sm">Full Name</Label>
-                      <Input
-                        id="signup-name"
-                        data-testid="signup-name-input"
-                        type="text"
-                        placeholder="John Doe"
-                        value={signupData.name}
-                        onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="signup-email" className="text-sm">Email</Label>
-                      <Input
-                        id="signup-email"
-                        data-testid="signup-email-input"
-                        type="email"
-                        placeholder="you@example.com"
-                        value={signupData.email}
-                        onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="signup-password" className="text-sm">Password</Label>
-                      <Input
-                        id="signup-password"
-                        data-testid="signup-password-input"
-                        type="password"
-                        placeholder="••••••••"
-                        value={signupData.password}
-                        onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
-                        required
-                        minLength={6}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="meal-plan" className="text-sm">Meal Plan</Label>
-                      <select
-                        id="meal-plan"
-                        data-testid="meal-plan-select"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white"
-                        value={signupData.meal_plan_amount}
-                        onChange={(e) => setSignupData({ ...signupData, meal_plan_amount: e.target.value })}
-                        required
-                      >
-                        <option value="">Select your meal plan</option>
-                        <option value="4005">Ultimate - $4,005</option>
-                        <option value="3466">Essential - $3,466</option>
-                        <option value="1865">Makers - $1,865</option>
-                        <option value="1031">Mini - $1,031</option>
-                        <option value="479">Micro - $479</option>
-                      </select>
-                    </div>
-                    <div>
-                      <Label htmlFor="semester" className="text-sm">Semester</Label>
-                      <select
-                        id="semester"
-                        data-testid="semester-select"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white"
-                        value={signupData.semester}
-                        onChange={(e) => setSignupData({ ...signupData, semester: e.target.value })}
-                        required
-                      >
-                        <option value="fall">Fall Semester (Aug 25 - Jan 19)</option>
-                        <option value="spring">Spring Semester (Jan 20 - May 17)</option>
-                        <option value="summer">Summer Semester (May 18 - Aug 16)</option>
-                      </select>
-                    </div>
-                    <Button
-                      type="submit"
-                      className="w-full bg-green-600 hover:bg-green-700 text-sm sm:text-base"
-                      disabled={loading}
-                      data-testid="signup-submit-button"
-                    >
-                      {loading ? 'Creating Account...' : 'Create Account'}
-                    </Button>
-                  </form>
-                </TabsContent>
-
-                <TabsContent value="login">
-                  <form onSubmit={handleLogin} className="space-y-4" data-testid="login-form">
-                    <div>
-                      <Label htmlFor="login-email" className="text-sm">Email</Label>
-                      <Input
-                        id="login-email"
-                        data-testid="login-email-input"
-                        type="email"
-                        placeholder="you@example.com"
-                        value={loginData.email}
-                        onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="login-password" className="text-sm">Password</Label>
-                      <Input
-                        id="login-password"
-                        data-testid="login-password-input"
-                        type="password"
-                        placeholder="••••••••"
-                        value={loginData.password}
-                        onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <Button
-                      type="submit"
-                      className="w-full bg-green-600 hover:bg-green-700 text-sm sm:text-base"
-                      disabled={loading}
-                      data-testid="login-submit-button"
-                    >
-                      {loading ? 'Signing In...' : 'Sign In'}
-                    </Button>
-                  </form>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              By signing up, you agree to our{' '}
-              <a href="/terms" className="text-green-600 hover:underline font-medium">Terms</a>
-              {' '}and{' '}
-              <a href="/privacy" className="text-green-600 hover:underline font-medium">Privacy Policy</a>
-            </p>
-          </div>
-        </div>
-      </div>
+        <p className="mt-6 text-center text-xs text-gray-500">
+          By continuing, you agree to our{' '}
+          <Link to="/terms" className="text-emerald-700 hover:underline">Terms</Link>
+          {' and '}
+          <Link to="/privacy" className="text-emerald-700 hover:underline">Privacy Policy</Link>.
+        </p>
+      </section>
     </div>
   );
 };

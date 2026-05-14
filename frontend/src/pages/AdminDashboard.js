@@ -199,38 +199,36 @@ const AdminDashboard = ({ user, onLogout }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-lime-50">
+    <div className="min-h-screen cafeteria-bg">
       {/* Header */}
-      <div className="bg-white/70 backdrop-blur-lg border-b border-green-200 sticky top-0 z-50">
+      <div className="bg-white/60 backdrop-blur-lg border-b border-white/40 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4 flex justify-between items-center">
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-xl flex items-center justify-center shadow-lg border border-gray-200">
-              <img src={LOGO_URL} alt="MakersTab" className="w-5 h-5 sm:w-6 sm:h-6" />
+            <div className="w-10 h-10 sm:w-11 sm:h-11 bg-white rounded-2xl flex items-center justify-center sticker-shadow">
+              <img src={LOGO_URL} alt="MakersTab" className="w-6 h-6 sm:w-7 sm:h-7" />
             </div>
             <div>
-              <h1 className="text-lg sm:text-xl font-bold text-gray-800" style={{fontFamily: 'Space Grotesk'}}>MakersTab Admin</h1>
-              <p className="text-xs text-gray-600 hidden sm:block">Welcome, {user.name}</p>
+              <h1 className="font-display text-2xl sm:text-3xl text-emerald-700 leading-none">makerstab · admin</h1>
+              <p className="text-xs text-gray-600 hidden sm:block mt-0.5">hey, {user.name} 👋</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
+            <button
               onClick={() => navigate('/dashboard')}
-              className="gap-2 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:border-blue-300 text-sm"
+              className="inline-flex items-center gap-2 rounded-full bg-emerald-100 text-emerald-700 font-medium px-4 py-2 text-sm hover:bg-emerald-200 transition"
               data-testid="back-to-user-button"
             >
               <Receipt className="w-4 h-4" />
-              <span className="hidden sm:inline">My Dashboard</span>
-            </Button>
-            <Button 
-              variant="outline" 
+              <span className="hidden sm:inline">My dashboard</span>
+            </button>
+            <button
               onClick={onLogout}
-              className="gap-2 hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-sm"
+              className="inline-flex items-center gap-2 rounded-full bg-white text-gray-700 font-medium px-4 py-2 text-sm border border-gray-200 hover:bg-gray-50 transition"
               data-testid="logout-button"
             >
               <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline">Logout</span>
-            </Button>
+              <span className="hidden sm:inline">Sign out</span>
+            </button>
           </div>
         </div>
       </div>
