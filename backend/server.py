@@ -28,6 +28,18 @@ load_dotenv(ROOT_DIR / '.env')
 # Import menu scraper
 from menu_scraper import scrape_and_save_menu, scrape_and_save_menu_async
 
+# Firebase Auth (ID token verification)
+from firebase_auth import verify_id_token, FirebaseAuthError
+
+# OneCard (TouchNet OneWeb) integration
+from onecard import (
+    setup_onecard_routes,
+    scheduled_onecard_refresh,
+    CREDENTIALS_COLLECTION as ONECARD_CREDENTIALS_COLLECTION,
+    BALANCES_COLLECTION as ONECARD_BALANCES_COLLECTION,
+    TRANSACTIONS_COLLECTION as ONECARD_TRANSACTIONS_COLLECTION,
+)
+
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
@@ -288,22 +300,35 @@ def create_token(user_id: str) -> str:
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """
+    Verify a Firebase ID token and return the corresponding Mongo user record.
+    Creates a minimal record on first authenticated request so new Firebase signups
+    don't need a separate backend signup call.
+    """
     try:
-        token = credentials.credentials
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        user_id = payload.get('user_id')
-        if not user_id:
-            raise HTTPException(status_code=401, detail="Invalid token")
-        
-        user = await db.users.find_one({"id": user_id}, {"_id": 0})
-        if not user:
-            raise HTTPException(status_code=401, detail="User not found")
-        
+        claims = verify_id_token(credentials.credentials)
+    except FirebaseAuthError as e:
+        raise HTTPException(status_code=401, detail=f"Invalid token: {e}")
+
+    uid = claims["sub"]
+    user = await db.users.find_one({"id": uid}, {"_id": 0})
+    if user:
         return user
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token expired")
-    except Exception as e:
-        raise HTTPException(status_code=401, detail="Invalid token")
+
+    # First request from a new Firebase user — provision a minimal record.
+    new_user = {
+        "id": uid,
+        "email": claims.get("email", ""),
+        "name": claims.get("name") or claims.get("email", "").split("@")[0],
+        "password_hash": "",  # Auth lives in Firebase now
+        "meal_plan_amount": 0.0,
+        "initial_meal_plan_amount": 0.0,
+        "semester": "fall",
+        "is_admin": False,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.users.insert_one(new_user)
+    return new_user
 
 async def get_admin_user(current_user: dict = Depends(get_current_user)):
     if not current_user.get('is_admin', False):
@@ -1778,6 +1803,9 @@ async def admin_delete_event(
         logger.error(f"Error deleting event: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to delete event")
 
+# Register OneCard routes on api_router before mounting
+setup_onecard_routes(api_router, db, get_current_user)
+
 # Include the router in the main app
 app.include_router(api_router)
 
@@ -1823,9 +1851,10 @@ async def global_exception_handler(request: Request, exc: Exception):
 async def startup_db_client():
     """Create database indexes for performance and initialize scheduler"""
     try:
-        # Users collection indexes
-        await db.users.create_index("email", unique=True)
-        await db.users.create_index("id")
+        # Users collection indexes — email is sparse since Firebase Auth allows
+        # users without an email (e.g. phone or anonymous providers).
+        await db.users.create_index("email", unique=True, sparse=True)
+        await db.users.create_index("id", unique=True)
         await db.users.create_index([("is_admin", 1)])
         
         # Receipts collection indexes
@@ -1848,7 +1877,15 @@ async def startup_db_client():
         await db.cafe_menu_items.create_index("item_id")
         await db.cafe_menu_items.create_index([("meal_period", 1)])
         await db.cafe_menu_items.create_index([("station", 1)])
-        
+
+        # OneCard collection indexes
+        await db[ONECARD_CREDENTIALS_COLLECTION].create_index("user_id", unique=True)
+        await db[ONECARD_BALANCES_COLLECTION].create_index([("user_id", 1), ("pot_name", 1)])
+        await db[ONECARD_TRANSACTIONS_COLLECTION].create_index(
+            [("user_id", 1), ("fingerprint", 1)], unique=True
+        )
+        await db[ONECARD_TRANSACTIONS_COLLECTION].create_index([("user_id", 1), ("occurred_at", -1)])
+
         logging.info("Database indexes created successfully")
         
         # Initialize scheduler for menu scraping
@@ -1866,7 +1903,19 @@ async def startup_db_client():
                 replace_existing=True
             )
             logging.info("Menu scraper scheduled for 4:00 AM daily")
-        
+
+        # OneCard refresh: every 4 hours. Each connected user triggers an Okta push
+        # to their phone on session re-auth, so we keep the cadence low.
+        scheduler.add_job(
+            lambda: scheduled_onecard_refresh(db),
+            'interval',
+            hours=4,
+            id='onecard_refresh',
+            name='OneCard balance + transaction refresh',
+            replace_existing=True,
+        )
+        logging.info("OneCard refresh scheduled every 4 hours")
+
         scheduler.start()
         app.state.scheduler = scheduler
         

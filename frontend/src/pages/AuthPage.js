@@ -1,5 +1,9 @@
 import { useState } from 'react';
-import { mockApi } from '@/services/mockApi';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,37 +11,54 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { Receipt, TrendingUp, History } from 'lucide-react';
+import { auth } from '@/lib/firebase';
 
 const LOGO_URL = 'https://customer-assets.emergentagent.com/job_cafe-wallet-2/artifacts/d2wwykae_makerstab.svg';
+const PROFILE_KEY = (uid) => `makerstab_profile_${uid}`;
+const FIRST_USER_FLAG = 'makerstab_first_user_signed_up';
 
-const AuthPage = ({ onLogin }) => {
+function saveLocalProfile(uid, profile) {
+  localStorage.setItem(PROFILE_KEY(uid), JSON.stringify(profile));
+}
+
+const AuthPage = () => {
   const [signupData, setSignupData] = useState({
     name: '',
     email: '',
     password: '',
     meal_plan_amount: '',
-    semester: 'fall'
+    semester: 'fall',
   });
 
-  const [loginData, setLoginData] = useState({
-    email: '',
-    password: ''
-  });
-
+  const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
 
   const handleSignup = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await mockApi.auth.signup({
-        ...signupData,
-        meal_plan_amount: parseFloat(signupData.meal_plan_amount)
+      const credential = await createUserWithEmailAndPassword(
+        auth,
+        signupData.email,
+        signupData.password,
+      );
+      await updateProfile(credential.user, { displayName: signupData.name });
+
+      const isFirstUser = !localStorage.getItem(FIRST_USER_FLAG);
+      if (isFirstUser) localStorage.setItem(FIRST_USER_FLAG, '1');
+
+      const mealPlan = parseFloat(signupData.meal_plan_amount) || 0;
+      saveLocalProfile(credential.user.uid, {
+        name: signupData.name,
+        meal_plan_amount: mealPlan,
+        initial_meal_plan_amount: mealPlan,
+        semester: signupData.semester,
+        is_admin: isFirstUser,
       });
+
       toast.success('Account created successfully!');
-      onLogin(response.data.token, response.data.user);
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Signup failed');
+      toast.error(prettyAuthError(error));
     } finally {
       setLoading(false);
     }
@@ -47,11 +68,10 @@ const AuthPage = ({ onLogin }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await mockApi.auth.login(loginData);
+      await signInWithEmailAndPassword(auth, loginData.email, loginData.password);
       toast.success('Welcome back!');
-      onLogin(response.data.token, response.data.user);
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Login failed');
+      toast.error(prettyAuthError(error));
     } finally {
       setLoading(false);
     }
@@ -59,9 +79,7 @@ const AuthPage = ({ onLogin }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
-      {/* Hero Section */}
       <div className="container mx-auto px-4 py-8 sm:py-12">
-        {/* Logo and Title */}
         <div className="text-center mb-8 sm:mb-12">
           <div className="inline-flex items-center gap-3 mb-6">
             <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white rounded-2xl flex items-center justify-center shadow-lg">
@@ -79,9 +97,7 @@ const AuthPage = ({ onLogin }) => {
           </p>
         </div>
 
-        {/* Feature Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12 max-w-6xl mx-auto">
-          {/* Scan Receipts */}
           <div className="bg-gradient-to-br from-orange-400 to-amber-500 rounded-3xl p-6 text-white shadow-xl transform hover:scale-105 transition-all duration-300">
             <div className="bg-white/20 rounded-2xl p-3 w-fit mb-4">
               <Receipt className="w-8 h-8" />
@@ -90,7 +106,6 @@ const AuthPage = ({ onLogin }) => {
             <p className="text-sm text-white/90">Instant AI-powered receipt scanning. Just snap a photo!</p>
           </div>
 
-          {/* Track Balance */}
           <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-3xl p-6 text-white shadow-xl transform hover:scale-105 transition-all duration-300">
             <div className="bg-white/20 rounded-2xl p-3 w-fit mb-4">
               <TrendingUp className="w-8 h-8" />
@@ -99,7 +114,6 @@ const AuthPage = ({ onLogin }) => {
             <p className="text-sm text-white/90">Real-time balance updates. Know exactly what you have left.</p>
           </div>
 
-          {/* View Menu */}
           <div className="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-3xl p-6 text-white shadow-xl transform hover:scale-105 transition-all duration-300">
             <div className="bg-white/20 rounded-2xl p-3 w-fit mb-4">
               <History className="w-8 h-8" />
@@ -108,7 +122,6 @@ const AuthPage = ({ onLogin }) => {
             <p className="text-sm text-white/90">Check what's cooking at Makers Cafe today.</p>
           </div>
 
-          {/* Stay Organized */}
           <div className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl p-6 text-white shadow-xl transform hover:scale-105 transition-all duration-300">
             <div className="bg-white/20 rounded-2xl p-3 w-fit mb-4">
               <TrendingUp className="w-8 h-8" />
@@ -118,7 +131,6 @@ const AuthPage = ({ onLogin }) => {
           </div>
         </div>
 
-        {/* Auth Section */}
         <div className="max-w-md mx-auto">
           <Card className="shadow-2xl border-0 bg-white rounded-3xl overflow-hidden">
             <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-600 text-white pb-8">
@@ -131,10 +143,9 @@ const AuthPage = ({ onLogin }) => {
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="signup" className="w-full">
-                <TabsList className="grid w-full grid-cols-3 mb-6">
+                <TabsList className="grid w-full grid-cols-2 mb-6">
                   <TabsTrigger value="signup" data-testid="signup-tab">Sign Up</TabsTrigger>
                   <TabsTrigger value="login" data-testid="login-tab">Login</TabsTrigger>
-                  <TabsTrigger value="quick">Quick Access</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="signup">
@@ -173,6 +184,7 @@ const AuthPage = ({ onLogin }) => {
                         value={signupData.password}
                         onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
                         required
+                        minLength={6}
                       />
                     </div>
                     <div>
@@ -255,39 +267,10 @@ const AuthPage = ({ onLogin }) => {
                     </Button>
                   </form>
                 </TabsContent>
-
-                <TabsContent value="quick">
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="access-code" className="text-sm">Access Code</Label>
-                      <Input
-                        id="access-code"
-                        type="password"
-                        placeholder="Enter 4-digit code"
-                        onKeyDown={async (e) => {
-                          if (e.key === 'Enter') {
-                            setLoading(true);
-                            try {
-                              const response = await mockApi.auth.validatePasscode(e.target.value);
-                              toast.success('Access Granted');
-                              onLogin(response.data.token, response.data.user);
-                            } catch (error) {
-                              toast.error(error.response?.data?.detail || 'Invalid Code');
-                            } finally {
-                              setLoading(false);
-                            }
-                          }
-                        }}
-                      />
-                      <p className="text-xs text-gray-500 mt-2">Press Enter to submit</p>
-                    </div>
-                  </div>
-                </TabsContent>
               </Tabs>
             </CardContent>
           </Card>
 
-          {/* Footer Links */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               By signing up, you agree to our{' '}
@@ -301,5 +284,26 @@ const AuthPage = ({ onLogin }) => {
     </div>
   );
 };
+
+function prettyAuthError(error) {
+  const code = error?.code || '';
+  switch (code) {
+    case 'auth/invalid-credential':
+    case 'auth/wrong-password':
+      return 'Invalid email or password';
+    case 'auth/user-not-found':
+      return 'No account found for that email';
+    case 'auth/email-already-in-use':
+      return 'An account already exists for that email';
+    case 'auth/weak-password':
+      return 'Password should be at least 6 characters';
+    case 'auth/invalid-email':
+      return 'That email address looks wrong';
+    case 'auth/too-many-requests':
+      return 'Too many attempts — try again in a few minutes';
+    default:
+      return error?.message || 'Authentication failed';
+  }
+}
 
 export default AuthPage;

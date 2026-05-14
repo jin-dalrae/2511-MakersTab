@@ -20,7 +20,8 @@ import {
   Wine,
   ShoppingBag,
   Users,
-  Trash2
+  Trash2,
+  CreditCard
 } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
@@ -336,6 +337,15 @@ const Dashboard = ({ user, onLogout }) => {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => navigate('/onecard')}
+              className="gap-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 text-sm"
+              data-testid="onecard-button"
+            >
+              <CreditCard className="w-4 h-4" />
+              <span className="hidden sm:inline">OneCard</span>
+            </Button>
             <Button
               variant="outline"
               onClick={() => navigate('/admin')}

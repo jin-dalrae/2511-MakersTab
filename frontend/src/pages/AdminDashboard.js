@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API } from '../App';
+import { getAuthHeaders } from '@/lib/firebase';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -52,8 +53,7 @@ const AdminDashboard = ({ user, onLogout }) => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const headers = { Authorization: `Bearer ${token}` };
+      const headers = await getAuthHeaders();
 
       const [statsRes, usersRes, todayRes, menuRes, cafeItemsRes, scraperSettingsRes] = await Promise.all([
         axios.get(`${API}/admin/statistics`, { headers }),
@@ -85,13 +85,11 @@ const AdminDashboard = ({ user, onLogout }) => {
   const handleAddMenuItem = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
+      const headers = await getAuthHeaders();
       await axios.post(`${API}/menu`, {
         ...newMenuItem,
         price: parseFloat(newMenuItem.price)
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      }, { headers });
       toast.success('Menu item added successfully!');
       setNewMenuItem({ name: '', category: 'meal', price: '', description: '' });
       fetchData();
@@ -102,10 +100,8 @@ const AdminDashboard = ({ user, onLogout }) => {
 
   const handleDeleteMenuItem = async (itemId) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`${API}/menu/${itemId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const headers = await getAuthHeaders();
+      await axios.delete(`${API}/menu/${itemId}`, { headers });
       toast.success('Menu item deleted');
       fetchData();
     } catch (error) {
@@ -116,10 +112,8 @@ const AdminDashboard = ({ user, onLogout }) => {
   const handleManualScrape = async () => {
     setScraping(true);
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.post(`${API}/admin/scrape-menu`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const headers = await getAuthHeaders();
+      const response = await axios.post(`${API}/admin/scrape-menu`, {}, { headers });
       
       if (response.data.success) {
         toast.success(`Menu scraped successfully! ${response.data.total_items} items found.`);
@@ -136,13 +130,11 @@ const AdminDashboard = ({ user, onLogout }) => {
 
   const handleToggleAutoScrape = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const headers = await getAuthHeaders();
       await axios.post(`${API}/admin/scraper-settings`, {
         auto_scrape_enabled: !scraperSettings.auto_scrape_enabled,
         scrape_time: scraperSettings.scrape_time || '04:00'
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      }, { headers });
       
       toast.success(`Auto-scraping ${!scraperSettings.auto_scrape_enabled ? 'enabled' : 'disabled'}`);
       fetchData();
@@ -153,10 +145,8 @@ const AdminDashboard = ({ user, onLogout }) => {
 
   const handleToggleAdmin = async (userId) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.patch(`${API}/admin/users/${userId}/toggle-admin`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const headers = await getAuthHeaders();
+      await axios.patch(`${API}/admin/users/${userId}/toggle-admin`, {}, { headers });
       toast.success('User admin status updated');
       fetchData();
     } catch (error) {
@@ -170,10 +160,8 @@ const AdminDashboard = ({ user, onLogout }) => {
     }
     
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`${API}/admin/users/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const headers = await getAuthHeaders();
+      await axios.delete(`${API}/admin/users/${userId}`, { headers });
       toast.success('User deleted successfully');
       fetchData();
     } catch (error) {

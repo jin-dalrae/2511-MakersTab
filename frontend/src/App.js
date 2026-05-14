@@ -1,53 +1,55 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import '@/App.css';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { Toaster } from '@/components/ui/sonner';
-import { mockApi } from '@/services/mockApi';
+import { auth } from '@/lib/firebase';
 
-// Lazy load pages for code splitting
 const AuthPage = lazy(() => import('./pages/AuthPage'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const TermsOfService = lazy(() => import('./pages/TermsOfService'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const OneCardSettings = lazy(() => import('./pages/OneCardSettings'));
 
-// Legacy API constant for any files not yet migrated (though we should migrate all)
 export const API = 'http://localhost:8000/api';
 
+const PROFILE_KEY = (uid) => `makerstab_profile_${uid}`;
+
+function buildUserFromFirebase(fbUser) {
+  if (!fbUser) return null;
+  const stored = (() => {
+    try {
+      return JSON.parse(localStorage.getItem(PROFILE_KEY(fbUser.uid)) || '{}');
+    } catch {
+      return {};
+    }
+  })();
+  return {
+    id: fbUser.uid,
+    email: fbUser.email,
+    name: fbUser.displayName || stored.name || fbUser.email?.split('@')[0] || '',
+    meal_plan_amount: stored.meal_plan_amount ?? 0,
+    initial_meal_plan_amount: stored.initial_meal_plan_amount ?? stored.meal_plan_amount ?? 0,
+    semester: stored.semester || 'fall',
+    is_admin: Boolean(stored.is_admin),
+  };
+}
+
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkAuth();
+    const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
+      setUser(buildUserFromFirebase(fbUser));
+      setLoading(false);
+    });
+    return unsubscribe;
   }, []);
 
-  const checkAuth = async () => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const response = await mockApi.auth.me();
-        setUser(response.data);
-        setIsAuthenticated(true);
-      } catch (error) {
-        localStorage.removeItem('token');
-        setIsAuthenticated(false);
-      }
-    }
-    setLoading(false);
-  };
-
-  const handleLogin = (token, userData) => {
-    localStorage.setItem('token', token);
-    setUser(userData);
-    setIsAuthenticated(true);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
-    setIsAuthenticated(false);
+  const handleLogout = async () => {
+    await signOut(auth);
   };
 
   const LoadingScreen = () => (
@@ -60,6 +62,8 @@ function App() {
     return <LoadingScreen />;
   }
 
+  const isAuthenticated = Boolean(user);
+
   return (
     <div className="App">
       <BrowserRouter>
@@ -71,7 +75,7 @@ function App() {
                 isAuthenticated ? (
                   <Navigate to="/dashboard" replace />
                 ) : (
-                  <AuthPage onLogin={handleLogin} />
+                  <AuthPage />
                 )
               }
             />
@@ -90,6 +94,16 @@ function App() {
               element={
                 isAuthenticated && user?.is_admin ? (
                   <AdminDashboard user={user} onLogout={handleLogout} />
+                ) : (
+                  <Navigate to="/" replace />
+                )
+              }
+            />
+            <Route
+              path="/onecard"
+              element={
+                isAuthenticated ? (
+                  <OneCardSettings user={user} />
                 ) : (
                   <Navigate to="/" replace />
                 )
