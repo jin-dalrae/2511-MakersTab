@@ -13,7 +13,7 @@ const TermsOfService = lazy(() => import('./pages/TermsOfService'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const OneCardSettings = lazy(() => import('./pages/OneCardSettings'));
 
-export const API = 'http://localhost:8000/api';
+export const API = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
 const PROFILE_KEY = (uid) => `makerstab_profile_${uid}`;
 
