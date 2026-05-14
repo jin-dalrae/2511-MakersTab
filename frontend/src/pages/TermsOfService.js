@@ -1,38 +1,33 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-
-const LOGO_URL = 'https://customer-assets.emergentagent.com/job_cafe-wallet-2/artifacts/d2wwykae_makerstab.svg';
+import { Blobs, cls, LOGO_URL } from '@/lib/theme';
 
 const TermsOfService = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-lime-50">
+    <div className={cls.pageBg}>
+      <Blobs />
+
       {/* Header */}
-      <div className="bg-white/70 backdrop-blur-lg border-b border-green-200 sticky top-0 z-50">
+      <div className="relative z-10 bg-white/60 backdrop-blur-lg border-b border-white/40 sticky top-0">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
-          <Button
-            variant="ghost"
-            onClick={() => window.location.href = '/'}
-            className="gap-2"
-          >
+          <Link to="/" className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-emerald-700">
             <ArrowLeft className="w-4 h-4" />
-            Back
-          </Button>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+            back
+          </Link>
+          <div className="flex items-center gap-2 ml-2">
+            <div className="w-9 h-9 bg-white rounded-2xl flex items-center justify-center sticker-shadow">
               <img src={LOGO_URL} alt="MakersTab" className="w-6 h-6" />
             </div>
-            <h1 className="text-xl font-bold text-gray-800" style={{fontFamily: 'Space Grotesk'}}>MakersTab</h1>
+            <span className="font-display text-2xl text-emerald-700">makerstab</span>
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 sm:p-10">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-2" style={{fontFamily: 'Space Grotesk'}}>
-            Terms of Service
-          </h1>
+      <div className="relative z-10 max-w-4xl mx-auto px-4 py-8 sm:py-12">
+        <div className={`${cls.card} p-6 sm:p-10`}>
+          <h1 className="font-display text-5xl sm:text-6xl text-emerald-700 mb-2">terms of service</h1>
           <p className="text-sm text-gray-500 mb-8">Last updated: November 19, 2025</p>
 
           <div className="prose prose-green max-w-none space-y-8">

@@ -21,8 +21,7 @@ import {
   ShoppingBag,
   Users,
   Trash2,
-  CreditCard,
-  ShoppingBag
+  CreditCard
 } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { LOGO_URL, ORDER_URL } from '@/lib/theme';
