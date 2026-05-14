@@ -103,3 +103,7 @@ frontend/node_modules/.cache/default-development/0.pack
 # Environment files
 *.env
 *.env.*
+
+# Firebase CLI noise
+firebase-debug.log*
+.firebase/
