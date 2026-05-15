@@ -4,9 +4,9 @@ The frontend already lives on Firebase Hosting at `https://makerstab-app-001.web
 deploys the FastAPI backend (auth verification, receipt OCR, OneCard scraper, cafe menu scraping)
 to Fly.io so the live site's OneCard tab and admin features actually work.
 
-Why Fly.io: Playwright ships a ~600MB Chromium binary. Cloud Run cold-starts on that are brutal
-(and exceed the 90s Okta push window we use). Fly's always-warm machines fit better. Render or
-a regular Docker host work too; the `Dockerfile` is portable.
+Why Fly.io: simple single-VM Docker deploy with a generous free allowance. The backend is a
+plain FastAPI + Mongo client app (no Chromium / Playwright), so any Docker host — Render,
+Railway, Cloud Run — works equally well; the `Dockerfile` is portable.
 
 ## Prerequisites
 
@@ -47,12 +47,11 @@ fly secrets set \
   MONGO_URL='mongodb+srv://user:pass@cluster.mongodb.net/?retryWrites=true&w=majority' \
   DB_NAME='makerstab' \
   FIREBASE_PROJECT_ID='makerstab-app-001' \
-  EMERGENT_LLM_KEY='sk-...' \
-  ONECARD_ENCRYPTION_KEY="$(python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())')"
+  EMERGENT_LLM_KEY='sk-...'
 ```
 
-Anything you skip will return a 503 from the matching feature (e.g. OneCard refuses to connect
-without `ONECARD_ENCRYPTION_KEY`).
+`EMERGENT_LLM_KEY` powers receipt OCR; skip it and only the scanner is degraded.
+OneCard import needs no secret — it just parses pasted text.
 
 ## Deploy
 
@@ -60,7 +59,7 @@ without `ONECARD_ENCRYPTION_KEY`).
 fly deploy
 ```
 
-Fly builds the Docker image (Playwright base + Python deps + app), pushes to its registry,
+Fly builds the Docker image (python:3.12-slim + deps + app), pushes to its registry,
 and rolls out the machine. The `/api/health` healthcheck must pass within 30s for the rollout
 to succeed. If it fails, check `fly logs`.
 
@@ -106,9 +105,10 @@ fly secrets set CORS_ORIGINS='https://makerstab-app-001.web.app,https://makersta
 
 ## Cost notes
 
-- `shared-cpu-2x` + 2GB RAM + `min_machines_running=1` ≈ **$3–5/month** at the time of writing.
-- If you can tolerate cold starts, drop `min_machines_running` to `0` — costs go to ~$0 when idle,
-  but the OneCard "Connect" call will time out on the first attempt of a cold day. Pick your poison.
+- `shared-cpu-1x` + 512MB RAM + `min_machines_running=0` is essentially free at this scale —
+  the machine sleeps when idle and cold-starts in a few seconds on the next request.
+- Bump `min_machines_running` to `1` in `fly.toml` if you want to avoid that first-request
+  cold start; it's only a couple dollars a month.
 
 ## Rolling back
 
@@ -127,7 +127,7 @@ If you'd rather use Render:
 2. Build command: (blank — Dockerfile detected automatically)
 3. Start command: (blank — Dockerfile `CMD`)
 4. Environment: copy the same secrets
-5. Instance type: at least **Standard 2 GB** (Chromium needs the RAM)
+5. Instance type: the free or starter tier is plenty (no Chromium, light memory footprint)
 
 Render's cold start is slower than Fly's by ~10s, but you get a free static IP and easy
 custom domains in exchange.

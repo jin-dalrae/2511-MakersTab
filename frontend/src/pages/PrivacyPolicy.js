@@ -80,17 +80,18 @@ const PrivacyPolicy = () => {
                 We scrape and display publicly available menu information from Cafe Bon Appetit's website. This data is stored temporarily and updated daily.
               </p>
 
-              <h3 className="text-xl font-semibold text-gray-800 mb-3 mt-6">5. OneCard Integration (only if you opt in)</h3>
+              <h3 className="text-xl font-semibold text-gray-800 mb-3 mt-6">5. OneCard Import (only if you use it)</h3>
               <p className="text-gray-700 leading-relaxed mb-2">
-                If you connect your CCA OneCard on the OneCard settings page, we additionally collect and store:
+                The OneCard feature is a manual paste-import. We never ask for your CCA login and
+                never access TouchNet ourselves. If you paste a statement, we store only:
               </p>
               <ul className="list-disc list-inside text-gray-700 space-y-2">
-                <li>The CCA SSO username and password you provide, <strong>encrypted at rest with Fernet (AES-128-CBC + HMAC)</strong> using a key held only by the backend server</li>
-                <li>TouchNet OneWeb session cookies, also encrypted at rest</li>
-                <li>Your OneCard balance(s) and recent transaction history pulled from <em>secure.touchnet.net</em> on your behalf</li>
+                <li>The balance amount(s) parsed from the text you pasted</li>
+                <li>Transaction rows (code, date-time, amount, running balance) parsed from the text you pasted</li>
               </ul>
               <p className="text-gray-700 leading-relaxed mt-3">
-                You can disconnect at any time. Disconnecting permanently wipes encrypted credentials, cookies, balances, and OneCard transactions from MakersTab's database.
+                No CCA credentials, session cookies, or tokens are ever sent to or stored by MakersTab.
+                "Clear all" on the OneCard page permanently deletes every imported balance and transaction.
               </p>
             </section>
 
@@ -118,7 +119,7 @@ const PrivacyPolicy = () => {
                 <li>Authentication delegated to Firebase Authentication (passwords never reach our servers)</li>
                 <li>Firebase ID token verification on every backend request</li>
                 <li>HTTPS encryption for all data transmission</li>
-                <li>OneCard credentials and session cookies encrypted at rest with Fernet</li>
+                <li>No CCA credentials are ever collected — OneCard data is manual paste-import only</li>
               </ul>
               <p className="text-gray-700 leading-relaxed mt-3">
                 <strong>Limitations:</strong> While we take reasonable measures to protect your data, no internet-based service is 100% secure. We cannot guarantee absolute security against unauthorized access or data breaches.
@@ -149,11 +150,6 @@ const PrivacyPolicy = () => {
               <h3 className="text-xl font-semibold text-gray-800 mb-2 mt-4">Firebase (Google)</h3>
               <p className="text-gray-700 leading-relaxed">
                 Firebase Authentication handles login, password storage, and session tokens. Firebase Hosting serves the MakersTab web app. Google's privacy practices apply to data Firebase collects (sign-in IP, user agent, etc.).
-              </p>
-
-              <h3 className="text-xl font-semibold text-gray-800 mb-2 mt-4">TouchNet OneWeb (opt-in)</h3>
-              <p className="text-gray-700 leading-relaxed">
-                If you connect your CCA OneCard, MakersTab logs in to <em>secure.touchnet.net</em> as you, using credentials you provided, to read balance and transaction data. We do not transmit MakersTab user data <em>to</em> TouchNet.
               </p>
 
               <h3 className="text-xl font-semibold text-gray-800 mb-2 mt-4">Zipthru / Bon Appétit Online Ordering</h3>

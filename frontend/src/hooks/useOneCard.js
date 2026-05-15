@@ -3,28 +3,20 @@ import { toast } from 'sonner';
 import { onecardApi } from '@/services/onecardApi';
 
 export function useOneCard() {
-  const [status, setStatus] = useState(null);
   const [balances, setBalances] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const [importing, setImporting] = useState(false);
 
   const loadAll = useCallback(async () => {
     setLoading(true);
     try {
-      const statusRes = await onecardApi.status();
-      setStatus(statusRes.data);
-      if (statusRes.data.connected) {
-        const [balRes, txRes] = await Promise.all([
-          onecardApi.balance(),
-          onecardApi.transactions(50),
-        ]);
-        setBalances(balRes.data);
-        setTransactions(txRes.data);
-      } else {
-        setBalances([]);
-        setTransactions([]);
-      }
+      const [balRes, txRes] = await Promise.all([
+        onecardApi.balance(),
+        onecardApi.transactions(50),
+      ]);
+      setBalances(balRes.data);
+      setTransactions(txRes.data);
     } catch (e) {
       console.error('OneCard load failed', e);
     } finally {
@@ -36,58 +28,44 @@ export function useOneCard() {
     loadAll();
   }, [loadAll]);
 
-  const connect = useCallback(async ({ username, password, risk_acknowledged }) => {
-    setRefreshing(true);
+  const importStatement = useCallback(async (rawText) => {
+    setImporting(true);
     try {
-      const res = await onecardApi.connect({ username, password, risk_acknowledged });
-      setStatus(res.data);
+      const res = await onecardApi.importStatement(rawText);
       await loadAll();
-      toast.success('OneCard connected');
-      return { ok: true };
+      const d = res.data;
+      toast.success(
+        `Imported — ${d.transactions_added} new, ${d.skipped_duplicates} already had` +
+          (d.balance != null ? `, balance $${d.balance.toFixed(2)}` : ''),
+      );
+      return { ok: true, result: d };
     } catch (e) {
       const detail = e.response?.data?.detail || e.message;
-      toast.error(`Connection failed: ${detail}`);
+      toast.error(detail);
       return { ok: false, error: detail };
     } finally {
-      setRefreshing(false);
+      setImporting(false);
     }
   }, [loadAll]);
 
-  const disconnect = useCallback(async () => {
+  const clearAll = useCallback(async () => {
     try {
-      await onecardApi.disconnect();
-      setStatus({ connected: false });
+      await onecardApi.clear();
       setBalances([]);
       setTransactions([]);
-      toast.success('OneCard disconnected');
+      toast.success('OneCard data cleared');
     } catch (e) {
-      toast.error('Disconnect failed');
+      toast.error('Clear failed');
     }
   }, []);
 
-  const refresh = useCallback(async () => {
-    setRefreshing(true);
-    try {
-      await onecardApi.refresh();
-      await loadAll();
-      toast.success('OneCard refreshed');
-    } catch (e) {
-      const detail = e.response?.data?.detail || e.message;
-      toast.error(`Refresh failed: ${detail}`);
-    } finally {
-      setRefreshing(false);
-    }
-  }, [loadAll]);
-
   return {
-    status,
     balances,
     transactions,
     loading,
-    refreshing,
-    connect,
-    disconnect,
-    refresh,
+    importing,
+    importStatement,
+    clearAll,
     reload: loadAll,
   };
 }

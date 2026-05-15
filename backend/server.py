@@ -34,8 +34,6 @@ from firebase_auth import verify_id_token, FirebaseAuthError
 # OneCard (TouchNet OneWeb) integration
 from onecard import (
     setup_onecard_routes,
-    scheduled_onecard_refresh,
-    CREDENTIALS_COLLECTION as ONECARD_CREDENTIALS_COLLECTION,
     BALANCES_COLLECTION as ONECARD_BALANCES_COLLECTION,
     TRANSACTIONS_COLLECTION as ONECARD_TRANSACTIONS_COLLECTION,
 )
@@ -1815,8 +1813,7 @@ async def startup_db_client():
         await db.cafe_menu_items.create_index([("meal_period", 1)])
         await db.cafe_menu_items.create_index([("station", 1)])
 
-        # OneCard collection indexes
-        await db[ONECARD_CREDENTIALS_COLLECTION].create_index("user_id", unique=True)
+        # OneCard collection indexes (manual import — no credentials collection)
         await db[ONECARD_BALANCES_COLLECTION].create_index([("user_id", 1), ("pot_name", 1)])
         await db[ONECARD_TRANSACTIONS_COLLECTION].create_index(
             [("user_id", 1), ("fingerprint", 1)], unique=True
@@ -1840,18 +1837,6 @@ async def startup_db_client():
                 replace_existing=True
             )
             logging.info("Menu scraper scheduled for 4:00 AM daily")
-
-        # OneCard refresh: every 4 hours. Each connected user triggers an Okta push
-        # to their phone on session re-auth, so we keep the cadence low.
-        scheduler.add_job(
-            lambda: scheduled_onecard_refresh(db),
-            'interval',
-            hours=4,
-            id='onecard_refresh',
-            name='OneCard balance + transaction refresh',
-            replace_existing=True,
-        )
-        logging.info("OneCard refresh scheduled every 4 hours")
 
         scheduler.start()
         app.state.scheduler = scheduler

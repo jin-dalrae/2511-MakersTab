@@ -1,6 +1,4 @@
-# Microsoft's Playwright base image: Ubuntu 22.04 + Python 3.10 + Chromium pre-baked.
-# Saves ~200MB of build-time installs.
-FROM mcr.microsoft.com/playwright/python:v1.49.0-noble
+FROM python:3.12-slim
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -10,11 +8,10 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-# Install Python deps first so the layer caches when only app code changes.
+# Python deps first so the layer caches when only app code changes.
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
-# App code.
 COPY . .
 
 EXPOSE 8000

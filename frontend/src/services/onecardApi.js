@@ -8,25 +8,15 @@ async function authConfig(extra = {}) {
 }
 
 export const onecardApi = {
-  status: async () =>
-    axios.get(`${API}/onecard/status`, await authConfig()),
-
-  connect: async ({ username, password, risk_acknowledged }) =>
-    axios.post(
-      `${API}/onecard/connect`,
-      { username, password, risk_acknowledged },
-      await authConfig({ timeout: 120000 }),
-    ),
-
-  disconnect: async () =>
-    axios.delete(`${API}/onecard/disconnect`, await authConfig()),
-
-  refresh: async () =>
-    axios.post(`${API}/onecard/refresh`, {}, await authConfig({ timeout: 120000 })),
+  importStatement: async (raw_text, pot_name) =>
+    axios.post(`${API}/onecard/import`, { raw_text, pot_name }, await authConfig()),
 
   balance: async () =>
     axios.get(`${API}/onecard/balance`, await authConfig()),
 
   transactions: async (limit = 50) =>
     axios.get(`${API}/onecard/transactions`, await authConfig({ params: { limit } })),
+
+  clear: async () =>
+    axios.delete(`${API}/onecard/clear`, await authConfig()),
 };

@@ -3,18 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useOneCard } from '@/hooks/useOneCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowLeft, RefreshCw, Unlink, AlertTriangle, ShieldAlert } from 'lucide-react';
-import { Blobs, cls } from '@/lib/theme';
+import { ArrowLeft, ClipboardPaste, Trash2, ExternalLink } from 'lucide-react';
+import { Blobs, cls, ORDER_URL } from '@/lib/theme';
 
-const formatCurrency = (n) =>
-  typeof n === 'number' ? `$${n.toFixed(2)}` : '—';
+const ONEWEB_STATEMENT_URL = 'https://secure.touchnet.net/C20080_oneweb/Account/Statement';
 
+const formatCurrency = (n) => (typeof n === 'number' ? `$${n.toFixed(2)}` : '—');
 const formatDateTime = (iso) => {
   if (!iso) return '—';
   try {
@@ -26,19 +21,14 @@ const formatDateTime = (iso) => {
 
 const OneCardSettings = () => {
   const navigate = useNavigate();
-  const { status, balances, transactions, loading, refreshing, connect, disconnect, refresh } = useOneCard();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [riskAck, setRiskAck] = useState(false);
+  const { balances, transactions, loading, importing, importStatement, clearAll } = useOneCard();
+  const [pasteText, setPasteText] = useState('');
 
-  const onConnect = async (e) => {
+  const onImport = async (e) => {
     e.preventDefault();
-    if (!riskAck) return;
-    const res = await connect({ username, password, risk_acknowledged: true });
-    if (res.ok) {
-      setUsername('');
-      setPassword('');
-    }
+    if (!pasteText.trim()) return;
+    const res = await importStatement(pasteText);
+    if (res.ok) setPasteText('');
   };
 
   if (loading) {
@@ -49,8 +39,6 @@ const OneCardSettings = () => {
       </div>
     );
   }
-
-  const connected = status?.connected;
 
   return (
     <div className={cls.pageBg}>
@@ -65,172 +53,131 @@ const OneCardSettings = () => {
 
         <div className="mb-6">
           <h1 className="font-display text-5xl text-emerald-700">your OneCard 💳</h1>
-          <p className="text-gray-600 mt-1">Live balance + transactions from CCA TouchNet.</p>
+          <p className="text-gray-600 mt-1">
+            Paste your OneWeb statement to backfill transactions. Receipt scanning already
+            keeps your balance current — this is just for history you didn’t snap.
+          </p>
         </div>
 
-        <Card className="mb-4 border-amber-300 bg-amber-50">
-          <CardHeader className="flex flex-row items-start gap-2 space-y-0">
-            <ShieldAlert className="w-5 h-5 text-amber-700 mt-1 shrink-0" />
-            <div>
-              <CardTitle className="text-amber-900 text-lg">Before you connect</CardTitle>
-              <CardDescription className="text-amber-900/80">
-                MakersTab logs in to CCA OneWeb as you and reads your OneCard balance + transactions.
-                Your CCA password is encrypted before storage. You may still receive Okta Verify push
-                notifications when MakersTab re-authenticates (roughly every 4 hours during active use).
-                You can disconnect at any time.
-              </CardDescription>
-            </div>
+        {/* Import */}
+        <Card className="mb-4">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ClipboardPaste className="w-5 h-5 text-emerald-600" />
+              Paste a statement
+            </CardTitle>
+            <CardDescription>
+              Open your{' '}
+              <a
+                href={ONEWEB_STATEMENT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-emerald-700 underline inline-flex items-center gap-1"
+              >
+                OneWeb Current Statement <ExternalLink className="w-3 h-3" />
+              </a>
+              , select the whole table (Transaction / Date-Time / Amount / Balance), copy it,
+              and paste below. We never see your CCA login — you stay in control.
+            </CardDescription>
           </CardHeader>
-        </Card>
-
-        {!connected && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Connect OneCard</CardTitle>
-              <CardDescription>Sign in with your CCA SSO credentials.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={onConnect} className="space-y-4">
-                <div>
-                  <Label htmlFor="cca-user">CCA email or username</Label>
-                  <Input
-                    id="cca-user"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    autoComplete="username"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="cca-pass">CCA password</Label>
-                  <Input
-                    id="cca-pass"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    autoComplete="current-password"
-                    required
-                  />
-                </div>
-                <div className="flex items-start gap-2">
-                  <Checkbox
-                    id="risk-ack"
-                    checked={riskAck}
-                    onCheckedChange={(v) => setRiskAck(Boolean(v))}
-                  />
-                  <Label htmlFor="risk-ack" className="text-sm leading-snug font-normal">
-                    I understand my CCA password will be stored encrypted on MakersTab's server,
-                    and that automated access to TouchNet OneWeb may not be permitted by CCA's
-                    or TouchNet's terms of service.
-                  </Label>
-                </div>
+          <CardContent>
+            <form onSubmit={onImport} className="space-y-3">
+              <textarea
+                value={pasteText}
+                onChange={(e) => setPasteText(e.target.value)}
+                placeholder={
+                  'Name  Student Balance\nEnd Amount  $0.89\n' +
+                  '004 : VEND (MONEY)  2026-05-11 18:39:39  -$14.49  1\n…'
+                }
+                rows={8}
+                className="w-full rounded-2xl border-2 border-emerald-100 bg-white p-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              />
+              <div className="flex gap-2">
                 <Button
                   type="submit"
-                  disabled={!riskAck || refreshing || !username || !password}
-                  className="bg-green-700 hover:bg-green-800"
+                  disabled={importing || !pasteText.trim()}
+                  className={cls.btnPrimary}
                 >
-                  {refreshing ? 'Connecting (approve the push on your phone)…' : 'Connect'}
+                  {importing ? 'Importing…' : 'Import statement'}
                 </Button>
-                <p className="text-xs text-gray-500">
-                  After you submit, watch your phone — Okta Verify will send a push notification you need to approve within 90 seconds.
-                </p>
-              </form>
+                {(balances.length > 0 || transactions.length > 0) && (
+                  <Button type="button" variant="outline" onClick={clearAll} className="rounded-full">
+                    <Trash2 className="w-4 h-4 mr-2" /> Clear all
+                  </Button>
+                )}
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+
+        {/* Balances */}
+        {balances.length > 0 && (
+          <Card className="mb-4">
+            <CardHeader>
+              <CardTitle>Balance</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid sm:grid-cols-2 gap-3">
+                {balances.map((b) => (
+                  <div key={b.pot_name} className="rounded-2xl border bg-white p-4">
+                    <div className="text-sm text-gray-500">{b.pot_name}</div>
+                    <div className="font-display text-4xl text-emerald-700">
+                      {formatCurrency(b.amount)}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         )}
 
-        {connected && (
-          <>
-            <Card className="mb-4">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                <div>
-                  <CardTitle>
-                    OneCard
-                    <Badge className="ml-2 bg-green-600">Connected</Badge>
-                  </CardTitle>
-                  <CardDescription>
-                    {status?.display_name && <>Signed in as {status.display_name}. </>}
-                    {status?.account_id && <>ID# {status.account_id}. </>}
-                    Last sync: {formatDateTime(status?.last_sync_at)}
-                  </CardDescription>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={refresh} disabled={refreshing}>
-                    <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                    Refresh
-                  </Button>
-                  <Button variant="outline" onClick={disconnect}>
-                    <Unlink className="w-4 h-4 mr-2" /> Disconnect
-                  </Button>
-                </div>
-              </CardHeader>
-              {status?.last_error && (
-                <CardContent>
-                  <Alert variant="destructive">
-                    <AlertTriangle className="w-4 h-4" />
-                    <AlertTitle>Last sync had an error</AlertTitle>
-                    <AlertDescription className="text-sm">{status.last_error}</AlertDescription>
-                  </Alert>
-                </CardContent>
-              )}
-            </Card>
+        {/* Transactions */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Imported transactions</CardTitle>
+            <CardDescription>Most recent first. Up to 50 shown. Duplicates are skipped automatically.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {transactions.length === 0 ? (
+              <p className="text-sm text-gray-500">Nothing imported yet — paste a statement above.</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date / Time</TableHead>
+                    <TableHead>Transaction</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
+                    <TableHead className="text-right">Balance</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {transactions.map((tx) => (
+                    <TableRow key={`${tx.code}-${tx.occurred_at}-${tx.amount}`}>
+                      <TableCell className="whitespace-nowrap">{formatDateTime(tx.occurred_at)}</TableCell>
+                      <TableCell>{tx.code}</TableCell>
+                      <TableCell className={`text-right ${tx.amount < 0 ? 'text-red-600' : 'text-emerald-700'}`}>
+                        {formatCurrency(tx.amount)}
+                      </TableCell>
+                      <TableCell className="text-right">{formatCurrency(tx.running_balance)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
 
-            <Card className="mb-4">
-              <CardHeader>
-                <CardTitle>Balances</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {balances.length === 0 ? (
-                  <p className="text-sm text-gray-500">No balances yet. Try Refresh.</p>
-                ) : (
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    {balances.map((b) => (
-                      <div key={b.pot_name} className="rounded-lg border bg-white p-4">
-                        <div className="text-sm text-gray-500">{b.pot_name}</div>
-                        <div className="text-2xl font-semibold text-green-700">{formatCurrency(b.amount)}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent transactions</CardTitle>
-                <CardDescription>Most recent first. Up to 50 shown.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {transactions.length === 0 ? (
-                  <p className="text-sm text-gray-500">No transactions yet.</p>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Date / Time</TableHead>
-                        <TableHead>Transaction</TableHead>
-                        <TableHead className="text-right">Amount</TableHead>
-                        <TableHead className="text-right">Balance</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {transactions.map((tx) => (
-                        <TableRow key={`${tx.code}-${tx.occurred_at}-${tx.amount}`}>
-                          <TableCell className="whitespace-nowrap">{formatDateTime(tx.occurred_at)}</TableCell>
-                          <TableCell>{tx.code}</TableCell>
-                          <TableCell className={`text-right ${tx.amount < 0 ? 'text-red-600' : 'text-green-700'}`}>
-                            {formatCurrency(tx.amount)}
-                          </TableCell>
-                          <TableCell className="text-right">{formatCurrency(tx.running_balance)}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
-          </>
-        )}
+        <div className="mt-6 text-center">
+          <a
+            href={ORDER_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${cls.btnSecondary} inline-flex`}
+          >
+            <ExternalLink className="w-4 h-4" />
+            Order online at CCA dining
+          </a>
+        </div>
       </div>
     </div>
   );

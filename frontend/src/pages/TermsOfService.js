@@ -49,7 +49,7 @@ const TermsOfService = () => {
                 <li>Transaction history and spending analytics</li>
                 <li>Live cafe menu from Cafe Bon Appetit</li>
                 <li>Weekly spending recommendations</li>
-                <li>Optional, opt-in connection to your CCA OneCard via TouchNet OneWeb to surface live balance and transaction history</li>
+                <li>Optional manual import of your CCA OneCard statement (you paste it in yourself — no login, no automated access)</li>
                 <li>Convenience link to the CCA online ordering portal (operated by Zipthru / Bon Appétit, not MakersTab)</li>
               </ul>
             </section>
@@ -104,7 +104,6 @@ const TermsOfService = () => {
                 <li><strong>OpenAI:</strong> AI-powered receipt OCR and data extraction</li>
                 <li><strong>MongoDB:</strong> Server-side storage for receipts, transactions, and OneCard data</li>
                 <li><strong>Cafe Bon Appetit:</strong> Public menu data (scraped daily)</li>
-                <li><strong>TouchNet OneWeb (C20080 — CCA):</strong> Only when you opt in to the OneCard integration; we authenticate to TouchNet on your behalf using credentials you provide</li>
                 <li><strong>Zipthru / Bon Appétit ordering:</strong> The "Order online" link opens their portal directly; MakersTab does not handle orders or payments</li>
               </ul>
               <p className="text-gray-700 leading-relaxed mt-3">
@@ -113,15 +112,17 @@ const TermsOfService = () => {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">OneCard Integration (Opt-In)</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">OneCard Import (Manual, Opt-In)</h2>
               <p className="text-gray-700 leading-relaxed mb-3">
-                The OneCard integration is <strong>optional</strong> and requires you to explicitly acknowledge its risks before connecting. By enabling the integration, you represent and warrant that:
+                The OneCard feature is a <strong>manual paste-import</strong>. MakersTab does
+                <strong> not</strong> ask for your CCA login, does not log in to TouchNet on your
+                behalf, and performs no automated access of any kind. You stay entirely in control:
               </p>
               <ul className="list-disc list-inside text-gray-700 space-y-2">
-                <li>The CCA SSO credentials you provide belong to you, and you alone have authority to use them.</li>
-                <li>You understand MakersTab logs in to <em>secure.touchnet.net</em> on your behalf, and that automated access to TouchNet OneWeb may not be permitted by CCA's Acceptable Use Policy or TouchNet's Terms of Service.</li>
-                <li>You accept full responsibility for any action taken by CCA, TouchNet, or any third party in response to that access — including suspension of your CCA account.</li>
-                <li>You may disconnect at any time on the OneCard settings page. Disconnecting wipes your encrypted credentials and cached balance/transactions from MakersTab.</li>
+                <li>You log in to OneWeb yourself, in your own browser, and copy your Current Statement.</li>
+                <li>You paste that text into MakersTab. We parse it into balance + transaction records and store those records only.</li>
+                <li>No CCA credentials, session cookies, or tokens are ever transmitted to or stored by MakersTab.</li>
+                <li>You can wipe all imported OneCard data at any time with the "Clear all" button.</li>
               </ul>
               <p className="text-gray-700 leading-relaxed mt-3">
                 MakersTab is not affiliated with, endorsed by, or operated in partnership with TouchNet or California College of the Arts.

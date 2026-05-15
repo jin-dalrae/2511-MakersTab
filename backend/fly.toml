@@ -33,12 +33,12 @@ primary_region = "sjc"
     path = "/api/health"
 
 [[vm]]
-  # Playwright Chromium needs real memory headroom — at least 1GB, 2GB is safer.
-  size = "shared-cpu-2x"
-  memory = "2gb"
+  # Plain FastAPI + Mongo client — light. No Chromium anymore.
+  size = "shared-cpu-1x"
+  memory = "512mb"
 
-# Keep at least one machine warm. OneCard scraping is interactive — cold-start
-# adds 20-40s of Playwright bootup, which times out the user's MFA push window.
 [deploy]
   strategy = "rolling"
-  min_machines_running = 1
+  # OK to scale to zero now that there's no interactive scrape with a tight
+  # MFA window — first request just pays a normal cold start.
+  min_machines_running = 0

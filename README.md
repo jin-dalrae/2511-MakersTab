@@ -31,7 +31,7 @@ MakersTab provides a centralized dashboard that visualizes the user's financial 
     *   **Weekly Reports**: Track daily and weekly spending averages.
 *   **💰 Budget Health Check**: Instant indicators showing if you are "On Track", "Over Budget", or "Under Budget".
 *   **🍽️ Menu Integration** *(Beta)*: Daily menu scraping from Makers Cafe to help plan meals (and costs) in advance.
-*   **🆔 OneCard Integration** *(Beta)*: Opt-in connection to CCA's TouchNet OneWeb portal to pull your live OneCard balance and transaction history into MakersTab. See [`backend/ONECARD_SETUP.md`](backend/ONECARD_SETUP.md).
+*   **🆔 OneCard Import** *(Beta)*: Manual paste-import of your CCA OneWeb statement — no login, no scraping, no credentials. See [`backend/ONECARD_SETUP.md`](backend/ONECARD_SETUP.md).
 *   **📱 Responsive Design**: Fully optimized for mobile use, allowing students to check their status while in line.
 
 ---
@@ -50,9 +50,8 @@ MakersTab provides a centralized dashboard that visualizes the user's financial 
 *   **Database**: MongoDB (Motor async driver)
 *   **Authentication**: Firebase Auth — backend verifies Firebase ID tokens via Google's public x509 certs (no service account required for verify-only)
 *   **AI/ML**: OpenAI GPT-4o (via `emergentintegrations`) for OCR and data extraction
-*   **Scheduling**: APScheduler (cafe menu scrape + OneCard refresh)
-*   **OneCard Scraper**: Playwright (Chromium) for SSO login, `httpx` + BeautifulSoup for polling
-*   **Encryption**: `cryptography` (Fernet) for OneCard credential at-rest encryption
+*   **Scheduling**: APScheduler (daily cafe menu scrape)
+*   **OneCard**: manual statement paste-import — text parser, no scraping, no credentials
 
 ---
 
@@ -75,10 +74,9 @@ MakersTab provides a centralized dashboard that visualizes the user's financial 
     python3 -m venv venv
     source venv/bin/activate  # Windows: venv\Scripts\activate
     ```
-3.  Install dependencies and the Playwright Chromium binary:
+3.  Install dependencies:
     ```bash
     pip install -r requirements.txt
-    python -m playwright install chromium
     ```
 4.  Create a `.env` file in the `backend` directory (see [Environment Variables](#environment-variables)).
 5.  Run the server:
@@ -119,10 +117,6 @@ FIREBASE_PROJECT_ID=makerstab-app-001
 
 # AI / OCR (used by the receipt scanner)
 EMERGENT_LLM_KEY=your_openai_api_key
-
-# OneCard (only required if you enable the OneWeb integration)
-# Generate with: python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'
-ONECARD_ENCRYPTION_KEY=
 ```
 
 ### `frontend/.env`
@@ -142,20 +136,19 @@ REACT_APP_FIREBASE_APP_ID=...
 
 ---
 
-## 🆔 OneCard (TouchNet OneWeb) Integration
+## 🆔 OneCard Import (manual)
 
-MakersTab can optionally connect to CCA's OneCard portal to surface live balance + transaction history alongside your receipt data. The flow:
+MakersTab does **not** connect to TouchNet, store CCA credentials, or scrape
+anything. The OneCard page is a manual paste-import:
 
-1.  User logs in to MakersTab and visits `/onecard`, then provides their CCA SSO credentials.
-2.  Backend launches headless Chromium via Playwright, walks through CCA's Okta SSO, and waits for the user to approve the Okta Verify push on their phone.
-3.  After approval, session cookies are captured and stored encrypted in Mongo.
-4.  Every 4 hours, a scheduled job pulls the dashboard + statement pages with the stored cookies. Expired sessions trigger an automatic re-login (which sends another push).
+1.  The student opens their OneWeb Current Statement themselves and copies the table.
+2.  They paste it into MakersTab's `/onecard` page and click **Import**.
+3.  The backend parses the text into balance + transaction records and stores
+    only those records. Duplicates are skipped via a fingerprint.
 
-**Risks the user accepts on connect (full disclosure in `backend/ONECARD_SETUP.md`):**
-- Storing CCA SSO credentials on a third-party server (even encrypted) expands the blast radius of any MakersTab compromise.
-- Automated access to TouchNet OneWeb may be prohibited by CCA's AUP and/or TouchNet's ToS.
-
-The connect form requires an explicit "I understand the risks" checkbox before proceeding.
+Receipt OCR is still the primary balance source — this is just for backfilling
+history you didn't snap a receipt for. Full detail in
+[`backend/ONECARD_SETUP.md`](backend/ONECARD_SETUP.md).
 
 ---
 
@@ -167,9 +160,8 @@ makerstab/
 │   ├── server.py             # FastAPI app, routes, scheduler, Mongo init
 │   ├── firebase_auth.py      # Firebase ID token verifier (no service account needed)
 │   ├── menu_scraper.py       # Cafe Bon Appetit menu scraper
-│   ├── onecard.py            # OneCard service: encrypted creds + routes + scheduled refresh
-│   ├── onecard_scraper.py    # Playwright SSO login + httpx/BeautifulSoup scraper
-│   ├── ONECARD_SETUP.md      # OneCard integration setup + risk disclosure
+│   ├── onecard.py            # OneCard manual paste-import: parser + routes
+│   ├── ONECARD_SETUP.md      # OneCard import design + parser notes
 │   ├── requirements.txt
 │   └── .env                  # Not committed
 ├── frontend/
@@ -190,7 +182,7 @@ makerstab/
 ## 🔮 Future Roadmap
 
 *   **Firestore Migration**: Replace MongoDB collections with Firestore (currently auth is Firebase, storage is Mongo).
-*   **OneCard parser hardening**: Tighten selectors in `onecard_scraper.py` against captured authenticated HTML — current selectors are written from screenshots.
+*   **OneCard parser hardening**: Tighten `parse_statement()` in `onecard.py` against more real pasted-statement samples (current parser is anchored on the ISO datetime + End Amount line).
 *   **Social Features**: Compare spending trends (anonymously) with campus averages.
 *   **Nutritional Tracking**: Link menu items to nutritional data.
 *   **Chrome Extension**: For online ordering integration.

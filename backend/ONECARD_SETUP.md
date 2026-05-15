@@ -1,91 +1,55 @@
-# OneCard (CCA OneWeb) Integration — Setup
+# OneCard (CCA OneWeb) — Manual Import
 
-MakersTab can connect to CCA's TouchNet OneWeb portal
-(`https://secure.touchnet.net/C20080_oneweb/`) to surface a user's OneCard
-balance and transaction history.
+MakersTab does **not** log in to TouchNet, store CCA credentials, or scrape
+anything automatically. The OneCard feature is a manual paste-import:
 
-## How it works
+1. The student opens their OneWeb **Current Statement** themselves
+   (`https://secure.touchnet.net/C20080_oneweb/Account/Statement`), in their
+   own browser, already logged in.
+2. They select the statement table and copy it.
+3. They paste it into MakersTab's OneCard page and click **Import**.
+4. The backend parses the text into a balance + transaction list and stores
+   only those parsed records.
 
-1. User enters their CCA SSO username + password on `/onecard`.
-2. Backend launches headless Chromium via Playwright, walks through CCA Okta SSO,
-   and waits up to 90 s for the user to approve the Okta Verify push on their phone.
-3. After the push is approved, the dashboard URL loads; backend captures the
-   `.touchnet.net` session cookies.
-4. Username, password, and cookies are encrypted with Fernet and stored in
-   MongoDB. The password is **never** stored in plaintext anywhere.
-5. Every 4 hours, a scheduled job re-fetches the dashboard + statement using
-   the stored cookies. If the session has expired, it re-runs the login flow
-   (which triggers a fresh push on the user's phone).
-6. The frontend reads `/api/onecard/{status,balance,transactions}` to render
-   the cached data instantly without scraping live.
+Receipt OCR remains the primary balance source — every scanned receipt updates
+the meal-plan balance. OneCard import is just for backfilling transaction
+history you didn't snap a receipt for.
 
-## Required setup
+## Why this design
 
-### 1. Install Playwright Chromium
+Earlier iterations stored CCA SSO credentials and drove a headless browser
+through Okta. That was abandoned: storing institutional credentials on a
+third-party server is a large blast radius, and automated TouchNet access
+likely violates CCA's AUP / TouchNet's ToS. The paste model keeps the student
+fully in control and removes MakersTab from the trust path entirely.
 
-```bash
-cd backend
-pip install -r requirements.txt
-python -m playwright install chromium
-```
+## Setup
 
-### 2. Generate and set the encryption key
-
-```bash
-python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'
-```
-
-Add to `backend/.env`:
-
-```
-ONECARD_ENCRYPTION_KEY=<the-generated-key>
-```
-
-> **Rotating this key invalidates every stored OneCard credential** —
-> users will have to reconnect. There is no migration path other than disconnect/reconnect.
-
-### 3. Restart the backend
-
-The scheduler picks up the new periodic refresh job on startup. Indexes are
-created on first run.
-
-## What's stored
+Nothing OneCard-specific. No Playwright, no Chromium, no encryption key.
+The two collections are created automatically on backend startup:
 
 | Collection | Per user | Contents |
 |---|---|---|
-| `onecard_credentials` | 1 doc | `username_enc`, `password_enc`, `cookies_enc`, `last_sync_at`, `last_error`, `account_id`, `display_name` |
-| `onecard_balances` | N docs (one per pot) | `pot_name`, `amount`, `updated_at` |
-| `onecard_transactions` | N docs | `fingerprint` (dedupe key), `code`, `occurred_at`, `amount`, `running_balance` |
+| `onecard_balances` | one doc per pot | `pot_name`, `amount`, `updated_at` |
+| `onecard_transactions` | N docs | `fingerprint` (dedupe key), `code`, `occurred_at`, `amount`, `running_balance`, `imported_at` |
 
-Disconnecting (`DELETE /api/onecard/disconnect`) wipes all three for that user.
+## API
 
-## API surface
+All endpoints require the standard Firebase bearer token.
 
-All endpoints require the standard MakersTab bearer token.
-
-- `POST /api/onecard/connect` — `{ username, password, risk_acknowledged }`. Logs in, captures cookies, runs an initial scrape. Long-running (waits for push approval).
-- `DELETE /api/onecard/disconnect` — wipes credentials, cookies, balances, transactions.
-- `GET  /api/onecard/status` — `{ connected, last_sync_at, last_error, account_id, display_name }`.
-- `POST /api/onecard/refresh` — forces an immediate refresh. May trigger a push if session has expired.
+- `POST /api/onecard/import` — `{ raw_text, pot_name? }`. Parses pasted statement,
+  upserts the balance, inserts new transactions (duplicates skipped via
+  fingerprint). Returns `{ pot_name, balance, transactions_added,
+  transactions_total, skipped_duplicates }`.
 - `GET  /api/onecard/balance` — array of `{ pot_name, amount }`.
-- `GET  /api/onecard/transactions?limit=50` — array of `{ code, occurred_at, amount, running_balance }`, most recent first.
+- `GET  /api/onecard/transactions?limit=50` — most recent first.
+- `DELETE /api/onecard/clear` — wipes the user's balances + transactions.
 
-## Known limitations / what to refine
+## Parser notes
 
-- **HTML selectors are tentative.** `_parse_dashboard` and the Okta login selectors
-  in `onecard_scraper.py` were written from screenshots. Once an authenticated
-  HTML capture is available, tighten them — the table parser uses header text
-  detection so it should hold up, but the balance card parser is a best-effort sweep.
-- **No alerting on repeated failures.** After 3 consecutive failed refreshes the
-  user only sees `last_error` in the UI. No email/push from MakersTab itself.
-- **Single Chromium per login.** Concurrent connects from many users will queue.
-  For >5 simultaneous users add a queue or a Playwright pool.
-- **Push fatigue.** Default 4-hour refresh + manual refresh button. Lower
-  cadence at your own risk — every refresh after session expiry pings the user's phone.
-
-## Risk reminder for users
-
-Storing CCA SSO passwords on a third-party server (even encrypted) materially
-expands the blast radius of a MakersTab compromise. Automated access to
-TouchNet OneWeb may also be prohibited by CCA's AUP and/or TouchNet's ToS.
-The connect form requires an explicit "I understand the risks" checkbox.
+`parse_statement()` in `onecard.py` anchors on the ISO datetime OneWeb prints
+(`2026-05-11 18:39:39`). It tolerates tab- or space-separated cells (students
+copy-paste inconsistently). It also reads `End Amount $X` for the current
+balance and `Name <pot>` for the pot label. If CCA changes the statement
+layout, this parser is the only thing that needs updating — and it fails
+soft (skips unparseable rows, returns a 400 only if nothing at all parsed).
